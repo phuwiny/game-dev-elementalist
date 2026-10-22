@@ -32,3 +32,18 @@ npm run dev      # เปิด dev server
 npm run check    # typecheck + test + build
 npm run build    # build เป็น static files ใน dist/
 ```
+
+เปิด `http://localhost:5173/?debug` เพื่อดู hitbox ของ physics
+
+## สถานะ: Phase 1 · Core Prototype
+
+ด่าน graybox ทดสอบ: เดิน, กระโดดแบบกดค้าง (coyote time + jump buffer), ฟันดาบ 3 จังหวะ, HP 5 ช่อง, 3 ชีวิต, checkpoint, หนาม, หลุม, Moss Slime, เหรียญ, Heart Fruit, เส้นชัย, Pause และ Game Over / Continue
+
+| ปุ่ม | Action |
+| --- | --- |
+| A / D หรือ ← / → | เดิน |
+| Space | กระโดด (กดค้างกระโดดสูงขึ้น) |
+| J | ฟันดาบ (กดต่อเนื่องเป็น combo 3 จังหวะ) |
+| Esc | Pause |
+
+ภาพทั้งหมดตอนนี้เป็น placeholder ที่สร้างขณะรัน เมื่อ Codex วางไฟล์จริงตาม `ART_HANDOFF.md` เกมจะใช้ไฟล์จริงทันที

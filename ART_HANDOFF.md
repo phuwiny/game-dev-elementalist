@@ -151,6 +151,8 @@ Asset ในเกมทุกไฟล์ใช้ได้เฉพาะส�
 - ชื่อ frame ใน atlas: `<anim>_<NNN>` เช่น `run_000`, `run_001` (เลข 3 หลักเริ่มที่ 000)
 - Animation key ที่ใช้ในเกม: `<atlas>_<anim>` เช่น `player_run`, `enemies_w1_moss_slime_move`
 - ใน atlas ที่รวมหลายตัว ใส่ชื่อตัวไว้หน้า anim: `moss_slime_move_000`
+- Frame นิ่งใน atlas `ui` ไม่มีเลขต่อท้าย ใช้ `<element>_<state>` เช่น `heart_full`, `heart_empty`, `energy_bar_fill_normal`, `element_icon_fire_locked` ส่วน element ที่มีสถานะเดียวใช้ชื่อ element ตรงๆ เช่น `energy_bar_frame`, `lives_icon`
+- รายชื่อ frame ที่เกมใช้อยู่ตอนนี้ดูได้ที่ `src/assets/manifest.ts` (เพิ่มตามแต่ละ phase ของการพัฒนา) asset ที่มีมากกว่าในไฟล์นั้นไม่ทำให้เกมพัง
 
 ### 3.7 Animation Manifest
 ทุก atlas ต้องมีรายการ animation ใน `public/assets/animations.json` เพื่อให้โค้ดสร้าง animation อัตโนมัติ
