@@ -1,5 +1,18 @@
 # Phase A — Style และ Concept
 
+## Latest revision — 2026-10-23 / idle seed v3 หลัง feedback ว่าภาพแตก
+
+พินเห็นว่า V2 แตกและขอให้ลดรายละเอียดสีเพื่อให้หน้าเนียนขึ้น จึงสร้าง **V3 ใหม่** จาก source แบบ cel shading ที่ลดจุดสีในผม/หน้า แล้วแปลงเป็นกริด 48×64 ด้วย area sampling และเก็บ facial pixels, กางเกง และดาบบนกริดเอง ภาพ V2 ยังอยู่ครบเพื่อเทียบ; V3 ยังไม่ถือว่าอนุมัติ.
+
+- [ภาพเทียบ V2 / V3 ที่ขยาย nearest พร้อม 1:1](../concept/aclaire_idle_seed_v3_comparison.png)
+- [PNG โปร่งใส V3 48×64](../previews/phase_a/2026-10-23_aclaire_seed_v3_16color.png), [ขยาย ×8](../previews/phase_a/2026-10-23_aclaire_seed_v3_16color_x8.png), [ภาพเทียบฐาน 640×360](../previews/phase_a/2026-10-23_aclaire_seed_v3_640x360.png)
+- [source](../concept/aclaire_idle_seed_v3_source.png), [prompt](2026-10-23_aclaire_seed_v3_prompt.md), [metrics](2026-10-23_aclaire_seed_v3_metrics.json), `tools/art/build_aclaire_seed_v3.py`
+
+**ผลตรวจ:** V3 ใช้ 16 สีจาก master palette เดิม, RGBA 48×64, alpha 0/255, เท้าถึงแถว 63. ผมลดเม็ดสีสุ่มชัดเจน; ตาทั้งสองมีตาขาว/สีฟ้า/จุดสะท้อนที่จัดบนกริด หน้าและแก้มเป็นพื้นที่สีต่อเนื่อง กางเกงอ่านเป็นขาสั้นด้วยตะเข็บกลาง. ด้าม/กันมือ/ฝักอยู่บนแกนตั้งเดียวกัน มือว่างและดาบอยู่บนหลัง. ตรวจทั้งภาพ ×8 และ native 1:1 แล้ว.
+
+**ข้อจำกัดที่ยังรอรีวิว:** ที่ 48×64 ใบหน้ามีความละเอียดน้อยกว่า Coin Quest 108×96 จริง และเฉดผิว/เงินเหลือเพียง 1–2 ขั้น ภาพ V3 จึงคมแบบ pixel art แต่ไม่เนียนเท่า Coin Quest เมื่อดูขยาย ถ้าพินต้องการขอบหน้าที่เนียนเท่านั้น อาจต้องทดลอง density 2 หรือการ scale แบบ smoothing ในเกมโดยผู้ดูแลฝั่งโค้ด; ยังไม่ได้เปลี่ยน runtime. ไม่ทำ animation หรือ Phase B.
+
+
 ## Latest revision — 2026-10-23 / idle seed v2 จาก Coin Quest local
 
 **ยังไม่มี seed/style ที่ได้รับอนุมัติ และหยุดที่ Phase A** ผลล่าสุดอยู่หัวข้อนี้; ข้อความเรื่อง ZIP เข้าไม่ได้ด้านล่างเป็นประวัติรอบก่อน รอบนี้อ่าน local `D:/nilworkspaces/tqm-proj/boss-game` ได้แล้ว โดยไม่แก้ Coin Quest.

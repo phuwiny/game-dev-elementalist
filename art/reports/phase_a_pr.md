@@ -1,5 +1,10 @@
 # art(concept): Phase A style and concept review
 
+## Latest update — V3 cleaner 16-color seed
+
+ผู้ใช้เห็นว่า V2 แตกและต้องการลดรายละเอียดสีเพื่อให้หน้าเนียนขึ้น จึงเพิ่ม [V2/V3 comparison](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/concept/aclaire_idle_seed_v3_comparison.png), [V3 native 48×64](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v3_16color.png) และ [640×360 scale probe](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v3_640x360.png). V3 ใช้ 16 สีจริงจาก master palette, alpha 0/255 และยังรอรีวิว style/seed. ภาพเดิมยังอยู่ครบ. รายละเอียดใน `phase_a.md`.
+
+
 ## Latest PR body — 2026-10-23 seed v2
 
 Phase A เพิ่ม Aclaire idle seed v2 ที่ 48×64 จาก feedback: หน้า/ตาโต ผมมีปริมาตร ท่ายืนสดใส และ costume v2 โดยเก็บ studies เดิมไว้ครบ
