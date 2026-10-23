@@ -63,3 +63,58 @@ export const EnergyBalance = {
 export const EnemyBalance = {
   mossSlime: { hp: 1, speed: 35, contactDamage: 1 },
 } as const;
+
+/** GDD หัวข้อ 3 */
+export const ElementBalance = {
+  switchCooldownMs: 250,
+  castCooldownMs: 250,
+  fire: {
+    cost: 20,
+    speed: 260,
+    damage: 1,
+    lifetimeMs: 1200,
+    burnMs: 3000,
+    burnTickMs: 1000,
+    burnDamage: 1,
+  },
+  water: {
+    cost: 25,
+    speedX: 130,
+    speedY: -90,
+    /** แรงโน้มถ่วงสุทธิของฟองน้ำ (ให้ลอยเป็นวิถีโค้งลงช้าๆ) */
+    gravity: 450,
+    /** ฟองน้ำเด้งไปตามพื้น ชนพื้นครบจำนวนนี้แล้วแตก (ชนกำแพงแตกทันที) */
+    maxBounces: 3,
+    bounce: 0.6,
+    lifetimeMs: 1800,
+    freezeMs: 2000,
+    /** แช่แข็งผิวน้ำรอบจุดที่โดน ± จำนวนช่อง */
+    freezeRadiusTiles: 2,
+  },
+  wind: {
+    gustCost: 15,
+    gustWidth: 48,
+    gustHeight: 30,
+    gustPushX: 280,
+    gustPushY: 180,
+    dashCost: 15,
+    dashSpeed: 330,
+    dashMs: 170,
+    glideFallSpeed: 45,
+    glideCostPerSecond: 20,
+    airJumps: 1,
+    doubleJumpVelocity: 340,
+  },
+  earth: {
+    blockCost: 30,
+    maxBlocks: 2,
+    blockSize: 32,
+    /** หาพื้นด้านล่างจุดวางบล็อกได้ลึกสุดกี่ช่อง */
+    blockDropTiles: 3,
+    slamCost: 30,
+    slamSpeed: 560,
+    slamDamage: 2,
+    slamWidth: 96,
+    slamHeight: 36,
+  },
+} as const;

@@ -19,6 +19,16 @@ export class JumpAssist {
     this.sincePressedMs += deltaMs;
   }
 
+  /** ยังกระโดดจากพื้นได้ (อยู่บนพื้นหรืออยู่ในช่วง coyote time) */
+  get canGroundJump(): boolean {
+    return this.sinceGroundedMs <= this.coyoteTimeMs;
+  }
+
+  /** ล้างการกดที่ค้างไว้ (เช่น เมื่อใช้กดนั้นเป็น double jump ไปแล้ว) */
+  clearPress(): void {
+    this.sincePressedMs = Number.POSITIVE_INFINITY;
+  }
+
   /** เรียกเมื่อผู้เล่นเพิ่งกดปุ่มกระโดด */
   press(): void {
     this.sincePressedMs = 0;
