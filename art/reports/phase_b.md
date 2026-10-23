@@ -27,3 +27,15 @@ This is still incompatible with the unchanged `ART_HANDOFF.md` production rules 
 ## Next Aclaire work
 
 Continue from this locked V4 seed with run and movement key poses, then normalize their frames to the same anchor and density. Keep one sheathed sword in movement/cast/hurt/dead poses; attacks must show one sword in hand and an empty sheath. Review each motion before atlas packing. The full Phase B phase report and production validation remain open.
+
+## Run key pose proposal (24 October 2026)
+
+After the idle preview, a single [run key pose](../previews/phase_b/2026-10-24_aclaire_run_key_64x64_density2.png) was generated from the approved V4 sprite and the owner's v2 sheet, then normalized and capped at 256 colors by `tools/art/build_aclaire_run_key_phase_b.py`. The image-generation prompt requested one isolated right-facing mid-stride pose, bright readable face, V4 outfit and proportions, one straight sheathed sword, no cape and transparent background. The [2× size comparison](../previews/phase_b/2026-10-24_aclaire_run_key_scale_review.png) and [640×360 probe](../previews/phase_b/2026-10-24_aclaire_run_key_640x360.png) show it beside V4 idle.
+
+The wide stride occupies 110×124 physical pixels. Preserving V4's height therefore requires a **128×128 physical / 64×64 logical run frame**, wider than V4 idle's 96×128 / 48×64. Pinz explicitly selected 64×64 logical px for the run animation after seeing the scale comparison. The normalized key uses 247 opaque colors and binary alpha. The generator source is stored at `art/concept/2026-10-24_aclaire_run_key_source.png`, outside `public/assets/`.
+
+## Eight-frame run motion study
+
+The full-strip image-generation pass was rejected: it drew fewer than eight well-separated figures and drifted in proportion and placement. Four individually reviewed source poses (contact, compression, passing and airborne flight), plus an alternate contact, were normalized by `tools/art/build_aclaire_run_phase_b.py` into [eight 128×128 RGBA preview frames](../previews/phase_b/2026-10-24_aclaire_run_study/), a [nearest-neighbor review sheet](../previews/phase_b/2026-10-24_aclaire_run_study_x2.png) and an [APNG loop](../previews/phase_b/2026-10-24_aclaire_run_study_motion.png). All frames use binary alpha and only colors from V4's 247-color family; the APNG uses 83 ms/frame, approximately 12 fps.
+
+**Review limitation:** this is a timing/size study, not the final production run strip. Passing and flight artwork is reused in the second stride, so the near/far leg exchange and hair lag are not yet convincing. The first and alternate contacts also still need closer sword-axis cleanup. The torso and face are recognizable at 1:1 and 2×, but motion should be redrawn or substantially refined before atlas packing. The source PNGs are kept under `art/concept/` for reproducibility. No `public/assets/` files or runtime code were changed.
