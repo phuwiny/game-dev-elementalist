@@ -194,8 +194,9 @@ export class Torch extends PuzzleObject implements Trigger {
     return this.lit;
   }
 
+  /** คบไฟที่จุดแล้วให้ลูกไฟผ่านไปจุดคบถัดไปได้ */
   override absorbs(element: ElementType): boolean {
-    return element === ElementType.Fire;
+    return element === ElementType.Fire && !this.lit;
   }
 
   onElementHit(element: ElementType): void {
@@ -351,5 +352,39 @@ export class Gate extends PuzzleObject {
       this.sprite.stop();
       this.sprite.setFrame('gate_door_closed_000');
     }
+  }
+}
+
+/** ประตูสนามบอส: เปิดอยู่ตั้งแต่ต้น ปิดขังผู้เล่นเมื่อเริ่มสู้ และเปิดเมื่อชนะหรือผู้เล่นตาย */
+export class ArenaGate extends PuzzleObject {
+  readonly group = 'solid';
+  private closed = false;
+
+  constructor(host: PuzzleHost, o: LevelObject) {
+    super(host, 'arenaGate', o.col, o.row, 'gate_door_open_005');
+    this.setBodyEnabledLater(false);
+  }
+
+  get isClosed(): boolean {
+    return this.closed;
+  }
+
+  onElementHit(): void {}
+
+  setClosed(closed: boolean): void {
+    if (this.closed === closed) return;
+    this.closed = closed;
+    this.setBodyEnabled(closed);
+    if (closed) {
+      this.sprite.stop();
+      this.sprite.setFrame('gate_door_closed_000');
+    } else {
+      this.sprite.play(objAnim('gate_door_open'));
+    }
+  }
+
+  /** zone ยังไม่มี body จนกว่า scene จะใส่ลงกลุ่ม physics */
+  private setBodyEnabledLater(enabled: boolean): void {
+    this.host.puzzleScene.time.delayedCall(0, () => this.setBodyEnabled(enabled || this.closed));
   }
 }

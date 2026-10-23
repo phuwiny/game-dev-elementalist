@@ -66,7 +66,7 @@ export class ElementSystem {
     });
     const after = this.selector.selected;
     if (after !== before && after !== null) {
-      if (before !== null) this.powers?.[before].release();
+      if (before !== null) this.powers?.[before].release(true);
       this.hooks.onSwitch(after);
     }
 

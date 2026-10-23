@@ -5,7 +5,12 @@
  * สัญลักษณ์พื้นฐาน
  *   .  ว่าง           #  พื้นแข็ง        ^  หนาม (ตายทันที)
  *   P  จุดเริ่ม        G  ธงเส้นชัย       K  checkpoint
- *   c  เหรียญ         h  Heart Fruit     s  Moss Slime
+ *   c  เหรียญ         h  Heart Fruit
+ *
+ * ศัตรู (Phase 3)
+ *   s  Moss Slime     f  Leaf Wisp (ลอยกลางอากาศ)     r  Thorn Beetle
+ *   B  บอส (มุมล่างซ้ายของสนาม ชนิดบอสกำหนดใน LevelDef หรือ Tiled)
+ *   A  ประตูสนามบอส 2×3 (เปิดอยู่ ปิดเมื่อเริ่มสู้บอส)
  *
  * วัตถุ puzzle (Phase 2) ช่องที่มีสัญลักษณ์คือมุม "ล่างซ้าย" ของวัตถุ
  * ช่องอื่นที่วัตถุทับต้องเป็น '.'
@@ -40,7 +45,14 @@ export type ObjectKind =
   | 'crackedWall'
   | 'plate'
   | 'gate'
+  | 'arenaGate'
   | 'spirit';
+
+export type EnemyKind = 'moss_slime' | 'leaf_wisp' | 'thorn_beetle';
+
+export interface EnemySpawn extends GridPoint {
+  kind: EnemyKind;
+}
 
 export interface LevelObject extends GridPoint {
   kind: ObjectKind;
@@ -58,8 +70,10 @@ export interface ParsedLevel {
   checkpoints: GridPoint[];
   coins: GridPoint[];
   hearts: GridPoint[];
-  slimes: GridPoint[];
+  enemies: EnemySpawn[];
   objects: LevelObject[];
+  /** จุดวางบอส (มุมล่างซ้าย) ถ้าด่านมีบอส */
+  boss: GridPoint | null;
 }
 
 export class LevelParseError extends Error {}
@@ -75,6 +89,13 @@ const OBJECT_SYMBOLS: Record<string, ObjectKind> = {
   X: 'crackedWall',
   _: 'plate',
   D: 'gate',
+  A: 'arenaGate',
+};
+
+const ENEMY_SYMBOLS: Record<string, EnemyKind> = {
+  s: 'moss_slime',
+  f: 'leaf_wisp',
+  r: 'thorn_beetle',
 };
 
 /** ขนาดวัตถุเป็นช่อง [กว้าง, สูง] */
@@ -89,6 +110,7 @@ export const OBJECT_SIZE: Record<ObjectKind, readonly [number, number]> = {
   crackedWall: [2, 2],
   plate: [2, 1],
   gate: [2, 3],
+  arenaGate: [2, 3],
   spirit: [1, 1],
 };
 
@@ -101,10 +123,11 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
   const checkpoints: GridPoint[] = [];
   const coins: GridPoint[] = [];
   const hearts: GridPoint[] = [];
-  const slimes: GridPoint[] = [];
+  const enemies: EnemySpawn[] = [];
   const objects: LevelObject[] = [];
   let player: GridPoint | null = null;
   let goal: GridPoint | null = null;
+  let boss: GridPoint | null = null;
 
   lines.forEach((line, row) => {
     if (line.length !== width) {
@@ -116,7 +139,10 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
       const point = { col, row };
       let tile = Tile.Empty;
       const objectKind = OBJECT_SYMBOLS[ch];
-      if (objectKind) {
+      const enemyKind = ENEMY_SYMBOLS[ch];
+      if (enemyKind) {
+        enemies.push({ kind: enemyKind, col, row });
+      } else if (objectKind) {
         objects.push({ kind: objectKind, col, row });
       } else if (ch >= '1' && ch <= '4') {
         objects.push({ kind: 'spirit', col, row, slot: Number(ch) - 1 });
@@ -147,8 +173,9 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
           case 'h':
             hearts.push(point);
             break;
-          case 's':
-            slimes.push(point);
+          case 'B':
+            if (boss) throw new LevelParseError('Level has more than one boss (B)');
+            boss = point;
             break;
           default:
             throw new LevelParseError(`Unknown symbol "${ch}" at row ${row}, col ${col}`);
@@ -162,13 +189,25 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
   if (!player) throw new LevelParseError('Level has no player start (P)');
   if (!goal) throw new LevelParseError('Level has no goal (G)');
 
-  const level: ParsedLevel = { width, height: lines.length, tiles, player, goal, checkpoints, coins, hearts, slimes, objects };
+  const level: ParsedLevel = {
+    width,
+    height: lines.length,
+    tiles,
+    player,
+    goal,
+    checkpoints,
+    coins,
+    hearts,
+    enemies,
+    objects,
+    boss,
+  };
   validateObjectFootprints(level, lines);
   return level;
 }
 
 /** วัตถุหลายช่องต้องอยู่ในด่าน และช่องที่ทับต้องว่าง */
-function validateObjectFootprints(level: ParsedLevel, lines: readonly string[]): void {
+export function validateObjectFootprints(level: ParsedLevel, lines: readonly string[]): void {
   for (const o of level.objects) {
     const [w, h] = OBJECT_SIZE[o.kind];
     for (let dy = 0; dy < h; dy += 1) {

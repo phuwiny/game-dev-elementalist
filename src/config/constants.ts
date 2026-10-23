@@ -8,6 +8,7 @@ export const SceneKey = {
   Boot: 'BootScene',
   Preload: 'PreloadScene',
   Title: 'TitleScene',
+  WorldMap: 'WorldMapScene',
   Game: 'GameScene',
   UI: 'UIScene',
   GameOver: 'GameOverScene',

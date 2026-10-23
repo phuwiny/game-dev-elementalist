@@ -1,21 +1,28 @@
 import Phaser from 'phaser';
 import { SceneKey, TILE_SIZE } from '../config/constants';
-import { ElementBalance } from '../config/balance';
+import { BossBalance, ElementBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { parseLevel, Tile, type GridPoint, type LevelObject, type ParsedLevel } from '../core/LevelParser';
 import { isGateOpen, linkTriggers } from '../core/TriggerLinks';
+import { parseTiledMap, type TiledMap } from '../core/TiledLevel';
+import type { Progress } from '../core/Progress';
 import type { Vitals } from '../core/Vitals';
-import { findLevel } from '../levels';
+import { findLevel, isAdventure, mapCacheKey, nextAdventureLevel, type LevelDef } from '../levels';
 import { Player, PlayerEvent } from '../entities/Player';
 import { Projectile } from '../entities/Projectile';
 import { Enemy } from '../entities/enemies/Enemy';
 import { MossSlime } from '../entities/enemies/MossSlime';
+import { LeafWisp } from '../entities/enemies/LeafWisp';
+import { ThornBeetle } from '../entities/enemies/ThornBeetle';
+import { BrambleKing, type BossHost } from '../entities/bosses/BrambleKing';
 import { SpiritCompanion, SPIRIT_NAMES, spiritKey } from '../entities/SpiritCompanion';
 import type { ElementWorld } from '../elements/ElementPowers';
 import { InputManager } from '../systems/InputManager';
 import { ElementSystem } from '../systems/ElementSystem';
+import { sfx } from '../systems/Sfx';
 import {
+  ArenaGate,
   Burnable,
   CrackedWall,
   Gate,
@@ -32,9 +39,11 @@ import {
 import { animKey } from '../assets/manifest';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
-import { REGISTRY_VITALS } from './BootScene';
+import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
 export const REGISTRY_LEVEL = 'level';
+/** id สำหรับ Combo.registerHit ของบอส (ศัตรูปกติใช้ id ตั้งแต่ 0 ขึ้นไป) */
+const BOSS_HIT_ID = -1;
 
 export interface HudState {
   hp: number;
@@ -46,6 +55,15 @@ export interface HudState {
   energyDenied: boolean;
   unlocked: ElementType[];
   selected: ElementType | null;
+  boss: { name: string; hp: number; max: number } | null;
+  muted: boolean;
+}
+
+/** วัตถุที่กระสุนธาตุชนแล้วมีปฏิกิริยา (วัตถุ puzzle และโล่เถาวัลย์ของบอส) */
+interface ElementTarget {
+  removed: boolean;
+  absorbs(element: ElementType): boolean;
+  onElementHit(element: ElementType, power: number): void;
 }
 
 /** ระยะใต้ขอบล่างของด่านที่ถือว่าตกเหว */
@@ -61,7 +79,7 @@ interface EarthBlock {
  * ด่านเล่น: ประกอบด่าน, ตัวละคร, ศัตรู, ไอเท็ม, วัตถุ puzzle, พลังธาตุ
  * และกฎ HP / ชีวิต / checkpoint (GDD หัวข้อ 2–4)
  */
-export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost {
+export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost, BossHost {
   private level!: ParsedLevel;
   private layer!: Phaser.Tilemaps.TilemapLayer;
   player!: Player;
@@ -85,6 +103,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   private stageCoins = 0;
   private finished = false;
   private puzzleDirty = true;
+  private def!: LevelDef;
+  private progress!: Progress;
+  private boss: BrambleKing | null = null;
+  private arenaGate: ArenaGate | null = null;
+  private goalFlag: Phaser.GameObjects.Sprite | null = null;
 
   constructor() {
     super(SceneKey.Game);
@@ -108,15 +131,20 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.gates = [];
     this.earthBlocks = [];
     this.puzzleDirty = true;
+    this.boss = null;
+    this.arenaGate = null;
+    this.goalFlag = null;
 
     const def = findLevel(data?.level ?? (this.registry.get(REGISTRY_LEVEL) as string | undefined));
+    this.def = def;
     this.registry.set(REGISTRY_LEVEL, def.key);
 
     this.vitals = this.registry.get(REGISTRY_VITALS) as Vitals;
+    this.progress = this.registry.get(REGISTRY_PROGRESS) as Progress;
     this.controls = new InputManager(this);
     this.cameras.main.setBackgroundColor(PALETTE.neutral1);
 
-    this.level = parseLevel(def.rows);
+    this.level = def.rows ? parseLevel(def.rows) : parseTiledMap(this.cache.json.get(mapCacheKey(def.key)) as TiledMap);
     this.layer = this.buildTerrain(this.level);
     const worldW = this.level.width * TILE_SIZE;
     const worldH = this.level.height * TILE_SIZE;
@@ -136,7 +164,12 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.player.on(PlayerEvent.AttackStep, (step: number) => this.spawnSlash(step));
     this.player.on(PlayerEvent.DeathAnimationDone, () => this.onPlayerDeathFinished());
     this.player.on(PlayerEvent.SlamImpact, (x: number, y: number) => this.slamImpact(x, y));
-    this.player.on(PlayerEvent.Dash, () => this.spawnFx('dash_trail', this.player.x - this.player.facing * 10, this.player.y - 24));
+    this.player.on(PlayerEvent.Dash, () => {
+      sfx.play('wind');
+      this.spawnFx('dash_trail', this.player.x - this.player.facing * 10, this.player.y - 24);
+    });
+    this.player.on(PlayerEvent.Jump, () => sfx.play('jump'));
+    this.player.on(PlayerEvent.DoubleJump, () => sfx.play('double_jump'));
 
     this.companion = new SpiritCompanion(this, this.player);
     this.elements = new ElementSystem(this.controls, {
@@ -150,11 +183,14 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.buildPickups();
     this.buildCheckpoints();
     this.buildGoal();
+    this.buildBoss();
     this.buildColliders();
 
-    if (new URLSearchParams(window.location.search).has('unlock')) {
-      for (const el of ELEMENT_ORDER) this.unlockSpirit(el, false);
-    }
+    // ภูตที่มีตั้งแต่เริ่ม: ตามโลกใน GDD + ที่ได้แล้วในโหมดผจญภัย
+    const owned = new Set<ElementType>(def.startSpirits ?? []);
+    if (isAdventure(def.key)) for (const el of this.progress.spiritList) owned.add(el);
+    if (new URLSearchParams(window.location.search).has('unlock')) for (const el of ELEMENT_ORDER) owned.add(el);
+    for (const el of ELEMENT_ORDER) if (owned.has(el)) this.unlockSpirit(el, false);
 
     const cam = this.cameras.main;
     cam.setBounds(0, 0, worldW, worldH);
@@ -182,6 +218,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.resolveProjectileHits();
     this.updatePlates();
     if (this.puzzleDirty) this.updateGates();
+    this.updateBoss(delta);
 
     if (!this.player.isDead && this.player.y > worldBottom + FALL_DEATH_MARGIN) {
       this.killPlayer();
@@ -200,7 +237,47 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
       energyDenied: this.elements.isDenied(this.time.now),
       unlocked: this.elements.selector.unlocked,
       selected: this.elements.selected,
+      boss: this.boss && (this.boss.isActive || this.boss.isDefeated) ? { name: this.boss.name, hp: this.boss.hp, max: this.boss.maxHp } : null,
+      muted: sfx.muted,
     };
+  }
+
+  now(): number {
+    return this.time.now;
+  }
+
+  // ---------------------------------------------------------------------------
+  // BossHost
+  // ---------------------------------------------------------------------------
+
+  addSolid(zone: Phaser.GameObjects.Zone): void {
+    this.solids.add(zone);
+  }
+
+  hurtPlayerIn(area: Phaser.Geom.Rectangle, damage: number, fromX: number): boolean {
+    if (this.player.isDead || this.player.isInvulnerable) return false;
+    const b = this.player.body;
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(area, new Phaser.Geom.Rectangle(b.x, b.y, b.width, b.height))) return false;
+    this.damagePlayer(damage, fromX);
+    return true;
+  }
+
+  shieldBlocks(area: Phaser.Geom.Rectangle): boolean {
+    if (!this.player.isShielding) return false;
+    const b = this.player.body;
+    const guard = new Phaser.Geom.Rectangle(b.x - 8, b.y - 10, b.width + 16, b.height + 10);
+    return Phaser.Geom.Intersects.RectangleToRectangle(area, guard);
+  }
+
+  evictPlayer(area: Phaser.Geom.Rectangle, toX: number): void {
+    const b = this.player.body;
+    if (this.player.isDead || !Phaser.Geom.Intersects.RectangleToRectangle(area, new Phaser.Geom.Rectangle(b.x, b.y, b.width, b.height))) return;
+    this.spawnFx('poof', this.player.x, this.player.y - 16);
+    b.reset(toX, this.player.y);
+  }
+
+  shake(ms: number, intensity: number): void {
+    this.cameras.main.shake(ms, intensity);
   }
 
   // ---------------------------------------------------------------------------
@@ -208,6 +285,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   // ---------------------------------------------------------------------------
 
   spawnProjectile(element: ElementType.Fire | ElementType.Water): void {
+    sfx.play(element === ElementType.Fire ? 'fire' : 'water');
     const m = this.player.muzzle;
     new Projectile(this, this.projectiles, m.x, m.y, this.player.facing, element);
   }
@@ -223,6 +301,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     );
     const fx = this.spawnFx('wind_wave', this.player.x + dir * 24, this.player.y - 20);
     fx.setFlipX(dir < 0);
+    sfx.play('wind');
 
     for (const e of this.enemies.getChildren() as Enemy[]) {
       if (e.isAlive && Phaser.Geom.Intersects.RectangleToRectangle(area, e.hurtbox())) {
@@ -241,6 +320,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     if (!spot) return;
     if (this.earthBlocks.length >= EB.maxBlocks) this.crumbleEarthBlock(this.earthBlocks[0]);
 
+    sfx.play('earth');
     const size = EB.blockSize;
     const sprite = this.add.sprite(spot.x + size / 2, spot.y + size, 'fx', 'earth_block_appear_000').setOrigin(0.5, 1).setDepth(3);
     sprite.play(animKey('fx', 'earth_block_appear'));
@@ -252,6 +332,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   }
 
   denyEnergy(): void {
+    sfx.play('deny');
     this.elements.deny(this.time.now);
   }
 
@@ -363,6 +444,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
         return new PressurePlate(this, o);
       case 'gate':
         return new Gate(this, o);
+      case 'arenaGate': {
+        const gate = new ArenaGate(this, o);
+        this.arenaGate = gate;
+        return gate;
+      }
       default:
         throw new Error(`Unsupported object ${o.kind}`);
     }
@@ -386,7 +472,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     if (!this.elements.unlock(element)) return;
     if (element === ElementType.Wind) this.player.doubleJumpUnlocked = true;
     this.elements.energy.refill();
-    if (announce) this.floatText(this.player.x, this.player.y - 60, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+    if (announce) {
+      sfx.play('spirit');
+      this.floatText(this.player.x, this.player.y - 60, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      if (isAdventure(this.def.key)) this.progress.addSpirit(element);
+    }
   }
 
   private buildSpikes(): void {
@@ -405,9 +495,30 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   private buildEnemies(): void {
     this.enemies = this.physics.add.group({ runChildUpdate: false, allowGravity: true });
     const isGroundAt = (x: number, y: number) => this.isSolidAt(x, y);
-    for (const p of this.level.slimes) {
-      const pos = this.footOf(p);
-      this.enemies.add(new MossSlime(this, pos.x, pos.y, isGroundAt));
+    const target = () => ({ x: this.player.x, y: this.player.y, alive: !this.player.isDead });
+    const blocked = (x: number, y: number) => {
+      sfx.play('block');
+      this.spawnFx('hit_spark', x, y);
+    };
+    for (const spawn of this.level.enemies) {
+      const foot = this.footOf(spawn);
+      switch (spawn.kind) {
+        case 'moss_slime':
+          this.enemies.add(new MossSlime(this, foot.x, foot.y, isGroundAt));
+          break;
+        case 'leaf_wisp': {
+          const c = this.centerOf(spawn);
+          const wisp = new LeafWisp(this, c.x, c.y + 8, target);
+          this.enemies.add(wisp);
+          wisp.body.setAllowGravity(false);
+          break;
+        }
+        case 'thorn_beetle':
+          this.enemies.add(new ThornBeetle(this, foot.x, foot.y, isGroundAt, blocked));
+          break;
+        default:
+          throw new Error(`Unknown enemy ${String(spawn.kind)}`);
+      }
     }
   }
 
@@ -422,6 +533,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
       (obj as Phaser.GameObjects.Sprite).destroy();
       this.stageCoins += 1;
       const extra = this.vitals.addCoins(1);
+      sfx.play(extra > 0 ? 'one_up' : 'coin');
       if (extra > 0) this.floatText(this.player.x, this.player.y - 50, '1UP', PALETTE.wind);
     });
 
@@ -434,6 +546,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.physics.add.overlap(this.player, hearts, (_p, obj) => {
       if (this.vitals.hp >= this.vitals.snapshot().maxHp) return;
       (obj as Phaser.GameObjects.Sprite).destroy();
+      sfx.play('heart');
       this.vitals.heal(1);
     });
   }
@@ -454,7 +567,46 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     const flag = this.add.sprite(pos.x, pos.y, 'items', 'goal_flag_wave_000').setOrigin(0.5, 1);
     flag.play(animKey('items', 'goal_flag_wave'));
     this.physics.add.existing(flag, true);
-    this.physics.add.overlap(this.player, flag, () => this.reachGoal());
+    this.physics.add.overlap(this.player, flag, () => {
+      if (flag.visible) this.reachGoal();
+    });
+    this.goalFlag = flag;
+    // ด่านบอส: ธงปรากฏเมื่อชนะบอส
+    if (this.level.boss) flag.setVisible(false);
+  }
+
+  private buildBoss(): void {
+    if (!this.level.boss) return;
+    if (!this.arenaGate) throw new Error('Boss level needs an arena gate');
+    const left = this.level.boss.col * TILE_SIZE;
+    const bottom = (this.level.boss.row + 1) * TILE_SIZE;
+    const arenaLeft = (this.arenaGate.col + 2) * TILE_SIZE;
+    this.boss = new BrambleKing(this, left, bottom, arenaLeft);
+  }
+
+  /** เริ่มสู้เมื่อผู้เล่นเดินผ่านประตูสนามเข้าไป */
+  private updateBoss(delta: number): void {
+    const boss = this.boss;
+    const gate = this.arenaGate;
+    if (!boss || !gate) return;
+    if (!boss.isActive && !boss.isDefeated && !this.player.isDead) {
+      const enterX = gate.bounds.right + BossBalance.brambleKing.startOffset;
+      if (this.player.body.x > enterX) {
+        gate.setClosed(true);
+        sfx.play('gate');
+        boss.start(() => this.onBossDefeated());
+      }
+    }
+    boss.update(delta);
+  }
+
+  private onBossDefeated(): void {
+    this.arenaGate?.setClosed(false);
+    this.time.delayedCall(1200, () => {
+      this.goalFlag?.setVisible(true);
+      sfx.play('clear');
+      if (this.goalFlag) this.floatText(this.goalFlag.x, this.goalFlag.y - 72, 'STAGE CLEAR!', PALETTE.gold);
+    });
   }
 
   private buildColliders(): void {
@@ -504,11 +656,16 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   /** กระสุนกับศัตรูใช้ hurtbox แทน body (body ของศัตรูตัวเตี้ยต่ำกว่าระดับที่ยิง) */
   private resolveProjectileHits(): void {
     const enemies = (this.enemies.getChildren() as Enemy[]).filter((e) => e.isAlive);
-    if (enemies.length === 0) return;
+    const weak = this.boss?.isExposed ? this.boss.weakPoint : null;
     for (const p of this.projectiles.getChildren() as Projectile[]) {
       if (p.isSpent) continue;
       const pb = p.body;
       const rect = new Phaser.Geom.Rectangle(pb.x, pb.y, pb.width, pb.height);
+      if (weak && p.damage > 0 && Phaser.Geom.Intersects.RectangleToRectangle(rect, weak)) {
+        this.boss?.hitWeakPoint(p.damage);
+        p.burst();
+        continue;
+      }
       const target = enemies.find((e) => Phaser.Geom.Intersects.RectangleToRectangle(rect, e.hurtbox()));
       if (target) this.projectileHitsEnemy(p, target);
     }
@@ -518,15 +675,19 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     if (p.isSpent || !e.isAlive) return;
     if (p.element === ElementType.Water) {
       e.freeze(ElementBalance.water.freezeMs);
+      sfx.play('freeze');
     } else if (e.hit(p.damage, p.x, p.element)) {
+      sfx.play('enemy_die');
       this.spawnFx('poof', e.x, e.y - 10);
+    } else {
+      sfx.play('hit');
     }
     p.burst();
   }
 
   private projectileHitsObject(p: Projectile, zone: Phaser.GameObjects.Zone): void {
     if (p.isSpent) return;
-    const obj = zone.getData('puzzle') as PuzzleObject | undefined;
+    const obj = zone.getData('puzzle') as ElementTarget | undefined;
     if (!obj) {
       // บล็อกหินของผู้เล่น
       p.burst();
@@ -534,10 +695,13 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     }
     if (obj.removed || !obj.absorbs(p.element)) return;
     obj.onElementHit(p.element, p.damage);
+    if (p.element === ElementType.Fire) sfx.play('burn');
+    else sfx.play('freeze');
     p.burst();
   }
 
   private slamImpact(x: number, y: number): void {
+    sfx.play('slam');
     this.spawnFx('ground_slam_wave', x, y - 16);
     this.cameras.main.shake(120, 0.006);
     // ครอบลงใต้เท้าเล็กน้อย ให้โดนวัตถุที่ฐานอยู่ระดับเดียวกับพื้นที่ยืน
@@ -649,22 +813,44 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
       if (!this.player.registerHit(e.enemyId)) continue;
       this.spawnFx('hit_spark', e.x, e.y - 8);
       this.elements.energy.gainFromMelee();
-      if (e.hit(this.player.attackDamage(), this.player.x, null)) this.spawnFx('poof', e.x, e.y - 10);
+      if (e.hit(this.player.attackDamage(), this.player.x, null)) {
+        sfx.play('enemy_die');
+        this.spawnFx('poof', e.x, e.y - 10);
+      } else {
+        sfx.play('hit');
+      }
       this.cameras.main.shake(60, 0.003);
+    }
+    // จุดอ่อนของบอส: ฟันได้ครั้งเดียวต่อหนึ่งจังหวะดาบ
+    const boss = this.boss;
+    if (boss?.isExposed && Phaser.Geom.Intersects.RectangleToRectangle(box, boss.weakPoint) && this.player.registerHit(BOSS_HIT_ID)) {
+      this.elements.energy.gainFromMelee();
+      boss.hitWeakPoint(this.player.attackDamage());
+      this.cameras.main.shake(80, 0.004);
     }
   }
 
   private onEnemyContact(enemy: Enemy): void {
-    if (!enemy.isAlive || this.player.isDead || this.player.isInvulnerable) return;
-    const result = this.vitals.damage(enemy.contactDamage);
-    if (result === 'died') this.killPlayer();
-    else if (result === 'hurt') this.player.takeHit(enemy.x);
+    if (!enemy.isAlive) return;
+    this.damagePlayer(enemy.contactDamage, enemy.x);
+  }
+
+  private damagePlayer(amount: number, fromX: number): void {
+    if (this.player.isDead || this.player.isInvulnerable || this.finished) return;
+    const result = this.vitals.damage(amount);
+    if (result === 'died') {
+      this.killPlayer();
+    } else if (result === 'hurt') {
+      sfx.play('hurt');
+      this.player.takeHit(fromX);
+    }
   }
 
   private killPlayer(): void {
     if (this.player.isDead || this.finished) return;
     // ตกเหว ตกน้ำ หรือโดนหนาม: HP หมดทันที
     this.vitals.damage(this.vitals.hp);
+    sfx.play('die');
     this.player.die();
   }
 
@@ -683,6 +869,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.player.respawn(this.respawnPoint.x, this.respawnPoint.y);
       this.elements.energy.refill();
+      // ตายระหว่างสู้บอส: บอสกลับเป็นเต็มเลือด เปิดประตูสนามให้เดินเข้าใหม่
+      if (this.boss?.isActive) {
+        this.boss.reset();
+        this.arenaGate?.setClosed(false);
+      }
       this.companion.snap();
       this.cameras.main.fadeIn(200, 15, 11, 26);
     });
@@ -699,6 +890,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.respawnPoint = { x: shrine.x, y: shrine.y };
     shrine.play(animKey('items', 'checkpoint_shrine_lighting'));
     shrine.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => shrine.play(animKey('items', 'checkpoint_shrine_lit')));
+    sfx.play('checkpoint');
     this.floatText(shrine.x, shrine.y - 56, 'CHECKPOINT', PALETTE.gold);
   }
 
@@ -707,9 +899,13 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
     this.finished = true;
     this.player.body.setVelocity(0, 0);
     this.player.body.setAcceleration(0, 0);
+    sfx.play('clear');
+    const adventure = isAdventure(this.def.key);
+    if (adventure) this.progress.markCleared(this.def.key);
+    const next = adventure ? nextAdventureLevel(this.def.key) : null;
     this.time.delayedCall(600, () => {
       this.scene.stop(SceneKey.UI);
-      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins });
+      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next });
     });
   }
 
@@ -732,12 +928,13 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
   }
 
   private spawnSlash(step: number): void {
+    sfx.play('slash');
     const dir = this.player.facing;
     const fx = this.spawnFx(`slash_${step + 1}`, this.player.x + dir * 18, this.player.y - 24);
     fx.setFlipX(dir < 0);
   }
 
-  private spawnFx(name: string, x: number, y: number): Phaser.GameObjects.Sprite {
+  spawnFx(name: string, x: number, y: number): Phaser.GameObjects.Sprite {
     const s = this.add.sprite(x, y, 'fx', `${name}_000`).setDepth(10);
     s.play(animKey('fx', name));
     s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => s.destroy());

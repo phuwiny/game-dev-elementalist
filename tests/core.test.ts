@@ -204,7 +204,7 @@ describe('parseLevel', () => {
     expect(level.goal).toEqual({ col: 4, row: 0 });
     expect(level.tiles[1]).toEqual([Tile.Solid, Tile.Spike, Tile.Solid, Tile.Empty, Tile.Solid]);
     expect(level.coins).toEqual([{ col: 2, row: 0 }]);
-    expect(level.slimes).toEqual([{ col: 3, row: 1 }]);
+    expect(level.enemies).toEqual([{ kind: 'moss_slime', col: 3, row: 1 }]);
     expect(level.checkpoints).toEqual([{ col: 0, row: 2 }]);
     expect(level.hearts).toEqual([{ col: 2, row: 2 }]);
   });
@@ -220,7 +220,7 @@ describe('parseLevel', () => {
   it('the bundled graybox level is valid', () => {
     const level = parseLevel(GRAYBOX_LEVEL);
     expect(level.checkpoints.length).toBeGreaterThanOrEqual(1);
-    expect(level.slimes.length).toBeGreaterThanOrEqual(1);
+    expect(level.enemies.length).toBeGreaterThanOrEqual(1);
     expect(level.goal.col).toBeGreaterThan(level.player.col);
   });
 });

@@ -19,6 +19,8 @@ export interface ElementWorld {
   denyEnergy(): void;
   /** ภูตเล่นท่าใช้พลัง */
   spiritCast(): void;
+  /** เวลาปัจจุบันของเกม (ms) */
+  now(): number;
 }
 
 /**
@@ -32,7 +34,8 @@ export abstract class ElementPower {
 
   abstract press(): void;
   hold(_deltaMs: number): void {}
-  release(): void {}
+  /** ปล่อย K หรือ cancelled = true เมื่อสลับธาตุกลางคัน */
+  release(_cancelled = false): void {}
 
   protected spend(cost: number): boolean {
     if (this.world.energy.trySpend(cost)) return true;
@@ -116,26 +119,64 @@ export class WindPower extends ElementPower {
 
 /**
  * Eathy
- * - บนพื้น: สร้างบล็อกหินด้านหน้า (สูงสุด 2 ก้อน ก้อนเก่าสุดพังเมื่อสร้างก้อนที่ 3)
+ * - บนพื้น แตะ K: สร้างบล็อกหินด้านหน้า (สูงสุด 2 ก้อน ก้อนเก่าสุดพังเมื่อสร้างก้อนที่ 3)
+ * - บนพื้น กดค้าง K: ยกโล่หินหมุนรอบตัว กันกระสุนศัตรู เดินช้าลง ใช้ Energy ต่อเนื่อง
  * - กลางอากาศ: ทุบพื้น ทำ damage รอบตัวและพังกำแพงร้าว
- * โล่หินเลื่อนไป Phase 3
  */
 export class EarthPower extends ElementPower {
   readonly element = ElementType.Earth;
+  private pressedAt = 0;
+  private shielding = false;
+  private warnedEmpty = false;
 
   press(): void {
     const p = this.world.player;
+    this.warnedEmpty = false;
     if (p.isGrounded) {
-      if (!this.world.canPlaceEarthBlock()) return;
-      if (!this.spend(ElementBalance.earth.blockCost)) return;
-      this.world.placeEarthBlock();
-      this.castFx();
+      // รอดูว่าแตะหรือกดค้าง ตัดสินตอนปล่อยหรือเมื่อครบเวลา
+      this.pressedAt = this.world.now();
       return;
     }
     if (p.canSlam() && this.spend(ElementBalance.earth.slamCost)) {
       p.startSlam();
       this.world.spiritCast();
     }
+  }
+
+  override hold(deltaMs: number): void {
+    const p = this.world.player;
+    if (this.pressedAt === 0) return;
+    if (!this.shielding) {
+      if (!p.isGrounded || this.world.now() - this.pressedAt < ElementBalance.earth.shieldHoldMs) return;
+      this.shielding = true;
+      p.setShielding(true);
+      this.world.spiritCast();
+    }
+    if (!this.world.energy.drain(ElementBalance.earth.shieldCostPerSecond, deltaMs)) {
+      this.stopShield();
+      if (!this.warnedEmpty) this.world.denyEnergy();
+      this.warnedEmpty = true;
+    }
+  }
+
+  override release(cancelled = false): void {
+    const wasTap = this.pressedAt > 0 && !this.shielding;
+    this.pressedAt = 0;
+    if (this.shielding) {
+      this.stopShield();
+      return;
+    }
+    if (!wasTap || cancelled || !this.world.player.isGrounded) return;
+    if (!this.world.canPlaceEarthBlock()) return;
+    if (!this.spend(ElementBalance.earth.blockCost)) return;
+    this.world.placeEarthBlock();
+    this.castFx();
+  }
+
+  private stopShield(): void {
+    this.shielding = false;
+    this.pressedAt = 0;
+    this.world.player.setShielding(false);
   }
 }
 

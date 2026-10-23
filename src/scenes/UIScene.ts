@@ -3,7 +3,13 @@ import { GAME_HEIGHT, GAME_WIDTH, SceneKey } from '../config/constants';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { PALETTE, hex } from '../assets/palette';
 import { textStyle } from '../ui/text';
-import type { GameScene, HudState } from './GameScene';
+import { REGISTRY_LEVEL, type GameScene, type HudState } from './GameScene';
+import { isAdventure } from '../levels';
+import { sfx } from '../systems/Sfx';
+
+const BOSS_FILL_WIDTH = 236;
+const BOSS_BAR_X = (GAME_WIDTH - 240) / 2;
+const BOSS_BAR_Y = GAME_HEIGHT - 24;
 
 const ENERGY_FILL_WIDTH = 92;
 const SLOT_X = (i: number) => 12 + i * 28;
@@ -21,6 +27,11 @@ export class UIScene extends Phaser.Scene {
   private livesText!: Phaser.GameObjects.Text;
   private coinsText!: Phaser.GameObjects.Text;
   private pauseLayer!: Phaser.GameObjects.Container;
+  private pauseHint!: Phaser.GameObjects.Text;
+  private bossLayer!: Phaser.GameObjects.Container;
+  private bossFill!: Phaser.GameObjects.Image;
+  private bossName!: Phaser.GameObjects.Text;
+  private shownBossHp = -1;
   private lastKey = '';
 
   constructor() {
@@ -47,16 +58,36 @@ export class UIScene extends Phaser.Scene {
     this.add.image(GAME_WIDTH - 102, 34, 'ui', 'coin_icon').setOrigin(0, 0);
     this.coinsText = this.add.text(GAME_WIDTH - 84, 31, '', textStyle(12)).setOrigin(0, 0);
 
+    this.shownBossHp = -1;
+    this.bossFill = this.add.image(BOSS_BAR_X + 2, BOSS_BAR_Y + 2, 'ui', 'boss_bar_fill').setOrigin(0, 0);
+    this.bossName = this.add.text(GAME_WIDTH / 2, BOSS_BAR_Y - 4, '', textStyle(10, PALETTE.highlight)).setOrigin(0.5, 1);
+    this.bossLayer = this.add
+      .container(0, 0, [this.add.image(BOSS_BAR_X, BOSS_BAR_Y, 'ui', 'boss_bar_frame').setOrigin(0, 0), this.bossFill, this.bossName])
+      .setVisible(false);
+
+    this.pauseHint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20, '', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
     this.pauseLayer = this.add
       .container(0, 0, [
         this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, hex(PALETTE.outline), 0.6).setOrigin(0, 0),
         this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'PAUSED', textStyle(24, PALETTE.gold)).setOrigin(0.5),
-        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20, 'ESC to resume', textStyle(10, PALETTE.neutral4)).setOrigin(0.5),
+        this.pauseHint,
       ])
       .setVisible(false)
       .setDepth(100);
 
-    this.input.keyboard?.on('keydown-ESC', () => this.togglePause());
+    const kb = this.input.keyboard;
+    kb?.on('keydown-ESC', () => this.togglePause());
+    kb?.on('keydown-M', () => {
+      sfx.toggleMute();
+      this.refreshPauseHint();
+    });
+    // ออกจากด่านได้เฉพาะตอนหยุดเกม
+    kb?.on('keydown-X', () => {
+      if (!this.pauseLayer.visible) return;
+      const level = this.registry.get(REGISTRY_LEVEL) as string | undefined;
+      this.scene.stop(SceneKey.Game);
+      this.scene.start(level && isAdventure(level) ? SceneKey.WorldMap : SceneKey.Title, { focus: level });
+    });
     // สลับแท็บแล้วหยุดเกมไว้ ไม่ให้ตัวละครตายตอนผู้เล่นไม่อยู่
     const onHidden = () => this.setPaused(true);
     this.game.events.on(Phaser.Core.Events.HIDDEN, onHidden);
@@ -88,9 +119,25 @@ export class UIScene extends Phaser.Scene {
       if (sel >= 0) this.slotSelect.setX(SLOT_X(sel) - 2);
     }
 
+    this.renderBoss(s.boss);
+
     const flash = s.energyDenied && Math.floor(this.time.now / 80) % 2 === 0;
     this.energyFill.setFrame(flash ? 'energy_bar_fill_flash' : 'energy_bar_fill_normal');
     this.energyFill.setCrop(0, 0, Math.round(ENERGY_FILL_WIDTH * (s.energy / s.energyMax)), 8);
+  }
+
+  private renderBoss(boss: HudState['boss']): void {
+    this.bossLayer.setVisible(boss !== null && boss.hp > 0);
+    if (!boss || boss.hp === this.shownBossHp) return;
+    this.shownBossHp = boss.hp;
+    this.bossName.setText(boss.name.toUpperCase());
+    this.bossFill.setCrop(0, 0, Math.round(BOSS_FILL_WIDTH * (boss.hp / boss.max)), 8);
+  }
+
+  private refreshPauseHint(): void {
+    const level = this.registry.get(REGISTRY_LEVEL) as string | undefined;
+    const exit = level && isAdventure(level) ? 'World Map' : 'Title';
+    this.pauseHint.setText(`ESC resume   M sound ${sfx.muted ? 'OFF' : 'ON'}   X quit to ${exit}`);
   }
 
   private togglePause(): void {
@@ -102,5 +149,6 @@ export class UIScene extends Phaser.Scene {
     if (paused) this.scene.pause(SceneKey.Game);
     else this.scene.resume(SceneKey.Game);
     this.pauseLayer.setVisible(paused);
+    if (paused) this.refreshPauseHint();
   }
 }
