@@ -153,6 +153,8 @@ Asset ในเกมทุกไฟล์ใช้ได้เฉพาะส�
 - ชื่อ frame ใน atlas: `<anim>_<NNN>` เช่น `run_000`, `run_001` (เลข 3 หลักเริ่มที่ 000)
 - Animation key ที่ใช้ในเกม: `<atlas>_<anim>` เช่น `player_run`, `enemies_w1_moss_slime_move`
 - ใน atlas ที่รวมหลายตัว ใส่ชื่อตัวไว้หน้า anim: `moss_slime_move_000`
+- Asset ที่มีหลายสถานะ (ตารางที่เขียนว่า "idle 1, burn 6" เป็นต้น) ตั้งชื่อ anim เป็น `<asset>_<state>` และชื่อ frame เป็น `<asset>_<state>_<NNN>` แม้มี frame เดียวก็ต้องมี `_000` เช่น `torch_unlit_000`, `torch_lit_000`…`torch_lit_003`, `earth_block_idle_000`, `freeze_shatter_004`
+- ภูตใน atlas `spirits` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
 - Frame นิ่งใน atlas `ui` ไม่มีเลขต่อท้าย ใช้ `<element>_<state>` เช่น `heart_full`, `heart_empty`, `energy_bar_fill_normal`, `element_icon_fire_locked` ส่วน element ที่มีสถานะเดียวใช้ชื่อ element ตรงๆ เช่น `energy_bar_frame`, `lives_icon`
 - รายชื่อ frame ที่เกมใช้อยู่ตอนนี้ดูได้ที่ `src/assets/manifest.ts` (เพิ่มตามแต่ละ phase ของการพัฒนา) asset ที่มีมากกว่าในไฟล์นั้นไม่ทำให้เกมพัง
 
@@ -301,15 +303,18 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | fireball (loop) | 16×16 | 4 |
 | fire_burst | 32×32 | 6 |
 | burn_status (loop) | 16×16 | 4 |
-| water_beam_head / water_beam_body (loop) | 16×16 | 4 / 4 |
-| freeze_overlay (ศัตรูถูกแช่แข็ง) | 32×32 | 1 + shatter 5 |
+| water_bubble (ฟองน้ำของ Wata, loop) | 16×16 | 4 |
+| water_splash (ฟองน้ำแตก) | 32×32 | 5 |
+| freeze (ศัตรูถูกแช่แข็ง) | 32×32 | `freeze_overlay` 1, `freeze_shatter` 5 |
 | wind_wave | 32×32 | 5 |
 | dash_trail | 32×48 | 3 |
 | ground_slam_wave | 64×32 | 6 |
-| stone_shield | 16×32 | appear 4, idle 1, break 4 |
+| stone_shield (ยังไม่ใช้ เลื่อนไป Phase 3) | 16×32 | appear 4, idle 1, break 4 |
 | earth_block | 32×32 | appear 4, idle 1, crumble 4 |
-| element_switch_aura (4 สีตามธาตุ) | 32×48 | 5 ต่อธาตุ |
+| element_switch_aura (4 สีตามธาตุ) | 32×48 | 5 ต่อธาตุ ชื่อ anim `element_switch_aura_fire`, `_water`, `_wind`, `_earth` |
 | checkpoint_spark | 16×16 | 5 |
+
+FX ที่ซ้อนบนศัตรูหรือตัวละคร (`freeze_overlay`, `burn_status`) วาดให้ฐานล่างตรงกับเท้า เพราะเกมวาง origin ที่กึ่งกลางล่าง
 
 ### 5.4 วัตถุ puzzle — atlas `objects`
 
@@ -320,9 +325,9 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | torch | 16×32 | unlit 1, lit 4 (loop) |
 | ice_block (ละลายได้) | 16×16 | idle 1, melt 5 |
 | water_surface | 16×16 | water 4 (loop), frozen 1 |
-| magic_seed → vine_stalk | 16×64 | seed 1, grow 8, grown 1 |
+| magic_seed (เมล็ด → ต้นที่มีใบให้เหยียบ) | 16×64 | seed 1, grow 8, grown 1 (ใบ 2 ชั้นที่สูง 32 และ 64 px จากพื้น ตรงกับแท่นเหยียบในเกม) |
 | windmill | 48×48 | idle 1, spin 8 (loop) |
-| cracked_wall | 32×32 | idle 1, break 6 |
+| cracked_wall | 32×32 | idle 1, break 6 (ในด่านวางซ้อน 2 ชิ้นเป็นกำแพงสูง 64 px ลายร้าวควรต่อกันได้) |
 | pressure_plate | 32×8 | up 1, down 1 |
 | gate_door | 32×48 | closed 1, open 6 |
 

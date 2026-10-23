@@ -33,6 +33,11 @@ export interface AtlasDef {
 
 export const ANIMATIONS_JSON = 'assets/animations.json';
 
+/** ชื่อภูตที่ใช้เป็น prefix ของ frame ใน atlas spirits (ลำดับ ไฟ น้ำ ลม ดิน) */
+export const SPIRIT_KEYS = ['burnil', 'wata', 'valvaliz', 'eathy'] as const;
+/** ชื่อธาตุที่ใช้ในชื่อ frame (ตรงกับค่าของ ElementType) */
+export const ELEMENT_KEYS = ['fire', 'water', 'wind', 'earth'] as const;
+
 const sprite = (dir: string, key: string) => ({
   key,
   png: `assets/sprites/${dir}/${key}.png`,
@@ -51,11 +56,54 @@ export const ATLASES: AtlasDef[] = [
       { name: 'jump_peak', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'fall', frames: 2, frameRate: 10, repeat: -1 },
       { name: 'land', frames: 2, frameRate: 14, repeat: 0 },
+      { name: 'double_jump', frames: 4, frameRate: 14, repeat: 0 },
+      { name: 'cast', frames: 4, frameRate: 12, repeat: 0 },
+      { name: 'dash', frames: 3, frameRate: 16, repeat: 0 },
+      { name: 'glide', frames: 4, frameRate: 10, repeat: -1 },
+      { name: 'ground_slam', frames: 5, frameRate: 14, repeat: 0 },
       { name: 'attack_1', frames: 4, frameRate: 16, repeat: 0, width: 64 },
       { name: 'attack_2', frames: 4, frameRate: 16, repeat: 0, width: 64 },
       { name: 'attack_3', frames: 5, frameRate: 16, repeat: 0, width: 64 },
       { name: 'hurt', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'dead', frames: 6, frameRate: 10, repeat: 0 },
+    ],
+  },
+  {
+    ...sprite('spirits', 'spirits'),
+    frameWidth: 32,
+    frameHeight: 32,
+    anims: SPIRIT_KEYS.flatMap((k) => [
+      { name: `${k}_idle`, frames: 6, frameRate: 8, repeat: -1 },
+      { name: `${k}_cast`, frames: 4, frameRate: 12, repeat: 0 },
+    ]),
+    stills: SPIRIT_KEYS.map((k) => ({ name: `${k}_icon` })),
+  },
+  {
+    ...sprite('objects', 'objects'),
+    frameWidth: 16,
+    frameHeight: 16,
+    anims: [
+      { name: 'burnable_vine_idle', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'burnable_vine_burn', frames: 6, frameRate: 12, repeat: 0 },
+      { name: 'wooden_crate_idle', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'wooden_crate_burn', frames: 6, frameRate: 12, repeat: 0 },
+      { name: 'torch_unlit', frames: 1, frameRate: 1, repeat: 0, height: 32 },
+      { name: 'torch_lit', frames: 4, frameRate: 10, repeat: -1, height: 32 },
+      { name: 'ice_block_idle', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'ice_block_melt', frames: 5, frameRate: 12, repeat: 0 },
+      { name: 'water_surface_water', frames: 4, frameRate: 6, repeat: -1 },
+      { name: 'water_surface_frozen', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'magic_seed_seed', frames: 1, frameRate: 1, repeat: 0, height: 64 },
+      { name: 'magic_seed_grow', frames: 8, frameRate: 12, repeat: 0, height: 64 },
+      { name: 'magic_seed_grown', frames: 1, frameRate: 1, repeat: 0, height: 64 },
+      { name: 'windmill_idle', frames: 1, frameRate: 1, repeat: 0, width: 48, height: 48 },
+      { name: 'windmill_spin', frames: 8, frameRate: 14, repeat: -1, width: 48, height: 48 },
+      { name: 'cracked_wall_idle', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 32 },
+      { name: 'cracked_wall_break', frames: 6, frameRate: 14, repeat: 0, width: 32, height: 32 },
+      { name: 'pressure_plate_up', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 8 },
+      { name: 'pressure_plate_down', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 8 },
+      { name: 'gate_door_closed', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 48 },
+      { name: 'gate_door_open', frames: 6, frameRate: 12, repeat: 0, width: 32, height: 48 },
     ],
   },
   {
@@ -92,6 +140,26 @@ export const ATLASES: AtlasDef[] = [
       { name: 'slash_3', frames: 3, frameRate: 20, repeat: 0 },
       { name: 'hit_spark', frames: 4, frameRate: 20, repeat: 0, width: 16, height: 16 },
       { name: 'poof', frames: 6, frameRate: 16, repeat: 0 },
+      { name: 'fireball', frames: 4, frameRate: 12, repeat: -1, width: 16, height: 16 },
+      { name: 'fire_burst', frames: 6, frameRate: 16, repeat: 0 },
+      { name: 'burn_status', frames: 4, frameRate: 10, repeat: -1, width: 16, height: 16 },
+      { name: 'water_bubble', frames: 4, frameRate: 10, repeat: -1, width: 16, height: 16 },
+      { name: 'water_splash', frames: 5, frameRate: 16, repeat: 0 },
+      { name: 'freeze_overlay', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'freeze_shatter', frames: 5, frameRate: 16, repeat: 0 },
+      { name: 'wind_wave', frames: 5, frameRate: 16, repeat: 0 },
+      { name: 'dash_trail', frames: 3, frameRate: 16, repeat: 0, height: 48 },
+      { name: 'ground_slam_wave', frames: 6, frameRate: 16, repeat: 0, width: 64 },
+      { name: 'earth_block_appear', frames: 4, frameRate: 16, repeat: 0 },
+      { name: 'earth_block_idle', frames: 1, frameRate: 1, repeat: 0 },
+      { name: 'earth_block_crumble', frames: 4, frameRate: 14, repeat: 0 },
+      ...ELEMENT_KEYS.map((el) => ({
+        name: `element_switch_aura_${el}`,
+        frames: 5,
+        frameRate: 16,
+        repeat: 0,
+        height: 48,
+      })),
     ],
   },
   {
