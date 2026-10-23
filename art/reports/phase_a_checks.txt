@@ -1,0 +1,24 @@
+CONCEPT style_guide: 1920x1080
+CONCEPT aclaire_pixel_study: 1920x1080
+CONCEPT aclaire_action_poses: 1920x1080
+CONCEPT spirits_sheet: 1920x1080
+CONCEPT enemies_lineup: 1920x1080
+CONCEPT boss_bramble_king: 1920x1080
+CONCEPT boss_magma_serpent: 1920x1080
+CONCEPT boss_tempest_roc: 1920x1080
+CONCEPT boss_moat_hydra: 1920x1080
+CONCEPT boss_hollow_warden: 1920x1080
+CONCEPT world_w1_keyframe: 1920x1080
+CONCEPT world_w2_keyframe: 1920x1080
+CONCEPT world_w3_keyframe: 1920x1080
+CONCEPT world_w4_keyframe: 1920x1080
+CONCEPT world_w5_keyframe: 1920x1080
+PIXEL aclaire_a_idle: 32x48, 14 colors, binary alpha
+PIXEL aclaire_a_attack: 64x48, 15 colors, binary alpha
+PIXEL aclaire_b_idle: 32x48, 15 colors, binary alpha
+PIXEL aclaire_b_attack: 64x48, 15 colors, binary alpha
+PIXEL burnil_study: 32x32, 4 colors, binary alpha
+PIXEL wata_study: 32x32, 6 colors, binary alpha
+PIXEL valvaliz_study: 32x32, 8 colors, binary alpha
+PIXEL eathy_study: 32x32, 9 colors, binary alpha
+PASS: 15 concept boards, 8 native studies, 35-color palette; Phase B validator not included.
