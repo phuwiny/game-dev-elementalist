@@ -1,5 +1,20 @@
 # Phase A — Style และ Concept
 
+## Latest revision — 2026-10-23 / ความละเอียดตัวละคร 2 เท่า (Aclaire V4)
+
+พินปฏิเสธ V3 เพราะภาพแตกและหน้าไม่ชัด และอนุญาตให้เพิ่ม budget ความละเอียดของตัวละครในเกมโดยรวม เริ่มที่ Aclaire พร้อมลดรายละเอียดผม เกราะ ดาบ รองเท้าตามจำเป็น. รอบนี้สร้าง [V4 source](../concept/aclaire_idle_seed_v4_source.png) ใหม่ด้วย built-in imagegen แล้ว [เก็บแกนดาบตรงเป็น source สุดท้าย](../concept/aclaire_idle_seed_v4_aligned_source.png) โดยยึด Aclaire v2 เป็นดีไซน์ และ Coin Quest local เป็นตัวอย่างคุณภาพภาพเท่านั้น. เก็บ V3 ไว้สำหรับเทียบ.
+
+**ข้อเสนอสำหรับรีวิว:** logical frame 48×64, density 2, ภาพจริง 96×128, bottom-center origin, หันขวา. [PNG โปร่งใส 96×128](../previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png) ใช้จริง **247 สี** จากเพดานทดลอง 256; [ภาพเทียบ V3/V4](../concept/aclaire_idle_seed_v4_comparison.png) แสดงขนาดบนจอเท่ากันโดยจำลองการแสดงผลที่นุ่ม; [ภาพ 640×360](../previews/phase_a/2026-10-23_aclaire_seed_v4_640x360.png) เป็น static display probe. มี [raw nearest ×4](../previews/phase_a/2026-10-23_aclaire_seed_v4_256color_x4_nearest.png) สำหรับตรวจพิกเซล และ [display ×4](../previews/phase_a/2026-10-23_aclaire_seed_v4_256color_x4_display.png) สำหรับตรวจความอ่านง่าย.
+
+**การทดลองลดสี:** [ตัวเลือก 60 สี](../previews/phase_a/2026-10-23_aclaire_seed_v4_64color_density2.png) ยังมีเม็ดสีและหน้าหยาบเมื่อดูใกล้ จึงไม่เสนอเป็นตัวหลัก. ตัว 247 สีมีตาขาว/ม่านตา แก้ม รูปกราม และปอยผมอ่านได้ชัดกว่า; ผม เกราะ และรองเท้าลดลายเล็กลงแล้ว. สีชุด Aclaire v2 ยังอยู่: ส้ม/ยางชมพู ตาฟ้า เสื้อชมพู/เกราะเงิน/สายดำ กางเกง tan เห็นต้นขา ถุงเท้า charcoal บูทดำขอบและพื้นขาว กำไลทอง ดาบเดียวในฝักหลัง ไม่มีผ้าคลุม. ด้าม/กันมือ/ฝักใน source สุดท้ายอยู่บนแนวต่อเนื่องเกือบตั้งตรง.
+
+**ผลตรวจเทคนิค:** `build_aclaire_seed_v4.py` ตรวจ raster 96×128, logical 48×64, alpha 0/255, เท้าถึงแถว 127 และสีจริงไม่เกิน 256; metrics อยู่ใน [ไฟล์นี้](2026-10-23_aclaire_seed_v4_metrics.json). Source/prompt อยู่ใน [provenance](2026-10-23_aclaire_seed_v4_prompt.md). การ smooth ในภาพเทียบ/640×360 เป็นเพียงการจำลองด้วย PIL; **ยังไม่ได้ใช้ Phaser runtime จริง**. สี 247 ไม่ใช่ master palette 35 สีและเกินข้อกำหนด 16 สีเดิม จึงเป็นข้อเสนอ Phase A ไม่ใช่ production asset ที่ผ่าน validator ตาม ART_HANDOFF.
+
+**ผลกระทบถ้าพินอนุมัติแนวความละเอียดใหม่นี้:** ผู้ดูแลฝั่ง code/spec ต้องปรับ ART_HANDOFF.md และ `src/assets/manifest.ts` รวมถึง loader/render scale ให้ใช้ density 2 โดยรักษา logical dimensions และ pivot ให้ตรง. Player V4 96×128 มีพื้นที่ภาพ 4 เท่าของ 48×64 และ 8 เท่าของ 32×48 เดิม; ไฟล์ RGBA ไม่บีบอัดต่อ frame เพิ่มจาก ~6 KiB (32×48) เป็น ~48 KiB. Atlas เดิมจำกัด 2048×2048 จึงต้องคำนวณจำนวน frame/padding, memory และโหลดจริงใหม่. ถ้าใช้แนวเดียวกันกับตัวละครอื่น: logical 32×32 → physical 64×64 (ภูต/ศัตรูทั่วไป), 48×48 → 96×96 (ศัตรูใหญ่), 32×48 → 64×96 (Spirit Knight); บอสขนาดใหญ่ต้องทดสอบ atlas/performance แยกก่อนขยาย. ยังไม่ได้ผลิต asset เหล่านี้หรือแก้ production code.
+
+**รอพินรีวิว V4 เป็น idle seed/style ก่อนทำ animation strip และก่อน Phase B.**
+
+
 ## Latest revision — 2026-10-23 / idle seed v3 หลัง feedback ว่าภาพแตก
 
 พินเห็นว่า V2 แตกและขอให้ลดรายละเอียดสีเพื่อให้หน้าเนียนขึ้น จึงสร้าง **V3 ใหม่** จาก source แบบ cel shading ที่ลดจุดสีในผม/หน้า แล้วแปลงเป็นกริด 48×64 ด้วย area sampling และเก็บ facial pixels, กางเกง และดาบบนกริดเอง ภาพ V2 ยังอยู่ครบเพื่อเทียบ; V3 ยังไม่ถือว่าอนุมัติ.

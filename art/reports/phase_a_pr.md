@@ -1,5 +1,10 @@
 # art(concept): Phase A style and concept review
 
+## Latest update — V4 density-2 proposal
+
+ผู้ใช้ขอเพิ่ม budget ความละเอียดตัวละครให้ใกล้ Coin Quest และปฏิเสธ V3 จึงทำ [V4 Aclaire comparison](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/concept/aclaire_idle_seed_v4_comparison.png): logical 48×64, physical 96×128, 247 สีจริง. [PNG โปร่งใส](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png) และ [640×360 scale probe](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v4_640x360.png). มีตัวเลือก 60 สีเทียบแต่หน้าหยาบกว่า. แก้แกนดาบบน source อีกครั้งให้ด้าม/กันมือ/ฝักเกือบตั้งตรง. รายละเอียดผลกระทบต่อขนาด/สี/atlas และขอบเขต approval อยู่ใน phase_a.md. V4 ยังรออนุมัติ; ไม่แก้ production code, ไม่เริ่ม animation หรือ Phase B.
+
+
 ## Latest update — V3 cleaner 16-color seed
 
 ผู้ใช้เห็นว่า V2 แตกและต้องการลดรายละเอียดสีเพื่อให้หน้าเนียนขึ้น จึงเพิ่ม [V2/V3 comparison](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/concept/aclaire_idle_seed_v3_comparison.png), [V3 native 48×64](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v3_16color.png) และ [640×360 scale probe](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v3_640x360.png). V3 ใช้ 16 สีจริงจาก master palette, alpha 0/255 และยังรอรีวิว style/seed. ภาพเดิมยังอยู่ครบ. รายละเอียดใน `phase_a.md`.
