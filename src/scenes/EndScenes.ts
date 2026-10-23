@@ -44,6 +44,8 @@ export class StageClearScene extends Phaser.Scene {
     this.add.text(cx, 120, 'STAGE CLEAR', textStyle(28, PALETTE.gold)).setOrigin(0.5);
     this.add.text(cx, 165, `Coins collected: ${data.coins ?? 0}`, textStyle(12)).setOrigin(0.5);
     this.add.text(cx, 210, 'ENTER  Play again', textStyle(12, PALETTE.neutral4)).setOrigin(0.5);
+    this.add.text(cx, 232, 'ESC  Title', textStyle(12, PALETTE.neutral3)).setOrigin(0.5);
     this.input.keyboard?.once('keydown-ENTER', () => this.scene.start(SceneKey.Game));
+    this.input.keyboard?.once('keydown-ESC', () => this.scene.start(SceneKey.Title));
   }
 }

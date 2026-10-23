@@ -13,10 +13,3 @@ export const SceneKey = {
   GameOver: 'GameOverScene',
   StageClear: 'StageClearScene',
 } as const;
-
-/** ชื่อ event ที่ GameScene ส่งให้ UIScene */
-export const GameEvent = {
-  StatsChanged: 'stats-changed',
-  Paused: 'paused',
-  Resumed: 'resumed',
-} as const;
