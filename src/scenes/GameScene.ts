@@ -459,7 +459,14 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost 
 
   private buildColliders(): void {
     const frozenWater = (_a: unknown, w: unknown) => this.waterOf(w)?.frozen === true;
-    const openWater = (_a: unknown, w: unknown) => this.waterOf(w)?.frozen === false;
+    // ตกน้ำเมื่อกลางตัวอยู่เหนือช่องน้ำที่ไม่แข็งและจมลงไปแล้ว ไม่ใช่แค่ขอบตัวแตะช่องข้างๆ
+    const openWater = (a: unknown, w: unknown) => {
+      const water = this.waterOf(w);
+      if (!water || water.frozen) return false;
+      const body = (a as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body;
+      const zone = water.bounds;
+      return body.center.x >= zone.left && body.center.x < zone.right && body.bottom > zone.top + 4;
+    };
     const frozenEnemy = (_p: unknown, e: unknown) => (e as Enemy).isFrozen;
 
     // ผู้เล่น
