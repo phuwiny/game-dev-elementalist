@@ -2,7 +2,7 @@
 
 วันที่ 23 ตุลาคม 2026 · branch `art/phase-a` · **รอผู้ใช้เลือก A/B และอนุมัติ style**
 
-สถานะส่ง GitHub: **ยังเปิด PR ไม่ได้** — `git push` ได้ HTTP 403 `Permission denied` และ GitHub connector สร้าง branch ได้ HTTP 403 `Resource not accessible by integration` จึงมีเฉพาะ local commit จนกว่า integration จะมี Contents/Pull requests write permission ข้อความ PR เตรียมไว้ใน `phase_a_pr.md`
+สถานะส่ง GitHub: **ส่ง branch และเปิด [draft PR #3](https://github.com/phuwiny/game-dev-elementalist/pull/3) เข้า main แล้ว** หลังผู้ใช้ปรับสิทธิ์ GitHub การส่งครั้งแรกติด HTTP 403 แต่การลองใหม่สำเร็จ ข้อความ PR อยู่ใน `phase_a_pr.md`
 
 อ่าน `AGENTS.md`, `ART_HANDOFF.md` ครบ รวมถึง `docs/GDD.md`, prompt v2 และภาพอ้างอิงก่อนผลิตงาน ยึด `aclaire_character_sheet_v2.png` และ `spirit_*.jpg` ทั้งสี่เป็นหลัก ไม่ใช้ดีไซน์เสื้อหัวใจ/กางเกงยีนส์เก่า
 
@@ -50,7 +50,7 @@
 - `tools/art/validate_phase_a.py` — ตรวจเฉพาะงาน Phase A ไม่ใช่ validator ตามหัวข้อ 9
 - `art/reports/phase_a_checks.txt` — ผลตรวจไฟล์จริง
 - `art/reports/phase_a.md` — รายงานนี้
-- `art/reports/phase_a_pr.md` — title/body สำหรับ PR ที่ยังติดสิทธิ์เขียน GitHub
+- `art/reports/phase_a_pr.md` — title/body สำหรับ draft PR #3
 
 ไม่มีการแก้ไฟล์ที่มีอยู่เดิม รวมถึง `art/reference/`, `src/`, `tests/`, `docs/`, config, maps หรือ audio
 
@@ -64,7 +64,7 @@
 python3: can't open file '/workspace/game-dev-elementalist/tools/validate_assets.py': [Errno 2] No such file or directory
 ```
 
-repo เริ่มต้นยังไม่มีไฟล์นี้และไม่มี `public/assets/` ตัว validator เป็นรายการส่ง Phase B ตามหัวข้อ 10 จึงไม่ได้สร้างแทนหรือรายงานว่าผ่าน งานนี้เตรียมส่งเป็น **draft PR สำหรับรีวิว Phase A** (ยังติดสิทธิ์ GitHub 403) พร้อมเปิดเผยข้อขัดแย้งของ gate ไม่ได้ผ่าน production acceptance ตามหัวข้อ 9
+repo เริ่มต้นยังไม่มีไฟล์นี้และไม่มี `public/assets/` ตัว validator เป็นรายการส่ง Phase B ตามหัวข้อ 10 จึงไม่ได้สร้างแทนหรือรายงานว่าผ่าน งานนี้ส่งเป็น **draft PR สำหรับรีวิว Phase A** พร้อมเปิดเผยข้อขัดแย้งของ gate ไม่ได้ผ่าน production acceptance ตามหัวข้อ 9
 
 `npm run dev -- --host 127.0.0.1` → Vite ready จากนั้นเปิดด้วย Chromium และกด Enter เข้าเกม: พบ canvas 1 ตัว, title `Elemental Spirit`, **pageerror 0** ตรวจ screenshot แล้ว HUD และด่าน placeholder แสดงได้ ไม่มี concept ถูกโหลดเป็น runtime asset ผลนี้เป็น smoke check เท่านั้น ไม่ใช่การทดสอบ asset ใหม่ในเกม
 
@@ -115,7 +115,7 @@ World keyframes เป็นภาพบรรยากาศ ไม่ใช่
 
 ## 4. ความขัดแย้งและข้อจำกัด
 
-1. `AGENTS.md` กำหนด validator exit 0 ก่อน PR แต่ handoff วางการสร้าง validator ไว้ Phase B และ repo ไม่มีไฟล์นี้: เปิดเผยผล exit 2 และเตรียมใช้ draft PR ไม่ข้าม gate ด้วย validator ปลอม
+1. `AGENTS.md` กำหนด validator exit 0 ก่อน PR แต่ handoff วางการสร้าง validator ไว้ Phase B และ repo ไม่มีไฟล์นี้: เปิดเผยผล exit 2 และใช้ draft PR ไม่ข้าม gate ด้วย validator ปลอม
 2. GDD บอกเพิ่มศัตรูโลกละ 2 แบบ แต่ตารางระบุ W1=3, W2=2, W3=2, W4=2, W5=1: ใช้รายชื่อและโลกจากตารางทั้ง 10 ตัว
 3. GDD roadmap วาง Phase A คู่ Dev 0 ขณะที่ handoff บอกส่งก่อน Dev 1: ไม่กระทบขอบเขตงานหรือการหยุดรออนุมัติ
 4. ภาพ illustration ที่ image generation สร้างมีข้อความบรรยายเสริม เช่นความสูงเป็นเมตร/รางวัลในภาพ Hydra และสัดส่วน heroine ย่อยที่ไม่ใช่ chibi: สิ่งเหล่านี้ **ไม่ใช่ข้อกำหนดใหม่**; ค่าพิกเซลใน footer, native study และ handoff มีอำนาจเหนือภาพประกอบ จดข้อจำกัดไว้เพื่อไม่ให้ผู้พัฒนานำข้อความในภาพไปตั้ง gameplay
