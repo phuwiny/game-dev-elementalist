@@ -1,7 +1,7 @@
 # Elemental Spirit (working title)
 
 เกม 2D action platformer แนว side-scrolling แบบ pixel art 16-bit เล่นบน browser บน desktop
-Aclaire ตะลุยด่านจนถึงเส้นชัย โดยใช้พลังจากภูต 4 ธาตุ ได้แก่ Ignis (ไฟ), Wata (น้ำ), Valvaliz (ลม) และ Eathy (ดิน)
+Aclaire ตะลุยด่านจนถึงเส้นชัย โดยใช้พลังจากภูต 4 ธาตุ ได้แก่ Burnil (ไฟ), Wata (น้ำ), Valvaliz (ลม) และ Eathy (ดิน)
 
 ## เอกสาร
 

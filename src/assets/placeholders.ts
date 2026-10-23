@@ -197,8 +197,9 @@ function paintUnknown(p: PixelPen, f: FrameInfo): void {
 }
 
 /**
- * Aclaire (art/reference/aclaire_full_mode.jpg) แบบหยาบ:
- * ผมบลอนด์หางม้าสูง เสื้อแขนกุดชมพู กางเกงขาสั้นน้ำตาลอ่อน บูทดำ ดาบใหญ่ฝักดำบนหลัง
+ * Aclaire v2 (art/reference/aclaire_character_sheet_v2.png) แบบหยาบ:
+ * ผมส้มหางม้าสูง เสื้อแขนกุดชมพู เกราะอกเงิน กางเกงขาสั้น tan
+ * ถุงเท้าเทาเข้มเหนือเข่า บูทดำขอบขาว ดาบใหญ่ฝักดำตั้งเกือบตรงบนหลัง
  */
 function paintAclaire(p: PixelPen, f: FrameInfo): void {
   const cx = Math.floor(f.w / 2);
@@ -250,39 +251,49 @@ function paintAclaire(p: PixelPen, f: FrameInfo): void {
 
   const foot = f.h - 1 - tuck;
   const top = foot - 39 + bob;
-
-  // ดาบบนหลัง (วาดก่อนลำตัว) ยกเว้นตอนฟันจะวาดฝักเปล่า
   const attacking = f.anim.startsWith('attack');
-  p.line(cx - 7, top + 14, cx + 5, top + 34, 4, C.neutral3);
-  p.line(cx - 7, top + 14, cx + 5, top + 34, 2, C.outline);
+
+  // ดาบบนหลัง: ปุ่มด้าม ด้าม กันมือ และฝักอยู่บนแกนตรงเส้นเดียว เกือบตั้งตรงหลังแผ่นหลัง
+  // ตอนฟันดาบ ด้ามหายไปจากหลัง เหลือฝักเปล่า
+  // แกนดาบ: ปุ่มด้ามเหนือไหล่หลังศีรษะ → ปลายฝักใกล้น่อง
+  p.line(cx - 8, top + 12, cx - 3, top + 34, 4, C.neutral3);
+  p.line(cx - 8, top + 12, cx - 3, top + 34, 2, C.outline);
   if (!attacking) {
-    p.rect(cx - 9, top + 11, 2, 3, C.gold);
-    p.rect(cx - 10, top + 9, 2, 2, C.fire1);
+    p.rect(cx - 10, top + 11, 5, 1, C.gold); // กันมือ
+    p.line(cx - 9, top + 7, cx - 8, top + 10, 2, C.gold); // ด้าม
+    p.px(cx - 9, top + 8, C.foliage2);
+    p.rect(cx - 10, top + 5, 2, 2, C.fire2); // ปุ่มด้ามสีแดง
   }
 
-  // ขา + บูท
-  const legY = top + 28;
+  // ขา: ต้นขาสีผิว → ถุงเท้าเทาเข้มเหนือเข่า → บูทดำขอบขาว พื้นขาว
+  const legY = top + 27;
   for (const [dx, swing] of [
     [-3, legA],
     [2, legB],
   ] as const) {
     const lx = cx + dx + swing;
-    p.rect(lx, legY, 3, foot - legY - 5, C.skin2);
-    p.rect(lx - 1, foot - 6, 5, 7, C.outline);
+    p.rect(lx, legY, 3, 2, C.skin3);
+    p.rect(lx, legY + 2, 3, foot - legY - 8, C.neutral2);
+    p.rect(lx, legY + 2, 3, 1, C.neutral3);
+    p.rect(lx - 1, foot - 6, 5, 6, C.outline);
     p.rect(lx - 1, foot - 6, 5, 1, C.highlight);
+    p.rect(lx - 1, foot, 5, 1, C.highlight);
   }
 
-  // กางเกงขาสั้น + เข็มขัด
-  p.rect(cx - 5, top + 23, 11, 6, C.earth3);
-  p.rect(cx - 5, top + 28, 11, 1, C.earth2);
-  p.rect(cx - 5, top + 22, 11, 1, C.wood2);
-  // เสื้อแขนกุดชมพู
-  p.rect(cx - 5, top + 14, 11, 8, C.pink2);
-  p.rect(cx - 5, top + 14, 2, 8, C.pink1);
-  p.rect(cx - 1, top + 13, 3, 2, C.pink3);
-  // สายสะพายดำพาดทแยง
-  p.line(cx + 4, top + 14, cx - 4, top + 21, 1, C.outline);
-  p.px(cx, top + 17, C.neutral4);
+  // กางเกงขาสั้น tan + เข็มขัดน้ำตาล
+  p.rect(cx - 5, top + 21, 11, 6, C.earth);
+  p.rect(cx - 5, top + 26, 11, 1, C.earth2);
+  p.rect(cx - 5, top + 20, 11, 1, C.wood1);
+  // เสื้อแขนกุดชมพู + คอตั้ง
+  p.rect(cx - 5, top + 13, 11, 7, C.pink2);
+  p.rect(cx - 5, top + 13, 2, 7, C.pink1);
+  p.rect(cx - 1, top + 12, 4, 2, C.pink2);
+  // เกราะอกเล็กสีเงิน
+  p.rect(cx, top + 15, 5, 3, C.neutral4);
+  p.rect(cx, top + 15, 5, 1, C.highlight);
+  p.rect(cx, top + 17, 5, 1, C.neutral3);
+  // สายสะพายดำพาดทแยงทับเกราะ
+  p.line(cx - 4, top + 13, cx + 4, top + 19, 1, C.outline);
   // แขน
   if (!attacking) {
     p.rect(cx - 7, top + 15, 2, 7, C.skin2);
@@ -293,20 +304,24 @@ function paintAclaire(p: PixelPen, f: FrameInfo): void {
   // หัว
   const hy = top + 6;
   p.disc(cx, hy, 6, C.skin3);
-  // ผมบลอนด์ + หน้าม้า
-  p.rect(cx - 6, hy - 6, 13, 4, C.earth4);
-  p.rect(cx - 6, hy - 3, 3, 6, C.earth4);
-  p.rect(cx + 2, hy - 3, 4, 2, C.earth4);
-  p.rect(cx - 6, hy - 6, 13, 1, C.earth3);
-  // หางม้าสูงชี้ไปด้านหลัง
-  const tailSwing = f.anim === 'run' ? (f.index % 2) : 0;
-  p.rect(cx - 9, hy - 8 + tailSwing, 5, 3, C.earth4);
-  p.rect(cx - 12, hy - 6 + tailSwing, 4, 3, C.earth3);
+  // ผมส้มฟู + หน้าม้า
+  p.rect(cx - 7, hy - 7, 14, 5, C.fire3);
+  p.rect(cx - 7, hy - 3, 4, 7, C.fire3);
+  p.rect(cx + 1, hy - 3, 5, 2, C.fire3);
+  p.px(cx + 4, hy - 1, C.fire3);
+  p.rect(cx - 6, hy - 7, 11, 1, C.gold);
+  p.rect(cx - 7, hy + 1, 2, 3, C.fire);
+  // หางม้าสูง + ยางรัดผมชมพู
+  const tailSwing = f.anim === 'run' ? f.index % 2 : 0;
+  p.rect(cx - 6, hy - 9, 3, 2, C.pink2);
+  p.rect(cx - 11, hy - 10 + tailSwing, 6, 4, C.fire3);
+  p.rect(cx - 13, hy - 7 + tailSwing, 4, 5, C.fire);
+  p.px(cx - 10, hy - 10 + tailSwing, C.gold);
   // ตาสีฟ้า (หันขวา)
   if (blink) {
     p.rect(cx + 2, hy, 3, 1, C.outline);
   } else {
-    p.rect(cx + 2, hy - 1, 2, 3, C.water2);
+    p.rect(cx + 2, hy - 1, 2, 3, C.water);
     p.px(cx + 2, hy - 1, C.highlight);
   }
 
@@ -342,17 +357,20 @@ function paintSwordSwing(p: PixelPen, f: FrameInfo, cx: number, top: number, t: 
   const bx = hx - Math.cos(angle) * 4;
   const by = hy - Math.sin(angle) * 4;
   p.line(hx, hy, bx, by, 2, C.gold);
+  p.px((hx + bx) / 2, (hy + by) / 2, C.foliage2);
   p.rect(bx - 1, by - 1, 2, 2, C.fire2);
 }
 
 function paintAclaireLying(p: PixelPen, f: FrameInfo, cx: number, t: number): void {
   const y = f.h - 6;
   const fall = Math.round((1 - Math.min(1, t * 2)) * 8);
-  p.rect(cx - 14, y - fall, 6, 4, C.outline);
-  p.rect(cx - 8, y - fall, 6, 4, C.earth3);
+  p.rect(cx - 16, y - fall, 4, 4, C.outline);
+  p.rect(cx - 12, y - fall, 4, 4, C.neutral2);
+  p.rect(cx - 8, y - fall, 6, 4, C.earth);
   p.rect(cx - 2, y - fall, 8, 4, C.pink2);
+  p.rect(cx + 1, y - fall, 3, 2, C.neutral4);
   p.disc(cx + 10, y + 2 - fall, 4, C.skin3);
-  p.rect(cx + 8, y - 3 - fall, 8, 3, C.earth4);
+  p.rect(cx + 8, y - 3 - fall, 8, 3, C.fire3);
   p.line(cx - 6, y - 2 - fall, cx + 8, y - 4 - fall, 2, C.outline);
 }
 
@@ -501,8 +519,8 @@ function paintUi(p: PixelPen, f: FrameInfo): void {
       return;
     case 'lives_icon':
       p.disc(8, 9, 6, C.skin3);
-      p.rect(2, 2, 13, 5, C.earth4);
-      p.rect(0, 1, 4, 3, C.earth3);
+      p.rect(2, 2, 13, 5, C.fire3);
+      p.rect(0, 1, 4, 3, C.fire);
       p.rect(10, 8, 2, 2, C.water2);
       return;
     case 'coin_icon':

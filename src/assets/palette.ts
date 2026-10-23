@@ -30,7 +30,6 @@ export const PALETTE = {
   earth1: '#3d2a17', // 24
   earth2: '#6e4a26', // 25
   earth: '#a8772f', // 26 earth identity
-  earth3: '#a8772f', // 26 (alias สำหรับกางเกงของ Aclaire)
   earth4: '#d9a94a', // 27
   foliage1: '#1e3d1f', // 28
   foliage2: '#3a6b2e', // 29
