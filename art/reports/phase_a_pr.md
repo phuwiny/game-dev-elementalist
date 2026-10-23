@@ -1,5 +1,31 @@
 # art(concept): Phase A style and concept review
 
+## Latest PR body — 2026-10-23 seed v2
+
+Phase A เพิ่ม Aclaire idle seed v2 ที่ 48×64 จาก feedback: หน้า/ตาโต ผมมีปริมาตร ท่ายืนสดใส และ costume v2 โดยเก็บ studies เดิมไว้ครบ
+
+- [ภาพเทียบ Coin Quest / เดิม / v2 16 สี / v2 26 สี](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/concept/aclaire_idle_seed_v2_comparison.png)
+- [PNG โปร่งใส 48×64 / 26 สี](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v2_master.png)
+- [ภาพฐาน 640×360](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v2_640x360.png)
+- [รายงานและข้อจำกัด](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/reports/phase_a.md)
+
+ตรวจ Coin Quest local แล้ว: idle ตรงกับ PNG ทุก pixel, density 2, raster 108×96, ตัวละคร 68×82, ใช้จริง 481 สี และ renderer เปิด smoothing. ใช้ built-in imagegen สร้าง source ใหม่แล้ว nearest-resample, map master palette และเก็บตา/ปาก/แกนดาบบนกริด. ตัวเลือก 16 สีเสียสี tan/เขียวพันด้ามบางส่วน; 26 สีรักษารายละเอียดมากกว่าแต่เกิน budget เดิม จึงเป็นข้อเสนอสำหรับรีวิว ไม่เปลี่ยน master palette หรือ production spec
+
+Validation:
+- validate_phase_a.py: PASS ชุดเดิม 16 boards / 9 studies.
+- build_aclaire_seed_v2.py: PASS assertions candidate ใหม่ ขนาด 48×64, binary alpha, master colors, feet baseline และ scale probe 640×360. 26 สีไม่ใช่ production pass.
+- ตรวจภาพจริงแล้ว; pixel clusters ในผมและตาไกลแคบยังเป็นจุดรอรีวิว.
+- git diff --check: PASS.
+- tools/validate_assets.py ยังไม่มี (exit 2).
+- Runtime รอบนี้ยังไม่ได้ตรวจ: ไม่มี npm ใน PATH และไม่มี node_modules. ภาพฐานเป็น static probe ไม่ใช่ screenshot เกม
+
+ชุด Phase A เดิม (palette/style/action poses/ภูต/ศัตรู/บอส/world keyframes) ยังอยู่ครบ. แก้เฉพาะ art/ และ tools/art/; Coin Quest อ่านอย่างเดียว
+
+ยังไม่มี approved seed/style. คง Draft และหยุดรอผู้ใช้ก่อน animation strip หรือ Phase B. ไม่ merge และไม่เปิด auto-merge.
+
+---
+## Previous PR body (historical)
+
 Base: `main` · Head: `art/phase-a` · Draft: yes
 
 ชุดรีวิวภาพตาม ART_HANDOFF.md หัวข้อ 8 และ 10 โดยยึด Aclaire v2 และภูตต้นฉบับทั้งสี่ เพิ่ม palette 35 สี, style guide, Aclaire pixel study A/B, action poses 7 ท่า, ภูตพร้อมสีหน้าและ pixel studies, ศัตรู 10 ตัว, บอสพร้อมจุดอ่อน 5 ตัว และ world keyframes 5 โลก

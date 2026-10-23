@@ -1,5 +1,49 @@
 # Phase A — Style และ Concept
 
+## Latest revision — 2026-10-23 / idle seed v2 จาก Coin Quest local
+
+**ยังไม่มี seed/style ที่ได้รับอนุมัติ และหยุดที่ Phase A** ผลล่าสุดอยู่หัวข้อนี้; ข้อความเรื่อง ZIP เข้าไม่ได้ด้านล่างเป็นประวัติรอบก่อน รอบนี้อ่าน local `D:/nilworkspaces/tqm-proj/boss-game` ได้แล้ว โดยไม่แก้ Coin Quest.
+
+### ไฟล์ใหม่และวิธีผลิต
+
+- [ภาพเทียบ Coin Quest / เดิม / ใหม่ 16 สี / ใหม่ 26 สี](../concept/aclaire_idle_seed_v2_comparison.png) — 1920×1080, มี native 1:1 และ nearest enlargement.
+- [PNG โปร่งใส 48×64 / 26 สี](../previews/phase_a/2026-10-23_aclaire_seed_v2_master.png), [ขยาย ×8](../previews/phase_a/2026-10-23_aclaire_seed_v2_master_x8.png).
+- [PNG โปร่งใส 48×64 / 16 สี](../previews/phase_a/2026-10-23_aclaire_seed_v2_16color.png), [ขยาย ×8](../previews/phase_a/2026-10-23_aclaire_seed_v2_16color_x8.png).
+- [ภาพฐาน 640×360](../previews/phase_a/2026-10-23_aclaire_seed_v2_640x360.png) เป็น static scale probe ไม่ใช่ screenshot เกม.
+- [source จาก built-in imagegen](../concept/aclaire_idle_seed_v2_source.png), [prompt และ provenance](2026-10-23_aclaire_seed_v2_prompt.md), [ผลวัด](2026-10-23_aclaire_seed_v2_metrics.json).
+- Coin Quest: `2026-10-23_cq_idle_decoded.png`, `2026-10-23_cq_idle_x4.png`, `2026-10-23_cq_idle_data.json` ใน `art/previews/phase_a/` เป็นหลักฐานอ้างอิง ไม่ใช่ asset สำหรับ Elemental Spirit.
+- `tools/art/extract_coin_quest_reference.cjs` อ่านข้อมูลจริงตามลำดับ loader; `tools/art/build_aclaire_seed_v2.py` ถอดภาพ reference, normalize, quantize, เก็บตา/ปาก/แกนดาบบนกริดและสร้างภาพเทียบซ้ำได้จาก source ที่เก็บไว้. ไม่ใช่การขยาย sprite เดิม.
+
+### ข้อเท็จจริงจากไฟล์ Coin Quest
+
+1. `index.html:404–406` โหลด `js/2026-10-15_character-art.js` แล้ว `js/2026-10-22_aclaire-walk.js` ก่อน `sprites.js`. ใช้ข้อมูลทั้งสองไฟล์ตามลำดับนี้ในการตรวจ.
+2. `CQ.CharacterArt`: version `concept-2026-10-17-aclaire-arm-swing`, logical 54×48, ax=32, **density=2**, backing raster 108×96. Palette รวมมี 1465 entries รวม index 0 โปร่งใส; **idle Aclaire ใช้จริง 481 สี** ไม่ใช่ 1465 สีต่อ sprite.
+3. ถอด idle แล้วตรงทุก RGBA pixel กับ `assets/characters/2026-10-16_aclaire-idle-hd.png`. Bounding box แบบ exclusive `(24,12,92,94)` = **68×82 physical pixels**, เท่ากับ 34×41 logical pixels ก่อน screen scale.
+4. `tools/2026-10-15_build-character-art.cjs:16–50` ครอป source sheet, ใช้ scale ร่วม, resize แบบ Lanczos3, threshold alpha ที่ 128 แล้วปัดแต่ละ RGB channel เป็นขั้น 17. จึงมีสีระหว่างทางจำนวนมาก ไม่ใช่ master palette 16 สี.
+5. `js/sprites.js:492–517` decode palette indices 3 hex digits และใช้ concept ก่อน fallback. `js/render.js:1752–1755` สร้าง backing canvas ตาม density; `1824–1826` เปิด image smoothing และ quality high สำหรับ density>1 แล้ววาด logical 54k×48k. ค่า k ขึ้นกับ viewport/DPR (`resize` บรรทัด 229 เป็นต้นไป), ไม่ได้ล็อกว่า display scale เท่าใดในเครื่องผู้ใช้. ภาพเทียบของเราขยาย nearest เพื่อเปิดให้เห็นข้อมูลจริง ไม่ได้จำลอง smoothing ของ runtime.
+
+**การตีความเชิงภาพ:** จากภาพที่เปิดตรวจ Coin Quest มีพื้นที่หน้า/ดวงตามาก, ผมเป็นก้อนโค้งและไล่เฉดละเอียด, แก้ม/ตาขาวมี transition สี. density 2, สี 481 สีและ smoothing เป็นเหตุผลทางเทคนิคที่รองรับความนุ่ม; ยังยืนยันไม่ได้ว่าเป็นเฟรม/ขนาดจอเดียวกับภาพที่พินชอบทุกประการ.
+
+### รีวิวด้วยตาและข้อจำกัด
+
+- ใหม่ทั้งสองแบบมีหางม้าส้มฟู ยางชมพู หน้าสามส่วนหันขวา ตาฟ้า ปากยิ้ม และท่ายืนไม่สมมาตร. ตรวจภาพขยายจริงหลัง normalize แล้ว ไม่อ้างคุณภาพจากภาพ source ขนาดใหญ่.
+- เสื้อชมพูคอตั้ง เกราะเงินกลางอกและสายดำยังแยกออกได้; เห็นต้นขา ถุงเท้าเข้ม และบูทขอบ/พื้นขาว. ดาบหนึ่งเล่มอยู่ในฝัก มือว่าง ไม่มีผ้าคลุม. เก็บส่วนด้าม/กันมือ/ฝักที่เปิดให้เห็นบนแกน x=18 หลัง sampling; ผมและตัวบังบางส่วน.
+- แบบ 26 สีรักษาเงาผิว สี tan และสีเขียวพันด้ามได้มากกว่า. แบบ 16 สีทำให้กางเกงออกส้ม เงาบางส่วนแบนและสีเขียวพันด้ามถูกแทน; จึงเสนอเป็นภาพเทียบข้อจำกัด ไม่อ้างว่ารักษารายละเอียดได้ครบเท่าแบบ 26 สี.
+- ยังมี pixel clusters เล็กในผม และตาไกลแคบกว่าตาใกล้; ใบหน้า 48×64 ไม่ละเอียดเท่า Coin Quest 108×96. นี่เป็น seed candidate สำหรับให้พินรีวิว ไม่ใช่ผลอนุมัติความตรง reference.
+- ขอบเขตตัวใหม่ 38×62 px เทียบเดิมสูง 55 px: ทั้งสองอยู่ในกรอบ 48×64 เท่ากันแต่ตัวใหม่กินพื้นที่จอมากขึ้น. แสดงเท้าฐานเดียวกันใน scale probe.
+
+### ผลตรวจและ assumptions
+
+- ใช้ built-in imagegen ตาม skill imagegen; sprite-pipeline ระบุเริ่ม animation จาก approved seed จึงไม่ได้ทำ strip.
+- ทุกสีของทั้งสองตัวเลือกอยู่ใน master 35 สีเดิม, alpha 0/255, PNG RGBA 48×64, เท้าถึงแถว 63. แบบ 26 สี **เกินข้อกำหนด 16 สี** โดยตั้งใจเพื่อรีวิวทางเลือก; ไม่แก้ master palette และไม่วางใน public/assets.
+- `build_aclaire_seed_v2.py` มี assertions ตรวจเฉพาะ candidate ใหม่และ scale probe. `validate_phase_a.py` ตรวจชุดเดิมผ่าน แต่ไม่ได้ครอบคลุม candidate ใหม่; ไม่อ้างว่ารวมผ่าน production acceptance.
+- `tools/validate_assets.py` ยังไม่มี: ผลเรียก exit 2; ไม่สร้าง validator ปลอม.
+- รอบนี้ `npm run dev` เริ่มไม่ได้เพราะไม่มี npm ใน PATH และ checkout ไม่มี node_modules. จึงไม่มี browser/runtime verification รอบใหม่; smoke screenshot ในรายงานเก่าเป็นผลจากรอบก่อน.
+- Assumptions: ใช้ idle ปกติไม่เปลี่ยน hue ของ Coin Quest เป็นตัวอย่าง; จัดสีและ silhouette ใหม่ตาม costume v2; ให้ PNG native 48×64 เป็นตัวตัดสิน style มากกว่าภาพ source.
+- ก่อนใช้จริง ผู้ดูแลต้องอนุมัติและปรับ ART_HANDOFF.md, manifest/frame size, atlas/FX alignment, origin และ collision ที่อาจเกี่ยวข้อง. ถ้าเลือก 26 สีต้องแก้ข้อจำกัดสีด้วย; ไม่แก้ไฟล์นอก art/tools-art เอง.
+
+**รอพินรีวิวหน้าตา/ผม/สัดส่วน และเลือกทาง 16 หรือ 26 สี ก่อน animation หรือ Phase B. ไม่มี merge หรือ auto-merge.**
+
 วันที่ 23 ตุลาคม 2026 · branch `art/phase-a` · **ผู้ใช้เลือกแนวลดรายละเอียด A และขอทดลอง 48×64; ยังรออนุมัติ style/seed**
 
 สถานะส่ง GitHub: **ส่ง branch และเปิด [draft PR #3](https://github.com/phuwiny/game-dev-elementalist/pull/3) เข้า main แล้ว** หลังผู้ใช้ปรับสิทธิ์ GitHub การส่งครั้งแรกติด HTTP 403 แต่การลองใหม่สำเร็จ ข้อความ PR อยู่ใน `phase_a_pr.md`
