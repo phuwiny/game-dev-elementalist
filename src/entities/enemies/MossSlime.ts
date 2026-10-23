@@ -40,7 +40,8 @@ export class MossSlime extends Enemy {
       if (hitWall || !groundAhead) this.direction = this.direction === 1 ? -1 : 1;
       this.body.setVelocityX(this.direction * B.speed);
     }
-    this.setFlipX(this.direction > 0);
+    // วาดหันขวา: เมื่อเดินไปทางซ้ายจึง flip
+    this.setFlipX(this.direction < 0);
     if (this.anims.currentAnim?.key !== this.anim('move')) this.play(this.anim('move'));
   }
 }

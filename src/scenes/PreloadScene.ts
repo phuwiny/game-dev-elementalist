@@ -5,6 +5,7 @@ import { createGrayboxTiles, createPlaceholderAtlas } from '../assets/placeholde
 import { registerAnimations } from '../assets/animations';
 import { PALETTE, hex } from '../assets/palette';
 import { REGISTRY_AVAILABLE_JSON } from './BootScene';
+import { LEVELS, mapCacheKey } from '../levels';
 
 export const GRAYBOX_TILES = 'graybox_tiles';
 const ANIMATIONS_KEY = 'animations';
@@ -36,6 +37,8 @@ export class PreloadScene extends Phaser.Scene {
       else this.failed.add(atlas.key);
     }
     if (available.has(ANIMATIONS_JSON)) this.load.json(ANIMATIONS_KEY, ANIMATIONS_JSON);
+    // ด่าน Tiled เป็นของฝั่งโค้ด ต้องมีเสมอ ถ้าโหลดไม่ได้ให้ error ชัด ๆ
+    for (const level of LEVELS) if (level.map) this.load.json(mapCacheKey(level.key), level.map);
     else this.failed.add(ANIMATIONS_KEY);
   }
 

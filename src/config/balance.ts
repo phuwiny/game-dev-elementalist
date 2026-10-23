@@ -116,5 +116,33 @@ export const ElementBalance = {
     slamDamage: 2,
     slamWidth: 96,
     slamHeight: 36,
+    /** กดค้าง K บนพื้นนานเท่านี้ = ยกโล่หิน (ปล่อยก่อน = สร้างบล็อก) */
+    shieldHoldMs: 250,
+    shieldCostPerSecond: 15,
+    shieldMoveFactor: 0.5,
   },
+} as const;
+
+export const BossBalance = {
+  brambleKing: {
+    hpPerPhase: 4,
+    shields: [1, 2, 3],
+    attackIntervalMs: [3000, 2400, 1900],
+    exposedMs: 4500,
+    whipTelegraphMs: 700,
+    whipSpeed: 420,
+    whipHeight: 14,
+    seedsPerVolley: [0, 3, 5],
+    seedTelegraphMs: 650,
+    seedFallSpeed: 260,
+    contactDamage: 1,
+    /** ระยะห่างจากผู้เล่นที่ทำให้สนามปิดและเริ่มสู้ (px หลังผ่านประตูสนาม) */
+    startOffset: 24,
+  },
+} as const;
+
+/** Leaf Wisp (ลม) และ Thorn Beetle (ดิน) GDD หัวข้อ 5 */
+export const W1EnemyBalance = {
+  leafWisp: { hp: 1, contactDamage: 1, patrolSpeed: 40, patrolRange: 48, waveAmplitude: 10, diveRange: 96, diveSpeed: 170, diveCooldownMs: 1800, diveTimeoutMs: 1200 },
+  thornBeetle: { hp: 3, contactDamage: 1, speed: 28, flippedMs: 4000 },
 } as const;

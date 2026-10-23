@@ -24,6 +24,7 @@ export const PlayerEvent = {
   AttackStep: 'player-attack-step',
   DeathAnimationDone: 'player-death-done',
   SlamImpact: 'player-slam-impact',
+  Jump: 'player-jump',
   DoubleJump: 'player-double-jump',
   Dash: 'player-dash',
 } as const;
@@ -57,6 +58,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private dashUsed = false;
   private gliding = false;
   private slamming = false;
+  private shielding = false;
+  private shieldSprite: Phaser.GameObjects.Sprite | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -107,6 +110,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   get isSlamming(): boolean {
     return this.slamming;
+  }
+
+  get isShielding(): boolean {
+    return this.shielding;
   }
 
   /** ใช้พลังธาตุได้หรือไม่ (ไม่ได้ตาย ไม่ได้กำลังโดนตี ไม่ได้ทุบพื้นหรือ dash อยู่) */
@@ -182,6 +189,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.jump.consume()) {
       this.body.setVelocityY(-B.jumpVelocity);
+      this.emit(PlayerEvent.Jump);
     }
     // variable jump height: ปล่อยปุ่มระหว่างขาขึ้นจะตัดความสูง
     if (!this.controls.isDown(Action.Jump) && this.body.velocity.y < 0) {
@@ -197,6 +205,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.updateState(grounded, dir, now);
     this.syncBodyToFrame();
+    this.shieldSprite?.setPosition(this.x + this.facing * 12, this.y - 6);
   }
 
   // ---------------------------------------------------------------------------
@@ -225,6 +234,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   setGliding(on: boolean): void {
     this.gliding = on && !this.isGrounded && !this.slamming && !this.isDashing;
+  }
+
+  /** โล่หินของ Eathy: เดินช้าลงขณะยกโล่ */
+  setShielding(on: boolean): void {
+    if (this.shielding === on) return;
+    this.shielding = on;
+    if (on) {
+      this.shieldSprite ??= this.scene.add.sprite(this.x, this.y, 'fx', 'stone_shield_idle_000').setOrigin(0.5, 1).setDepth(7);
+      this.shieldSprite.setVisible(true).play(animKey('fx', 'stone_shield_appear'));
+    } else if (this.shieldSprite) {
+      const s = this.shieldSprite;
+      s.play(animKey('fx', 'stone_shield_break'));
+      s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        if (!this.shielding) s.setVisible(false);
+      });
+    }
   }
 
   canSlam(): boolean {
@@ -330,6 +355,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private cancelMobility(): void {
     this.combo.cancel();
     this.gliding = false;
+    this.setShielding(false);
     if (this.slamming) {
       this.slamming = false;
       this.body.setMaxVelocityY(B.maxFallSpeed);
@@ -342,7 +368,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private applyHorizontal(dir: number, grounded: boolean, delta: number): void {
     const attackingOnGround = this.combo.isAttacking && grounded;
-    const target = attackingOnGround ? 0 : dir * B.runSpeed;
+    const speed = this.shielding ? B.runSpeed * E.shieldMoveFactor : B.runSpeed;
+    const target = attackingOnGround ? 0 : dir * speed;
     const vx = this.body.velocity.x;
     const accelerating = dir !== 0 && Math.sign(target) === Math.sign(vx || target);
     const rate = grounded

@@ -5,6 +5,7 @@ import { PALETTE } from './assets/palette';
 import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { TitleScene } from './scenes/TitleScene';
+import { WorldMapScene } from './scenes/WorldMapScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { GameOverScene, StageClearScene } from './scenes/EndScenes';
@@ -28,7 +29,7 @@ const game = new Phaser.Game({
       debug: new URLSearchParams(window.location.search).has('debug'),
     },
   },
-  scene: [BootScene, PreloadScene, TitleScene, GameScene, UIScene, GameOverScene, StageClearScene],
+  scene: [BootScene, PreloadScene, TitleScene, WorldMapScene, GameScene, UIScene, GameOverScene, StageClearScene],
 });
 
 // เปิดให้ทดสอบผ่าน console / automated test ได้
