@@ -1,5 +1,10 @@
 # Phase A — Style และ Concept
 
+## Review decision — 2026-10-23
+
+พินรีวิว Aclaire V4 แล้วและระบุว่า **"V4 กำลังดีเลยครับ ตำแหน่งดาบแปลกไปนิดแต่ใช้ได้ครับ"** จึงใช้ [V4 idle seed](../previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png) เป็นภาพต้นแบบที่พินยอมรับสำหรับงาน Aclaire ต่อไป โดยเก็บข้อสังเกตเรื่องตำแหน่งดาบไว้เป็นจุดเก็บรายละเอียด ไม่ปรับภาพที่ยอมรับแล้วทับไฟล์เดิม. การตัดสินใจนี้ครอบคลุมหน้าตาและแนวความละเอียดของ Aclaire; budget สี, สเปก asset ของตัวละครอื่น, runtime และการอนุมัติ style ของ Phase A ทั้งชุดยังไม่ได้สรุป. หยุดก่อน animation strip และ Phase B ตาม gate เดิม.
+
+
 ## Latest revision — 2026-10-23 / ความละเอียดตัวละคร 2 เท่า (Aclaire V4)
 
 พินปฏิเสธ V3 เพราะภาพแตกและหน้าไม่ชัด และอนุญาตให้เพิ่ม budget ความละเอียดของตัวละครในเกมโดยรวม เริ่มที่ Aclaire พร้อมลดรายละเอียดผม เกราะ ดาบ รองเท้าตามจำเป็น. รอบนี้สร้าง [V4 source](../concept/aclaire_idle_seed_v4_source.png) ใหม่ด้วย built-in imagegen แล้ว [เก็บแกนดาบตรงเป็น source สุดท้าย](../concept/aclaire_idle_seed_v4_aligned_source.png) โดยยึด Aclaire v2 เป็นดีไซน์ และ Coin Quest local เป็นตัวอย่างคุณภาพภาพเท่านั้น. เก็บ V3 ไว้สำหรับเทียบ.

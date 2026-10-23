@@ -1,5 +1,10 @@
 # art(concept): Phase A style and concept review
 
+## Review decision — Aclaire V4 accepted
+
+พินระบุว่า "V4 กำลังดีเลยครับ ตำแหน่งดาบแปลกไปนิดแต่ใช้ได้ครับ" จึงบันทึก V4 เป็น idle seed ที่ยอมรับสำหรับ Aclaire และเก็บตำแหน่งดาบเป็น polish note. ไม่แก้ภาพที่ยอมรับแล้วทับไฟล์เดิม; budget สี/สเปกตัวละครอื่นและ gate ของ Phase A ทั้งชุดยังรอสรุป. PR ยังคง Draft.
+
+
 ## Latest update — V4 density-2 proposal
 
 ผู้ใช้ขอเพิ่ม budget ความละเอียดตัวละครให้ใกล้ Coin Quest และปฏิเสธ V3 จึงทำ [V4 Aclaire comparison](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/concept/aclaire_idle_seed_v4_comparison.png): logical 48×64, physical 96×128, 247 สีจริง. [PNG โปร่งใส](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png) และ [640×360 scale probe](https://github.com/phuwiny/game-dev-elementalist/blob/art/phase-a/art/previews/phase_a/2026-10-23_aclaire_seed_v4_640x360.png). มีตัวเลือก 60 สีเทียบแต่หน้าหยาบกว่า. แก้แกนดาบบน source อีกครั้งให้ด้าม/กันมือ/ฝักเกือบตั้งตรง. รายละเอียดผลกระทบต่อขนาด/สี/atlas และขอบเขต approval อยู่ใน phase_a.md. V4 ยังรออนุมัติ; ไม่แก้ production code, ไม่เริ่ม animation หรือ Phase B.
