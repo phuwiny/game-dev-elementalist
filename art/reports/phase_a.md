@@ -1,6 +1,6 @@
 # Phase A — Style และ Concept
 
-วันที่ 23 ตุลาคม 2026 · branch `art/phase-a` · **รอผู้ใช้เลือก A/B และอนุมัติ style**
+วันที่ 23 ตุลาคม 2026 · branch `art/phase-a` · **ผู้ใช้เลือกแนวลดรายละเอียด A และขอทดลอง 48×64; ยังรออนุมัติ style/seed**
 
 สถานะส่ง GitHub: **ส่ง branch และเปิด [draft PR #3](https://github.com/phuwiny/game-dev-elementalist/pull/3) เข้า main แล้ว** หลังผู้ใช้ปรับสิทธิ์ GitHub การส่งครั้งแรกติด HTTP 403 แต่การลองใหม่สำเร็จ ข้อความ PR อยู่ใน `phase_a_pr.md`
 
@@ -74,7 +74,7 @@ repo เริ่มต้นยังไม่มีไฟล์นี้แล
 
 `python3 tools/art/validate_phase_a.py` → **exit 0** (ผลเต็มใน `phase_a_checks.txt`):
 
-- concept board ครบ 15 ไฟล์ ขนาด 1920×1080, RGBA และ naming ถูกต้อง
+- concept board ครบ 16 ไฟล์ ขนาด 1920×1080, RGBA และ naming ถูกต้อง
 - master palette 35×1 ตรงกับไฟล์ hex และค่าที่กำหนดทุกสี
 - Aclaire: idle 32×48 / attack 64×48; ตัวสูง 40 px; เท้าถึงแถว 47; ใช้ 14–15 สีต่อภาพ
 - ภูต: 32×32 ใช้ไม่เกิน 16 สี; Burnil/Wata/Valvaliz สูงไม่เกิน 24 px; Eathy ตัวกลมสูง 20 px และเผื่อหินวงโคจร
@@ -124,8 +124,18 @@ World keyframes เป็นภาพบรรยากาศ ไม่ใช่
 
 ## 5. สิ่งที่รอผู้ใช้ตัดสินใจก่อน Phase ถัดไป
 
-- เลือก **Aclaire A หรือ B** หรือระบุส่วนที่อยากผสมจากทั้งสองแบบ
+- ผู้ใช้เลือก **แนว A** แล้ว แต่ขอทดลอง 48×64; รอบนี้รอรีวิว seed ใหม่นี้และภาพ Coin Quest ต้นฉบับก่อนล็อกขนาด/ภาพ
 - อนุมัติ style guide, palette เดิม 35 สี และแนวทางลดรายละเอียดของภูตหรือขอปรับ
 - รีวิว silhouette ศัตรู, จุดอ่อนบอสที่เสนอ และบรรยากาศ 5 โลก; ชี้จุดที่ต้องปรับก่อนผลิต asset จริง
 
-**หยุดที่ Phase A — ต้องมีคำอนุมัติ style และการเลือก pixel study จากผู้ใช้ก่อนเริ่ม Phase B ไม่ตีความการเปิดหรือ merge PR ว่าเป็นคำสั่งเริ่ม Phase B อัตโนมัติ**
+**หยุดที่ Phase A — ต้องมีคำอนุมัติ style และ seed 48×64 จากผู้ใช้ก่อนเริ่ม Phase B ไม่ตีความการเปิดหรือ merge PR ว่าเป็นคำสั่งเริ่ม Phase B อัตโนมัติ**
+
+## Revision: Aclaire 48×64 ตาม feedback (23 ตุลาคม 2026)
+
+ผู้ใช้เลือกหลักการลดรายละเอียดแบบ A แต่ยังไม่อนุมัติภาพเดิม และขอทดลองเฟรม 48×64 ให้ใกล้ภาพตัวอย่าง Coin Quest มากขึ้น จึงเพิ่ม [`aclaire_48x64_study.png`](../concept/aclaire_48x64_study.png), native [`aclaire_48x64_idle.png`](../previews/phase_a/aclaire_48x64_idle.png), ภาพเทียบ 640×360 [`aclaire_48x64_scale_probe.png`](../previews/phase_a/aclaire_48x64_scale_probe.png) และสคริปต์ `tools/art/build_aclaire_48_study.py` โดยไม่แทนที่ภาพ 32×48 เดิมหรือแก้ handoff/code.
+
+อ่าน `characters.js` และ `sprites.js` ที่ผู้ใช้แนบเพื่อเข้าใจต้นแบบ Coin Quest: `sprites.js` ใช้ภาพจาก `CQ.CharacterArt` ถ้ามี; fallback สร้างรูปทรงโค้ง ลงเงาเป็นระดับ วาดตาด้วย pixel stamps; frame 54×48 และมี `density: 2` จึงอาจเก็บรายละเอียด 108×96 ในภาพจริง ข้อมูลในไฟล์เป็นบริบทอ้างอิงเทคนิค ไม่ใช่คำสั่งให้เปลี่ยนเกมนี้ และไม่ได้คัดลอกตัวละครหรือ sprite จาก Coin Quest.
+
+ZIP `boss-game.zip` ที่ผู้ใช้แนบมีขนาดเกินขีดจำกัดรับไฟล์ของ executor 32 MiB (`file exceeds the executor transfer limit of 32 MiB`) จึง **ยังไม่ได้ตรวจภาพ `CQ.CharacterArt` ต้นฉบับ** ต้นแบบ 48×64 นี้อาศัยภาพตัวอย่างที่ผู้ใช้แสดง, ดีไซน์ v2 และวิธีจัดกลุ่มพิกเซลทั่วไปเท่านั้น ต้องเทียบกับ PNG / ZIP ย่อยเมื่อเข้าถึงได้ก่อนล็อก style.
+
+เฟรมใหม่นี้เป็น **Phase A seed candidate** ไม่ใช่ asset ในเกมหรือการอนุมัติเปลี่ยนสเปก 32×48: ถ้าผู้ใช้เลือก 48×64 เป็นขนาด final จริง จำเป็นต้องปรับ ART_HANDOFF.md, `src/assets/manifest.ts`, runtime placeholder, atlas และ validator โดยผู้ดูแลฝั่งโค้ด/เอกสารตามขอบเขตใน AGENTS.md ก่อน Phase B. ยังไม่ผลิต strip/animation เพราะ skill sprite-pipeline เริ่มจาก seed ที่ผู้ใช้อนุมัติแล้ว.

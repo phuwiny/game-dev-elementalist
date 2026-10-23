@@ -1,5 +1,6 @@
 CONCEPT style_guide: 1920x1080
 CONCEPT aclaire_pixel_study: 1920x1080
+CONCEPT aclaire_48x64_study: 1920x1080
 CONCEPT aclaire_action_poses: 1920x1080
 CONCEPT spirits_sheet: 1920x1080
 CONCEPT enemies_lineup: 1920x1080
@@ -17,8 +18,9 @@ PIXEL aclaire_a_idle: 32x48, 14 colors, binary alpha
 PIXEL aclaire_a_attack: 64x48, 15 colors, binary alpha
 PIXEL aclaire_b_idle: 32x48, 15 colors, binary alpha
 PIXEL aclaire_b_attack: 64x48, 15 colors, binary alpha
+PIXEL aclaire_48x64_idle: 48x64, 15 colors, binary alpha
 PIXEL burnil_study: 32x32, 4 colors, binary alpha
 PIXEL wata_study: 32x32, 6 colors, binary alpha
 PIXEL valvaliz_study: 32x32, 8 colors, binary alpha
 PIXEL eathy_study: 32x32, 9 colors, binary alpha
-PASS: 15 concept boards, 8 native studies, 35-color palette; Phase B validator not included.
+PASS: 16 concept boards, 9 native studies, 35-color palette; Phase B validator not included.

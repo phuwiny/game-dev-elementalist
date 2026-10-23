@@ -4,7 +4,7 @@ import re
 from PIL import Image
 from build_phase_a_studies import ROOT, ART, P
 
-names=['style_guide','aclaire_pixel_study','aclaire_action_poses','spirits_sheet','enemies_lineup']
+names=['style_guide','aclaire_pixel_study','aclaire_48x64_study','aclaire_action_poses','spirits_sheet','enemies_lineup']
 names += ['boss_'+s for s in ('bramble_king','magma_serpent','tempest_roc','moat_hydra','hollow_warden')]
 names += [f'world_w{n}_keyframe' for n in range(1,6)]
 errors=[]
@@ -26,6 +26,7 @@ for name in names:
             check(im.mode=='RGBA',f'{name}: not RGBA')
         print(f'CONCEPT {name}: {im.width}x{im.height}')
 studies={f'aclaire_{v}_{a}':(64 if a=='attack' else 32,48) for v in ('a','b') for a in ('idle','attack')}
+studies['aclaire_48x64_idle']=(48,64)
 studies.update({k+'_study':(32,32) for k in ('burnil','wata','valvaliz','eathy')})
 for name,size in studies.items():
     with Image.open(ART/f'previews/phase_a/{name}.png') as im:
@@ -36,7 +37,9 @@ for name,size in studies.items():
         check(len(colors)<=16,name+': more than 16 colors')
         check(all(v[3] in (0,255) for v in pixels),name+': intermediate alpha')
         if name.startswith('aclaire'):
-            check(im.getbbox()[1]==8 and im.getbbox()[3]==48,name+': expected 40 px body and feet row 47')
+            check(im.getbbox()[3]==size[1],name+': feet must reach bottom row')
+            if name=='aclaire_48x64_idle':check(im.getbbox()[1]==9,name+': unexpected top margin')
+            else:check(im.getbbox()[1]==8,name+': expected 40 px body')
         if name in ('burnil_study','wata_study','valvaliz_study'):
             b=im.getbbox();check(b[3]-b[1]<=24,name+': body taller than 24 px')
         print(f'PIXEL {name}: {size[0]}x{size[1]}, {len(colors)} colors, binary alpha')
@@ -48,4 +51,5 @@ for p in (ART/'concept').glob('*.png'):
     check(bool(re.fullmatch(r'[a-z0-9_]+\.png',p.name)),p.name+': naming')
 if errors:
     print('\n'.join('FAIL '+e for e in errors));raise SystemExit(1)
-print(f'PASS: {len(names)} concept boards, 8 native studies, 35-color palette; Phase B validator not included.')
+check(Image.open(ART/'previews/phase_a/aclaire_48x64_scale_probe.png').size==(640,360),'48x64 scale probe size')
+print(f'PASS: {len(names)} concept boards, {len(studies)} native studies, 35-color palette; Phase B validator not included.')
