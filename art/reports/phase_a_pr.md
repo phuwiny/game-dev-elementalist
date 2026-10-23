@@ -1,5 +1,11 @@
 # art(concept): Phase A style and concept review
 
+## Review decision — Phase A style approved
+
+พินอนุมัติ **style Phase A ตาม Aclaire V4 และ concept ใน PR #3** แล้ว; ตำแหน่งดาบเป็น polish note สำหรับ revision ภายหลัง. V4 เป็น idle seed ที่อนุมัติสำหรับทิศทางภาพ (logical 48×64, density 2, raster 96×128, 247 สีจริง). การอนุมัตินี้ไม่ใช่การยืนยันว่า asset ผ่านสเปก production เดิม: ART_HANDOFF.md ยังระบุ player 32×48, master palette 35 สี และไม่เกิน 16 สีต่อ sprite. ผู้ดูแล code/spec ต้องตกลงและปรับ frame/color budget, manifest, runtime scale และ atlas ก่อนผลิต asset ใช้จริง. ข้อความเก่าที่ระบุว่า “ยังรออนุมัติ” ด้านล่างเป็นประวัติรอบรีวิวเดิม.
+
+PR คงเป็น Draft สำหรับ Phase A; ไม่เริ่ม animation หรือ Phase B จนกว่าพินจะสั่งโดยตรง.
+
 ## Review decision — Aclaire V4 accepted
 
 พินระบุว่า "V4 กำลังดีเลยครับ ตำแหน่งดาบแปลกไปนิดแต่ใช้ได้ครับ" จึงบันทึก V4 เป็น idle seed ที่ยอมรับสำหรับ Aclaire และเก็บตำแหน่งดาบเป็น polish note. ไม่แก้ภาพที่ยอมรับแล้วทับไฟล์เดิม; budget สี/สเปกตัวละครอื่นและ gate ของ Phase A ทั้งชุดยังรอสรุป. PR ยังคง Draft.
