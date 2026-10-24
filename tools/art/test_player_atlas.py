@@ -1,6 +1,7 @@
 """Production packet checks: frame coverage, lossless packing and anchors."""
 from pathlib import Path
 import json
+import hashlib
 import unittest
 from PIL import Image
 
@@ -21,10 +22,15 @@ class MovementPacketTests(unittest.TestCase):
             self.assertEqual((base[0],base[2]), (box[0],box[2]))
             self.assertLessEqual(abs(box[1]-base[1]), 1)
             self.assertEqual(base[3]-base[1], box[3]-box[1])
-        for i in range(4):
-            box = eyes(f'run_{i:03}')
-            self.assertEqual((base[2]-base[0],base[3]-base[1]),
-                             (box[2]-box[0],box[3]-box[1]))
+        original_run = (
+            '49726eb48b88aba57e4348cb473a1f07e5cc7a26cbb9389e2345ff031e5b3858',
+            '9216aa0fa8ec3f47a05e2a248761ec0470aaa84667170cd82cb0c5bd9cd83669',
+            '887b0a02210085b609860a59b605dd55c448e188cdbd61a201ff6bffebe2d80c',
+            'b7686c143a4b2593e0e43a7bde1db1b03e1be86981f5d29cdd2db56e6fdcd069',
+        )
+        for i, digest in enumerate(original_run):
+            frame = (ROOT/f'art/frames/player/run_{i:03}.png').read_bytes()
+            self.assertEqual(digest, hashlib.sha256(frame).hexdigest())
 
     def test_roundtrip_coverage_and_baseline(self):
         data=json.loads((ROOT/'public/assets/sprites/player/player.json').read_text())

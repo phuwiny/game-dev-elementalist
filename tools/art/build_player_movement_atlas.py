@@ -62,12 +62,12 @@ def build():
     DEST.mkdir(parents=True, exist_ok=True)
     REVIEW.mkdir(parents=True, exist_ok=True)
     result = {}
-    folders = {'idle':'2026-10-24_idle_run_revision/idle', 'run':'2026-10-24_idle_run_revision/run',
+    folders = {'idle':'2026-10-24_idle_run_revision/idle', 'run':'2026-10-24_aclaire_run_v4_redraw',
                'jump_up':'2026-10-24_aclaire_jump_up_v4_study'}
     for anim, folder in folders.items():
         for i, path in enumerate(sorted((PREVIEW/folder).glob('*.png'))):
             source = Image.open(path).convert('RGBA')
-            if anim in ('idle', 'run'):
+            if anim == 'idle':
                 frame = indexed(source)
             else:
                 frame = anchor(source, (128 if anim == 'run' else 96, 128), .94 if anim == 'jump_up' else 1)

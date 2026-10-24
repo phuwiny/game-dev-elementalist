@@ -29,8 +29,7 @@ def build():
     # Keep the curved dark eyelid itself (y=46+) intact.
     clean = ImageDraw.Draw(blink_seed)
     clean.rectangle((50, 41, 57, 42), fill=(252, 225, 201, 255))
-    for anim in ('idle', 'run'):
-        (OUT / anim).mkdir(parents=True, exist_ok=True)
+    (OUT / 'idle').mkdir(parents=True, exist_ok=True)
     # One smooth inhale/exhale cycle: upper body moves together, no x sway,
     # no isolated head deformation, and the feet never move.
     for i, offset in enumerate((0, 0, 1, 1, 1, 0)):
@@ -41,17 +40,5 @@ def build():
             frame.paste(pose.crop((0, 0, 96, 90)), (0, 1))
             frame.paste(pose.crop((0, 91, 96, 128)), (0, 91))
         frame.save(OUT / 'idle' / f'{i+1:02}.png')
-    head = seed.crop((0, 0, 96, 62))
-    for i in range(4):
-        original = Image.open(ROOT / f'art/previews/phase_b/2026-10-24_aclaire_run_v4_redraw/{i+1:02}.png').convert('RGBA')
-        # Shared torso/leg transform, rather than a per-frame fit. Keep the
-        # established alternating leg poses and soles at row 127.
-        body = original.crop((0, 50, 128, 126)).resize((128, 66), Image.Resampling.NEAREST)
-        frame = Image.new('RGBA', (128, 128))
-        frame.alpha_composite(body, (0, 62))
-        frame.alpha_composite(head, (16, 0))
-        frame.save(OUT / 'run' / f'{i+1:02}.png')
-
-
 if __name__ == '__main__':
     build()
