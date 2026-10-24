@@ -17,8 +17,8 @@ MASTER = ROOT / "art/palette/master_palette.hex"
 V4 = ROOT / "art/palette/2026-10-24_aclaire_v4_palette.hex"
 FRAME_NAME = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*_\d{3}$")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
-PLAYER_SIZES = {"run": (128, 128), "attack_1": (128, 96),
-                "attack_2": (128, 96), "attack_3": (128, 96)}
+PLAYER_SIZES = {"run": (128, 128), "attack_1": (192, 128),
+                "attack_2": (192, 128), "attack_3": (192, 128)}
 PLAYER_DEFAULT = (96, 128)
 
 
@@ -115,8 +115,6 @@ def validate(root: Path, master: set, v4: set) -> list[str]:
     for png_path in pngs:
         if png_path.relative_to(root).parts[0] in {"sprites", "ui"} and not png_path.with_suffix(".json").exists() and png_path.stem != "font_hud":
             fail(png_path, "matching atlas JSON missing")
-    if atlas_frames and not (root / "animations.json").exists():
-        fail(root / "animations.json", "animation manifest missing")
     for path in files:
         if path.suffix.lower() != ".json" or path.name == "animations.json":
             continue
@@ -162,6 +160,9 @@ def validate(root: Path, master: set, v4: set) -> list[str]:
             for b, bx, by, bw, bh in rectangles[i + 1:]:
                 if ax < bx + bw + 2 and bx < ax + aw + 2 and ay < by + bh + 2 and by < ay + ah + 2:
                     fail(path, f"{a} and {b} lack 2px padding")
+
+    if atlas_frames and not (root / "animations.json").exists():
+        fail(root / "animations.json", "animation manifest missing")
 
     for path in files:
         if path.name != "animations.json":

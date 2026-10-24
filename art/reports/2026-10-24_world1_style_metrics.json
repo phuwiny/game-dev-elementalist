@@ -1,0 +1,45 @@
+{
+  "moss_slime": {
+    "size": [
+      32,
+      32
+    ],
+    "colors": 13
+  },
+  "thorn_beetle": {
+    "size": [
+      32,
+      32
+    ],
+    "colors": 12
+  },
+  "moss_soil": {
+    "size": [
+      16,
+      16
+    ],
+    "colors": 10
+  },
+  "ember_leaves": {
+    "size": [
+      16,
+      16
+    ],
+    "colors": 11
+  },
+  "old_roots": {
+    "size": [
+      16,
+      16
+    ],
+    "colors": 12
+  },
+  "ruin_stone": {
+    "size": [
+      16,
+      16
+    ],
+    "colors": 12
+  },
+  "tile_union_colors": 19
+}
