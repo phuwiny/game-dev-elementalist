@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Aclaire V4 — movement review</title>
+<style>
+body{margin:0 auto;background:#0f0b1a;color:#f2efe6;font:14px system-ui;display:grid;gap:12px;padding:16px;width:min(640px,calc(100vw - 32px))}canvas{max-width:100%;height:auto!important}
+h1{font-size:20px;margin:0}p{margin:0;max-width:640px;color:#b4b2c9}canvas{image-rendering:pixelated}button,select{font:inherit;padding:8px;background:#2b2440;color:#f2efe6;border:1px solid #7b7896}label{margin-right:16px}
+</style>
+<h1>Aclaire V4 · six movement animations</h1>
+<p>640 × 360 · density 2 · bottom-center · green line is the sole baseline. Art review only; this page does not replace gameplay integration.</p>
+<div><button id="pause">Pause</button> <label><input id="flip" type="checkbox"> Face left</label><label><input id="body" type="checkbox"> 16 × 46 body guide</label><label>Speed <select id="speed"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label></div>
+<div id="preview"></div>
+<p id="status">Loading atlas…</p>
+<script type="module">
+import Phaser from '/node_modules/phaser/dist/phaser.esm.js';
+const names=['idle','run','jump_up','jump_peak','fall','land'];
+let scene, sprites=[], guides=[], paused=false;
+new Phaser.Game({type:Phaser.AUTO,parent:'preview',width:640,height:360,pixelArt:true,roundPixels:true,backgroundColor:'#2b2440',scene:{
+preload(){this.load.atlas('player','/assets/sprites/player/player.png','/assets/sprites/player/player.json');this.load.json('motions','/assets/animations.json');},
+create(){scene=this; const data=this.cache.json.get('motions');
+names.forEach((name,i)=>{const def=data['player_'+name];this.anims.create({key:name,frames:Array.from({length:def.frames},(_,j)=>({key:'player',frame:name+'_'+String(j).padStart(3,'0')})),frameRate:def.frameRate,repeat:-1});
+const x=60+i*104;this.add.rectangle(x,215,80,1,0x48c9a0);this.add.text(x,232,name,{fontSize:'12px',color:'#f2efe6'}).setOrigin(.5,0);
+this.add.text(x,252,def.frames+' frames / '+def.frameRate+' fps',{fontSize:'9px',color:'#b4b2c9'}).setOrigin(.5,0);
+sprites.push(this.add.sprite(x,215,'player',name+'_000').setOrigin(.5,1).setScale(.5).play(name));
+guides.push(this.add.rectangle(x,215-23,16,46).setStrokeStyle(1,0xff9ec4).setVisible(false));});
+this.add.text(20,24,'ACLAIRE V4 / ATLAS MOTION REVIEW',{fontSize:'16px',color:'#f2efe6'});
+this.add.text(20,49,'Non-looping game actions repeat here for inspection.',{fontSize:'11px',color:'#b4b2c9'});
+document.querySelector('#status').textContent='Loaded 18 atlas frames. Pause / slow down to inspect anchors and motion.';
+}}});
+document.querySelector('#pause').onclick=e=>{paused=!paused;sprites.forEach(s=>paused?s.anims.pause():s.anims.resume());e.target.textContent=paused?'Resume':'Pause';};
+document.querySelector('#flip').onchange=e=>sprites.forEach(s=>s.setFlipX(e.target.checked));
+document.querySelector('#body').onchange=e=>guides.forEach(g=>g.setVisible(e.target.checked));
+document.querySelector('#speed').onchange=e=>sprites.forEach(s=>s.anims.timeScale=Number(e.target.value));
+</script>
+</html>

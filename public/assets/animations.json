@@ -1,0 +1,44 @@
+{
+  "player_idle": {
+    "atlas": "player",
+    "prefix": "idle_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "player_run": {
+    "atlas": "player",
+    "prefix": "run_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "player_jump_up": {
+    "atlas": "player",
+    "prefix": "jump_up_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "player_jump_peak": {
+    "atlas": "player",
+    "prefix": "jump_peak_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "player_fall": {
+    "atlas": "player",
+    "prefix": "fall_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "player_land": {
+    "atlas": "player",
+    "prefix": "land_",
+    "frames": 2,
+    "frameRate": 14,
+    "repeat": 0
+  }
+}

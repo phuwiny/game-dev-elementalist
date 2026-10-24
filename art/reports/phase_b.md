@@ -1,3 +1,71 @@
+# Phase B — first production movement atlas, 2026-10-24
+
+## Style gate decision — 2026-10-24
+
+Pinz approved the 640×360 Aclaire V4 / Moss Slime / Thorn Beetle / four-tile style comparison. This clears the pre-Phase-C visual style gate. PR #7 remains a draft because Phase B production is still partial and the runtime integration items in section 4 belong to Claude. Phase C production will begin after this Phase B branch is integrated, following the agreed phase order.
+
+## Review correction — idle motion, run proportions and idle_003 blink
+
+Pinz reported head-only jitter in idle, a smaller head on entering run, and an unnatural blink. The previous idle builder applied row-weighted one-pixel offsets to the upper silhouette. Run studies independently fitted each full pose to a target height, so foot alignment alone did not ensure matching head proportions.
+
+- Added `tools/art/build_player_idle_run_revision.py`. Idle now moves the entire upper body together vertically by one physical pixel, with fixed horizontal position and fixed feet. Six frames and 8fps remain unchanged.
+- The initial run-size correction was reverted at Pinz's request. The four run frames now match the original production atlas byte-for-byte; idle and the improved blink remain in place.
+- Pinz completed a manual edit of `idle_003`; its updated PNG is now the preserved source `art/concept/2026-10-24_aclaire_idle_003_user.png`. The build pipeline uses it for the fourth idle frame and regenerates the production atlas and review images from that file.
+- Redrew the closed eyes for `idle_003` using built-in imagegen, then composited only the eye regions into the approved face and quantized to the existing palette. Mouth, head outline and hair remain from V4. Source: `art/concept/2026-10-24_aclaire_blink_revision_source.png`.
+- New versioned studies, before/after blink comparison and an idle/run transition APNG are in `art/previews/phase_b/2026-10-24_idle_run_revision/`. Earlier approved study folders are untouched. Production frames and atlas incorporate the requested correction.
+- Run frames were restored byte-for-byte from the original production packet (commit `1c94401`). Verification: asset validator PASS; 11 art tests PASS, including fixed idle horizontal eye position and hashes for the restored run frames. All soles remain on row 127. Browser review loads the real atlas at scale 0.5; level 1-1 was checked for movement and grounded return. Combat knockback occurred during a run sample, so that airborne screenshot is not evidence of a floor-anchor defect.
+- No changes to game code, manifests/config, protected references or handoff specification. Existing integration notes below still apply. The style approval has since been granted as recorded above.
+
+This delivery follows merged PR #5 and is based on main `6a78a06` (including Claude's player V4 integration, PR #6). It supersedes earlier status notes below. Full Phase B is not complete.
+
+## 1. Files delivered
+
+- `public/assets/sprites/player/player.png` + `player.json`: 1024x262 RGBA atlas, 18 untrimmed/unrotated frames, 2px padding, Phaser JSON Hash. Frames retain physical sourceSize and pivot (0.5, 1); image scale metadata is 1, while runtime handles density 2.
+- `public/assets/animations.json`: idle 6 @ 8fps, run 4 @ 8fps, jump_up 2 @ 10fps, jump_peak 2 @ 10fps, fall 2 @ 10fps, land 2 @ 14fps. Only idle/run/fall loop in the game.
+- `art/frames/player/`: the 18 individual physical frame PNGs, matching table 5.1 naming.
+- `tools/art/build_player_movement_atlas.py`, `tools/art/pack_atlas.py`: reproducible normalization and packing. Existing approved studies and reference images remain unchanged.
+- `art/previews/phase_b/2026-10-24_player_movement/`: six APNG motion loops, six nearest-neighbor review boards, and a 640x360 overview.
+- `art/previews/phase_b/2026-10-24_player_movement_review.html`: Phaser atlas review at 640x360, scale 0.5, pause/flip/speed controls and the user's requested 16x46 body guide.
+- `art/mockups/2026-10-24_aclaire_v4_world1_style_test.png`: pre-Phase-C 640x360 comparison. Aclaire remains 48x64 on screen; enemies and 16px tile samples are displayed at main's new world scale 1.5.
+- `art/previews/phase_b/2026-10-24_world1_style_samples/`: two 32x32 enemy samples and four 16x16 tile samples, review only; they are NOT a production World 1 pack.
+- Source sheets under `art/concept/2026-10-24_aclaire_movement_batch_source.png` and `2026-10-24_world1_style_samples_source.png`; generation method and prompts in `art/reports/2026-10-24_production_generation_prompts.md`.
+- Metrics: `2026-10-24_player_movement_metrics.json`, `2026-10-24_world1_style_metrics.json` in this report directory.
+- Validator now accepts the approved 192x128 physical attack contract. Fixed a pre-existing missing-animations check that ran before atlas discovery. Added packet coverage/packing/anchor tests under `tools/art/`.
+
+## 2. Validation and visual results
+
+- `tools/validate_assets.py`: **PASS, 0 errors, exit 0** using bundled Python 3.
+- `python -m unittest discover -s tools/art -p 'test_*.py'`: **10 tests passed**. Includes all 18 frame names, counts/timing, lossless atlas extraction, untrimmed metadata, baseline, and unchanged opaque idle-seed pixels.
+- All 18 physical frames: binary alpha, soles on row 127. Atlas union: exactly 247 approved V4 colors. Run is 128x128; all other delivered frames are 96x128.
+- Horizontal eye-center range within each animation: idle 2.169 physical px (intentional breathing), run 0.574, jump_up 0.007, jump_peak 0.129, fall 0.721, land 0.254. These measurements are anchor diagnostics, not a guarantee of subjective animation quality.
+- Phaser review loaded all six animations with no warning/error logs; pause and left-facing flip were checked. Sole baselines stay aligned. The four-key run remains deliberately sparse and should be judged visually by Pinz.
+- Dev server: bundled `pnpm run dev --host 127.0.0.1 --port 5174` (same Vite dev script; npm not on PATH). After receiving PR #6, opened `/?lowres` for a 640x360 render, entered World Map -> level 1-1, moved right, jumped, observed fall and returned to idle. Screenshots show correctly sized V4 with soles meeting the floor, without persistent sinking/floating. This is a smoke check, not exhaustive collision/playthrough validation.
+- Before PR #6 arrived, the old main rendered V4 oversized. That earlier result is superseded by the check above.
+- Style test: Moss Slime 13 colors, Thorn Beetle 12; four tiles use 10/11/12/12 colors, union 19, all from master palette. This mockup is an art comparison, not an engine screenshot or a tile-seam acceptance pass.
+
+## 3. Assumptions and production method
+
+- Reused approved idle, four-frame run and two-frame jump-up sources. Idle frame 000 preserves every opaque seed pixel and alpha; invisible RGB is cleared. Blink colors outside the locked palette are mapped into it.
+- Run receives a baseline translation, not a new redraw. Jump-up uses one shared 0.94 nearest-neighbor scale to retain the full ponytail while centering the face/body in a 96px-wide production frame. The old approved preview files are untouched.
+- New peak/fall/land poses were generated together in one six-slot sheet using the built-in imagegen tool with approved idle/jump and owner character sheet references. One shared 0.25 nearest-neighbor scale is applied to all six new frames, then binary alpha, V4 palette mapping, common horizontal eye anchor and last-row sole placement. There is no individual fit-to-height resizing.
+- APNG review loops intentionally repeat even non-looping game actions. Animation manifest retains their correct non-looping values.
+- The pre-Phase-C sample sheet was generated with built-in imagegen from the existing enemy concept sheet, then normalized/quantized and composed using the project's Python/Pillow art workflow. No CLI image generation was used.
+
+## 4. Remaining runtime/spec issues for Claude (no src changes made)
+
+1. **Partial player atlas fallback is missing.** Preload only creates placeholders when the entire atlas fails. The 10 undelivered player animations therefore log missing frames: double_jump, cast, dash, glide, ground_slam, attack_1/2/3, hurt, dead. Please supply per-animation placeholder fallback before merging this partial production atlas for normal gameplay. The art request explicitly permits placeholders for those actions; the present code does not yet implement that behavior. Do not treat the successful movement smoke check as acceptance of those actions.
+2. **animations.json overrides can be ignored.** In `PreloadScene.preload`, the `else this.failed.add(ANIMATIONS_KEY)` is attached to the map loop's `if (level.map)`, so mapless lab/graybox entries mark animations failed even when the JSON loaded. Current manifest happens to match this packet's counts/fps after PR #6, but future art overrides will not apply reliably. Claude owns the fix.
+3. **Hitbox contract differs:** Pinz requested about 16x46 logical. Main's latest ART_HANDOFF now states 21x57 logical, corresponding to 14x38 world units at world scale 1.5. Artwork remains the approved V4 proportions; no game/spec changes were made here. Review page's 16x46 guide represents Pinz's request, not the current gameplay body.
+4. The style mockup follows main's latest world scale 1.5 (16px tiles appear 24px; 32px enemy frames appear 48px), with V4 on-screen size unchanged. Source pixel sizes and palette limits are unchanged.
+
+## 5. Review gates and next work
+
+- Review the first six movement animations and the pre-Phase-C style test. V4 is visibly more detailed than the low-color enemies; tiles are denser than the character silhouettes and are samples requiring style approval.
+- **Stop before Phase C until Pinz approves the 640x360 comparison.** No World 1 production atlas, tileset/TSX, background or boss was produced.
+- Keep this first production delivery as a draft PR until Claude reconciles partial-atlas fallback and the runtime/spec issues above. Full player moveset and other Phase B atlases remain future work.
+
+---
+
 # Phase B — merge handoff, 2026-10-24
 
 This status supersedes the historical notes below. This PR consolidates approved Phase A concept work and Phase B Aclaire studies; it is not completion of all Phase B production assets.

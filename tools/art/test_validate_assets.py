@@ -58,6 +58,15 @@ class PlayerContractTests(unittest.TestCase):
     def test_missing_assets_are_not_a_pass(self):
         self.assertTrue(any("no production assets" in e for e in self.check()))
 
+    def test_missing_animation_manifest_is_rejected(self):
+        self.write_atlas()
+        (self.root / 'animations.json').unlink()
+        self.assertTrue(any('animation manifest missing' in e for e in self.check()))
+
+    def test_attack_contract_replaces_legacy_allocation(self):
+        for anim in ('attack_1', 'attack_2', 'attack_3'):
+            self.assertEqual((192, 128), validator.player_size(f'{anim}_000'))
+
     def test_approved_v4_previews_fit_the_new_contract(self):
         paths = [ROOT / "art/previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png",
                  ROOT / "art/previews/phase_b/2026-10-24_aclaire_jump_up_key_v4_48x64_density2.png"]
