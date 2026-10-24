@@ -3,7 +3,8 @@ import { AttackBalance, ElementBalance, PlayerBalance as B } from '../config/bal
 import { Action } from '../core/Bindings';
 import { Combo } from '../core/Combo';
 import { JumpAssist } from '../core/JumpAssist';
-import { animKey } from '../assets/manifest';
+import { animKey, textureScale } from '../assets/manifest';
+import { WORLD_SCALE } from '../config/constants';
 import type { InputManager } from '../systems/InputManager';
 
 export type PlayerState =
@@ -30,6 +31,24 @@ export const PlayerEvent = {
 } as const;
 
 const ATLAS = 'player';
+/**
+ * pixel ของ texture ต่อ 1 pixel ในด่าน: ภาพ V4 วาดที่ density 2 ของจอ logical
+ * และด่านถูกขยาย WORLD_SCALE (1.5) เท่า จึงได้ 3 (ภาพ 96×128 = 32×42.7 px ในด่าน)
+ */
+const DENSITY = WORLD_SCALE / textureScale(ATLAS);
+
+/**
+ * ตำแหน่งบนตัว Aclaire วัดจากฝ่าเท้าขึ้นไป (px ในด่าน) ใช้วาง FX และจุดยิง
+ * ตัวที่วาดสูงประมาณ 41 px ในด่าน (62 px แบบ logical, ART_HANDOFF.md หัวข้อ 5.1)
+ */
+export const PlayerLayout = {
+  /** กลางลำตัว: FX ที่ซ้อนตัวละคร เช่น slash, aura */
+  chestY: 22,
+  /** มือที่ปล่อยพลัง: ต่ำพอให้กระสุนโดนศัตรูตัวเตี้ย */
+  muzzleY: 18,
+  /** เหนือหัว: ข้อความลอย, ภูตที่ตามอยู่ */
+  overheadY: 48,
+} as const;
 const anim = (name: string) => animKey(ATLAS, name);
 const W = ElementBalance.wind;
 const E = ElementBalance.earth;
@@ -72,8 +91,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.setOrigin(0.5, 1);
+    this.setScale(1 / DENSITY);
     this.setDepth(6);
-    this.body.setSize(B.bodyWidth, B.bodyHeight);
+    // ขนาด body ระบุเป็น pixel ของ texture แล้ว Phaser คูณ scale ให้เป็นขนาดในเกม
+    this.body.setSize(B.bodyWidth * DENSITY, B.bodyHeight * DENSITY);
     this.body.setMaxVelocityY(B.maxFallSpeed);
     this.body.setCollideWorldBounds(true);
     this.syncBodyToFrame();
@@ -124,7 +145,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** จุดที่พลังธาตุพุ่งออก (หน้ามือ) */
   get muzzle(): { x: number; y: number } {
-    return { x: this.x + this.facing * 12, y: this.y - 20 };
+    return { x: this.x + this.facing * 12, y: this.y - PlayerLayout.muzzleY };
   }
 
   override update(_time: number, delta: number): void {
@@ -438,10 +459,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     else if (this.alpha !== 1) this.setAlpha(1);
   }
 
-  /** ปรับ body ให้อยู่กึ่งกลางล่างเสมอ แม้ frame ท่าฟันดาบจะกว้าง 64 px */
+  /** ปรับ body ให้อยู่กึ่งกลางล่างเสมอ แม้ frame ท่าวิ่งและท่าฟันดาบจะกว้างกว่า (offset เป็น pixel ของ texture) */
   private syncBodyToFrame(): void {
     const fw = this.frame.realWidth;
     const fh = this.frame.realHeight;
-    this.body.setOffset((fw - B.bodyWidth) / 2, fh - B.bodyHeight);
+    this.body.setOffset((fw - B.bodyWidth * DENSITY) / 2, fh - B.bodyHeight * DENSITY);
   }
 }

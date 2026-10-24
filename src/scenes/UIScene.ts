@@ -3,6 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH, SceneKey } from '../config/constants';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { PALETTE, hex } from '../assets/palette';
 import { textStyle } from '../ui/text';
+import { useUiCamera } from '../ui/screen';
 import { REGISTRY_LEVEL, type GameScene, type HudState } from './GameScene';
 import { isAdventure } from '../levels';
 import { sfx } from '../systems/Sfx';
@@ -39,6 +40,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   create(): void {
+    useUiCamera(this);
     this.lastKey = '';
     this.hearts = [];
     for (let i = 0; i < 9; i += 1) {

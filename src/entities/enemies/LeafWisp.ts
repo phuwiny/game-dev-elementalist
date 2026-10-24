@@ -3,6 +3,7 @@ import { W1EnemyBalance } from '../../config/balance';
 import { ElementType } from '../../core/Element';
 import { animKey } from '../../assets/manifest';
 import { Enemy } from './Enemy';
+import { PlayerLayout } from '../Player';
 
 const ATLAS = 'enemies_w1';
 const B = W1EnemyBalance.leafWisp;
@@ -50,11 +51,11 @@ export class LeafWisp extends Enemy {
 
     if (!this.diving && t.alive && this.sinceDiveMs >= B.diveCooldownMs) {
       const dx = t.x - this.x;
-      const dy = t.y - 20 - this.y;
+      const dy = t.y - PlayerLayout.chestY - this.y;
       if (Math.hypot(dx, dy) < B.diveRange) {
         this.diving = true;
         this.diveElapsedMs = 0;
-        this.diveTarget = { x: t.x, y: t.y - 20 };
+        this.diveTarget = { x: t.x, y: t.y - PlayerLayout.chestY };
         this.play(this.anim('move'));
       }
     }

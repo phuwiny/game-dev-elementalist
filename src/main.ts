@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from './config/constants';
+import { GAME_HEIGHT, GAME_WIDTH, RENDER_SCALE } from './config/constants';
 import { PlayerBalance } from './config/balance';
 import { PALETTE } from './assets/palette';
 import { BootScene } from './scenes/BootScene';
@@ -13,8 +13,8 @@ import { GameOverScene, StageClearScene } from './scenes/EndScenes';
 const game = new Phaser.Game({
   type: Phaser.WEBGL,
   parent: 'game',
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  width: GAME_WIDTH * RENDER_SCALE,
+  height: GAME_HEIGHT * RENDER_SCALE,
   backgroundColor: PALETTE.outline,
   pixelArt: true,
   roundPixels: true,

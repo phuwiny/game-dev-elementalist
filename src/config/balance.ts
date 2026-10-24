@@ -11,6 +11,7 @@ export const PlayerBalance = {
   airDecel: 600,
 
   gravity: 1100,
+  /** กระโดดสูงสุด v²/2g ≈ 66 px (~4 ช่อง) ตัวละครในด่านสูง ~41 px */
   jumpVelocity: 380,
   /** ปล่อยปุ่มกระโดดก่อนถึงจุดสูงสุด ความเร็วขาขึ้นจะถูกคูณด้วยค่านี้ */
   jumpCutMultiplier: 0.45,
@@ -19,7 +20,7 @@ export const PlayerBalance = {
   coyoteTimeMs: 100,
   jumpBufferMs: 100,
 
-  /** hitbox ตัวละคร (เล็กกว่า frame 32×48) */
+  /** hitbox ตัวละคร px ในด่าน (ภาพ V4 ในด่าน 32×42.7, ผมและหางม้าเกิน hitbox ได้) */
   bodyWidth: 14,
   bodyHeight: 38,
 

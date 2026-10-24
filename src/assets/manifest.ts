@@ -24,14 +24,26 @@ export interface AtlasDef {
   key: string;
   png: string;
   json: string;
+  /** ขนาด frame เป็น pixel ของไฟล์ภาพ (physical) */
   frameWidth: number;
   frameHeight: number;
+  /**
+   * pixel ของไฟล์ภาพต่อ 1 pixel ในเกม (ค่าเริ่มต้น 1)
+   * player V4 ใช้ 2: ภาพ 96×128 แสดงในเกมเป็น 48×64 (ART_HANDOFF.md หัวข้อ 5.1)
+   */
+  density?: number;
   anims: AnimDef[];
   /** frame เดี่ยวที่ไม่ใช่ animation ชื่อ frame ตามที่เขียน (ไม่มีเลขต่อท้าย) */
   stills?: { name: string; width?: number; height?: number }[];
 }
 
 export const ANIMATIONS_JSON = 'assets/animations.json';
+
+/** scale ที่ต้องตั้งให้ sprite ของ atlas นี้ เพื่อให้ขนาดในเกมเป็น logical pixel */
+export function textureScale(atlasKey: string): number {
+  const atlas = ATLASES.find((a) => a.key === atlasKey);
+  return 1 / (atlas?.density ?? 1);
+}
 
 /** ชื่อภูตที่ใช้เป็น prefix ของ frame ใน atlas spirits (ลำดับ ไฟ น้ำ ลม ดิน) */
 export const SPIRIT_KEYS = ['burnil', 'wata', 'valvaliz', 'eathy'] as const;
@@ -47,11 +59,13 @@ const sprite = (dir: string, key: string) => ({
 export const ATLASES: AtlasDef[] = [
   {
     ...sprite('player', 'player'),
-    frameWidth: 32,
-    frameHeight: 48,
+    // Aclaire V4: 48×64 logical (run 64×64, attack 96×64) วาดที่ density 2
+    frameWidth: 96,
+    frameHeight: 128,
+    density: 2,
     anims: [
       { name: 'idle', frames: 6, frameRate: 8, repeat: -1 },
-      { name: 'run', frames: 8, frameRate: 12, repeat: -1 },
+      { name: 'run', frames: 4, frameRate: 8, repeat: -1, width: 128 },
       { name: 'jump_up', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'jump_peak', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'fall', frames: 2, frameRate: 10, repeat: -1 },
@@ -61,9 +75,9 @@ export const ATLASES: AtlasDef[] = [
       { name: 'dash', frames: 3, frameRate: 16, repeat: 0 },
       { name: 'glide', frames: 4, frameRate: 10, repeat: -1 },
       { name: 'ground_slam', frames: 5, frameRate: 14, repeat: 0 },
-      { name: 'attack_1', frames: 4, frameRate: 16, repeat: 0, width: 64 },
-      { name: 'attack_2', frames: 4, frameRate: 16, repeat: 0, width: 64 },
-      { name: 'attack_3', frames: 5, frameRate: 16, repeat: 0, width: 64 },
+      { name: 'attack_1', frames: 4, frameRate: 16, repeat: 0, width: 192 },
+      { name: 'attack_2', frames: 4, frameRate: 16, repeat: 0, width: 192 },
+      { name: 'attack_3', frames: 5, frameRate: 16, repeat: 0, width: 192 },
       { name: 'hurt', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'dead', frames: 6, frameRate: 10, repeat: 0 },
     ],

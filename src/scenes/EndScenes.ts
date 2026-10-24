@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, SceneKey } from '../config/constants';
 import { PALETTE } from '../assets/palette';
 import { textStyle } from '../ui/text';
+import { useUiCamera } from '../ui/screen';
 import type { Vitals } from '../core/Vitals';
 import { REGISTRY_VITALS } from './BootScene';
 import { REGISTRY_LEVEL } from './GameScene';
@@ -22,7 +23,7 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.cameras.main.setBackgroundColor(PALETTE.outline);
+    useUiCamera(this).setBackgroundColor(PALETTE.outline);
     const cx = GAME_WIDTH / 2;
     this.add.text(cx, 130, 'GAME OVER', textStyle(28, PALETTE.fire)).setOrigin(0.5);
     this.add.text(cx, 190, 'ENTER  Continue', textStyle(12)).setOrigin(0.5);
@@ -49,7 +50,7 @@ export class StageClearScene extends Phaser.Scene {
   }
 
   create(data: { coins?: number; level?: string; next?: string | null }): void {
-    this.cameras.main.setBackgroundColor(PALETTE.outline);
+    useUiCamera(this).setBackgroundColor(PALETTE.outline);
     const cx = GAME_WIDTH / 2;
     const exit = exitScene(data.level);
     const adventure = exit === SceneKey.WorldMap;

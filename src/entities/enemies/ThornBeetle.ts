@@ -16,7 +16,7 @@ const B = W1EnemyBalance.thornBeetle;
 export class ThornBeetle extends Enemy {
   readonly element = ElementType.Earth;
   readonly contactDamage = B.contactDamage;
-  protected readonly hurtHeight = 18;
+  protected readonly hurtHeight = 24;
   private direction: 1 | -1 = -1;
   private flippedUntil = 0;
 

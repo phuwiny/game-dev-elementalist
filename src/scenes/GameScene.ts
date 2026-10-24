@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SceneKey, TILE_SIZE } from '../config/constants';
+import { SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
 import { BossBalance, ElementBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
@@ -9,7 +9,7 @@ import { parseTiledMap, type TiledMap } from '../core/TiledLevel';
 import type { Progress } from '../core/Progress';
 import type { Vitals } from '../core/Vitals';
 import { findLevel, isAdventure, mapCacheKey, nextAdventureLevel, type LevelDef } from '../levels';
-import { Player, PlayerEvent } from '../entities/Player';
+import { Player, PlayerEvent, PlayerLayout } from '../entities/Player';
 import { Projectile } from '../entities/Projectile';
 import { Enemy } from '../entities/enemies/Enemy';
 import { MossSlime } from '../entities/enemies/MossSlime';
@@ -166,7 +166,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.player.on(PlayerEvent.SlamImpact, (x: number, y: number) => this.slamImpact(x, y));
     this.player.on(PlayerEvent.Dash, () => {
       sfx.play('wind');
-      this.spawnFx('dash_trail', this.player.x - this.player.facing * 10, this.player.y - 24);
+      this.spawnFx('dash_trail', this.player.x - this.player.facing * 10, this.player.y - PlayerLayout.chestY);
     });
     this.player.on(PlayerEvent.Jump, () => sfx.play('jump'));
     this.player.on(PlayerEvent.DoubleJump, () => sfx.play('double_jump'));
@@ -195,8 +195,9 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const cam = this.cameras.main;
     cam.setBounds(0, 0, worldW, worldH);
     cam.setRoundPixels(true);
+    cam.setZoom(WORLD_ZOOM);
     cam.startFollow(this.player, true, 0.15, 0.15);
-    cam.setDeadzone(48, 40);
+    cam.setDeadzone(32, 28);
 
     if (!this.scene.isActive(SceneKey.UI)) this.scene.launch(SceneKey.UI);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.player.removeAllListeners());
@@ -272,7 +273,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   evictPlayer(area: Phaser.Geom.Rectangle, toX: number): void {
     const b = this.player.body;
     if (this.player.isDead || !Phaser.Geom.Intersects.RectangleToRectangle(area, new Phaser.Geom.Rectangle(b.x, b.y, b.width, b.height))) return;
-    this.spawnFx('poof', this.player.x, this.player.y - 16);
+    this.spawnFx('poof', this.player.x, this.player.y - PlayerLayout.chestY);
     b.reset(toX, this.player.y);
   }
 
@@ -299,7 +300,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       W.gustWidth,
       W.gustHeight,
     );
-    const fx = this.spawnFx('wind_wave', this.player.x + dir * 24, this.player.y - 20);
+    const fx = this.spawnFx('wind_wave', this.player.x + dir * 24, this.player.y - PlayerLayout.muzzleY);
     fx.setFlipX(dir < 0);
     sfx.play('wind');
 
@@ -474,7 +475,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.elements.energy.refill();
     if (announce) {
       sfx.play('spirit');
-      this.floatText(this.player.x, this.player.y - 60, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY - 10, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
       if (isAdventure(this.def.key)) this.progress.addSpirit(element);
     }
   }
@@ -534,7 +535,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       this.stageCoins += 1;
       const extra = this.vitals.addCoins(1);
       sfx.play(extra > 0 ? 'one_up' : 'coin');
-      if (extra > 0) this.floatText(this.player.x, this.player.y - 50, '1UP', PALETTE.wind);
+      if (extra > 0) this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, '1UP', PALETTE.wind);
     });
 
     const hearts = this.physics.add.staticGroup();
@@ -595,12 +596,23 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         gate.setClosed(true);
         sfx.play('gate');
         boss.start(() => this.onBossDefeated());
+        this.frameBossFight(true);
       }
     }
     boss.update(delta);
   }
 
+  /**
+   * ระหว่างสู้บอส: วางผู้เล่นไว้ฝั่งซ้ายของจอ ให้เห็นบอสที่อยู่ทางขวา
+   * (มุมกล้องในด่านแคบกว่าสนามบอส)
+   */
+  private frameBossFight(on: boolean): void {
+    const cam = this.cameras.main;
+    cam.setFollowOffset(on ? -cam.worldView.width * 0.28 : 0, 0);
+  }
+
   private onBossDefeated(): void {
+    this.frameBossFight(false);
     this.arenaGate?.setClosed(false);
     this.time.delayedCall(1200, () => {
       this.goalFlag?.setVisible(true);
@@ -758,7 +770,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private findEarthBlockSpot(): { x: number; y: number } | null {
     const size = EB.blockSize;
     const p = this.player;
-    const front = p.facing === 1 ? p.x + 8 : p.x - 8 - size;
+    // เว้นจากขอบ hitbox 1 px ไม่ให้บล็อกทับตัวผู้เล่น
+    const front = p.facing === 1 ? p.body.right + 1 : p.body.x - 1 - size;
     const left = p.facing === 1 ? Math.ceil(front / TILE_SIZE) * TILE_SIZE : Math.floor(front / TILE_SIZE) * TILE_SIZE;
     let bottom = Math.round(p.y / TILE_SIZE) * TILE_SIZE;
 
@@ -872,6 +885,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       // ตายระหว่างสู้บอส: บอสกลับเป็นเต็มเลือด เปิดประตูสนามให้เดินเข้าใหม่
       if (this.boss?.isActive) {
         this.boss.reset();
+        this.frameBossFight(false);
         this.arenaGate?.setClosed(false);
       }
       this.companion.snap();
@@ -881,7 +895,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
   private onElementSwitch(element: ElementType): void {
     this.companion.setElement(element);
-    this.spawnFx(`element_switch_aura_${element}`, this.player.x, this.player.y - 24);
+    this.spawnFx(`element_switch_aura_${element}`, this.player.x, this.player.y - PlayerLayout.chestY);
   }
 
   private activateCheckpoint(shrine: Phaser.GameObjects.Sprite): void {
@@ -930,7 +944,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private spawnSlash(step: number): void {
     sfx.play('slash');
     const dir = this.player.facing;
-    const fx = this.spawnFx(`slash_${step + 1}`, this.player.x + dir * 18, this.player.y - 24);
+    const fx = this.spawnFx(`slash_${step + 1}`, this.player.x + dir * 24, this.player.y - PlayerLayout.chestY);
     fx.setFlipX(dir < 0);
   }
 
@@ -943,7 +957,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
   private floatText(x: number, y: number, text: string, color: string): void {
     const t = this.add
-      .text(x, y, text, { fontFamily: 'monospace', fontSize: '10px', color, stroke: PALETTE.outline, strokeThickness: 3 })
+      .text(x, y, text, { fontFamily: 'monospace', fontSize: '7px', color, stroke: PALETTE.outline, strokeThickness: 2, resolution: 6 })
       .setOrigin(0.5)
       .setDepth(20);
     this.tweens.add({ targets: t, y: y - 16, alpha: 0, duration: 1200, onComplete: () => t.destroy() });

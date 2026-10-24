@@ -69,6 +69,12 @@ export class PixelPen {
 }
 
 /** สร้าง placeholder ให้ atlas หนึ่งชุด (ข้ามถ้ามี texture key นี้แล้ว) */
+/**
+ * ตัวขยายของ placeholder ต่อ atlas: ภาพ Aclaire แบบหยาบวาดไว้สูง ~40 px
+ * ขยาย 1.5 เท่าให้สูงใกล้ V4 (~62 px ในเกม)
+ */
+const PAINT_SCALE: Record<string, number> = { player: 1.5 };
+
 export function createPlaceholderAtlas(textures: Phaser.Textures.TextureManager, atlas: AtlasDef): void {
   if (textures.exists(atlas.key)) textures.remove(atlas.key);
 
@@ -82,6 +88,9 @@ export function createPlaceholderAtlas(textures: Phaser.Textures.TextureManager,
   const pen = new PixelPen(ctx);
   const painter = PAINTERS[atlas.key] ?? paintUnknown;
 
+  // วาด placeholder ที่ขนาดเล็ก แล้วขยายแบบ pixel ให้เต็ม frame จริง (density × ขนาดตัวละคร)
+  const unit = (atlas.density ?? 1) * (PAINT_SCALE[atlas.key] ?? 1);
+
   for (const f of frames) {
     const pos = layout.positions.get(f.name);
     if (!pos) continue;
@@ -90,7 +99,12 @@ export function createPlaceholderAtlas(textures: Phaser.Textures.TextureManager,
     ctx.beginPath();
     ctx.rect(0, 0, f.w, f.h);
     ctx.clip();
-    painter(pen, f);
+    const vw = Math.floor(f.w / unit);
+    const vh = Math.floor(f.h / unit);
+    // จัดกึ่งกลางล่าง ให้ฝ่าเท้าอยู่แถวล่างสุดของ frame
+    ctx.translate(Math.floor((f.w - vw * unit) / 2), f.h - vh * unit);
+    ctx.scale(unit, unit);
+    painter(pen, { ...f, w: vw, h: vh });
     ctx.restore();
     canvas.add(f.name, 0, pos.x, pos.y, f.w, f.h);
   }
