@@ -25,6 +25,10 @@ def build():
     draw.polygon([(62, 44), (67, 43), (70, 46), (70, 52), (66, 54), (61, 52), (60, 48)], fill=255)
     blink_seed = seed.copy()
     blink_seed.paste(aligned_blink, (0, 0), eye_mask)
+    # Remove the extra black brow produced above the closed left eyelid.
+    # Keep the curved dark eyelid itself (y=46+) intact.
+    clean = ImageDraw.Draw(blink_seed)
+    clean.rectangle((50, 41, 57, 42), fill=(252, 225, 201, 255))
     for anim in ('idle', 'run'):
         (OUT / anim).mkdir(parents=True, exist_ok=True)
     # One smooth inhale/exhale cycle: upper body moves together, no x sway,
