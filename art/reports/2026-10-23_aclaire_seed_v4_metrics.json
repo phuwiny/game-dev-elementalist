@@ -1,0 +1,22 @@
+{
+  "physical_size": [
+    96,
+    128
+  ],
+  "logical_size": [
+    48,
+    64
+  ],
+  "bbox": [
+    13,
+    4,
+    81,
+    128
+  ],
+  "opaque_colors": 247,
+  "alt_64color_opaque_colors": 60,
+  "alpha": [
+    0,
+    255
+  ]
+}
