@@ -39,6 +39,9 @@ export interface AtlasDef {
 
 export const ANIMATIONS_JSON = 'assets/animations.json';
 
+/** texture ที่เก็บ placeholder ของ frame ที่ไฟล์จริงยังไม่มี (atlas ส่งมาไม่ครบทุกท่า) */
+export const fillTextureKey = (atlasKey: string): string => `${atlasKey}__fill`;
+
 /** scale ที่ต้องตั้งให้ sprite ของ atlas นี้ เพื่อให้ขนาดในเกมเป็น logical pixel */
 export function textureScale(atlasKey: string): number {
   const atlas = ATLASES.find((a) => a.key === atlasKey);

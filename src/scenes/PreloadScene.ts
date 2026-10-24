@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { useUiCamera } from '../ui/screen';
 import { GAME_HEIGHT, GAME_WIDTH, SceneKey, TILE_SIZE } from '../config/constants';
-import { ANIMATIONS_JSON, ATLASES } from '../assets/manifest';
-import { createGrayboxTiles, createPlaceholderAtlas } from '../assets/placeholders';
+import { ANIMATIONS_JSON, ATLASES, fillTextureKey } from '../assets/manifest';
+import { createGrayboxTiles, createPlaceholderAtlas, missingFrames } from '../assets/placeholders';
 import { registerAnimations } from '../assets/animations';
 import { PALETTE, hex } from '../assets/palette';
 import { REGISTRY_AVAILABLE_JSON } from './BootScene';
@@ -39,21 +39,34 @@ export class PreloadScene extends Phaser.Scene {
       else this.failed.add(atlas.key);
     }
     if (available.has(ANIMATIONS_JSON)) this.load.json(ANIMATIONS_KEY, ANIMATIONS_JSON);
-    // ด่าน Tiled เป็นของฝั่งโค้ด ต้องมีเสมอ ถ้าโหลดไม่ได้ให้ error ชัด ๆ
-    for (const level of LEVELS) if (level.map) this.load.json(mapCacheKey(level.key), level.map);
     else this.failed.add(ANIMATIONS_KEY);
+    // ด่าน Tiled เป็นของฝั่งโค้ด ต้องมีเสมอ ถ้าโหลดไม่ได้ให้ error ชัด ๆ
+    for (const level of LEVELS) {
+      if (level.map) this.load.json(mapCacheKey(level.key), level.map);
+    }
   }
 
   create(): void {
     const placeholders: string[] = [];
+    const partial: string[] = [];
     for (const atlas of ATLASES) {
       if (this.failed.has(atlas.key) || !this.textures.exists(atlas.key)) {
         createPlaceholderAtlas(this.textures, atlas);
         placeholders.push(atlas.key);
+        continue;
+      }
+      // atlas จริงส่งมาบางท่า: เติม placeholder เฉพาะ frame ที่ยังไม่มี ลง texture แยก
+      const missing = missingFrames(this.textures, atlas);
+      if (missing.size > 0) {
+        createPlaceholderAtlas(this.textures, atlas, { key: fillTextureKey(atlas.key), only: missing });
+        partial.push(`${atlas.key} (${missing.size} frames)`);
       }
     }
     if (placeholders.length > 0) {
       console.info(`[assets] using placeholders for: ${placeholders.join(', ')}`);
+    }
+    if (partial.length > 0) {
+      console.info(`[assets] filling missing frames with placeholders: ${partial.join(', ')}`);
     }
     createGrayboxTiles(this.textures, GRAYBOX_TILES, TILE_SIZE);
 

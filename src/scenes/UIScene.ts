@@ -6,6 +6,7 @@ import { textStyle } from '../ui/text';
 import { useUiCamera } from '../ui/screen';
 import { REGISTRY_LEVEL, type GameScene, type HudState } from './GameScene';
 import { isAdventure } from '../levels';
+import { setAtlasFrame } from '../assets/frames';
 import { sfx } from '../systems/Sfx';
 
 const BOSS_FILL_WIDTH = 236;
@@ -109,12 +110,12 @@ export class UIScene extends Phaser.Scene {
       this.lastKey = key;
       this.hearts.forEach((h, i) => {
         h.setVisible(i < s.maxHp);
-        h.setFrame(i < s.hp ? 'heart_full' : 'heart_empty');
+        setAtlasFrame(h, 'ui', i < s.hp ? 'heart_full' : 'heart_empty');
       });
       this.livesText.setText(`×${s.lives}`);
       this.coinsText.setText(String(s.coins).padStart(2, '0'));
       ELEMENT_ORDER.forEach((el, i) => {
-        this.slots[i].setFrame(`element_icon_${el}_${s.unlocked.includes(el) ? 'normal' : 'locked'}`);
+        setAtlasFrame(this.slots[i], 'ui', `element_icon_${el}_${s.unlocked.includes(el) ? 'normal' : 'locked'}`);
       });
       const sel = s.selected === null ? -1 : ELEMENT_ORDER.indexOf(s.selected);
       this.slotSelect.setVisible(sel >= 0);
@@ -124,7 +125,7 @@ export class UIScene extends Phaser.Scene {
     this.renderBoss(s.boss);
 
     const flash = s.energyDenied && Math.floor(this.time.now / 80) % 2 === 0;
-    this.energyFill.setFrame(flash ? 'energy_bar_fill_flash' : 'energy_bar_fill_normal');
+    setAtlasFrame(this.energyFill, 'ui', flash ? 'energy_bar_fill_flash' : 'energy_bar_fill_normal');
     this.energyFill.setCrop(0, 0, Math.round(ENERGY_FILL_WIDTH * (s.energy / s.energyMax)), 8);
   }
 
