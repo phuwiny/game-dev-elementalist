@@ -7,6 +7,7 @@ Repo นี้คือเกม **Elemental Spirit** (2D action platformer, pix
 
 ## เอกสารอ้างอิง
 
+- `docs/STATUS.md` — สถานะงานล่าสุด การตัดสินใจ งานถัดไป และวิธีทดสอบ **อ่านก่อนเริ่มงานใน session ใหม่**
 - `docs/GDD.md` — game design ทั้งหมด
 - `ART_HANDOFF.md` — สัญญาระหว่างโค้ดกับ asset (path, ขนาด frame, ชื่อ frame, animation) โค้ดต้องโหลด asset ตามเอกสารนี้
 
