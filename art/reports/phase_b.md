@@ -1,5 +1,9 @@
 # Phase B — first production movement atlas, 2026-10-24
 
+## Style gate decision — 2026-10-24
+
+Pinz approved the 640×360 Aclaire V4 / Moss Slime / Thorn Beetle / four-tile style comparison. This clears the pre-Phase-C visual style gate. PR #7 remains a draft because Phase B production is still partial and the runtime integration items in section 4 belong to Claude. Phase C production will begin after this Phase B branch is integrated, following the agreed phase order.
+
 ## Review correction — idle motion, run proportions and idle_003 blink
 
 Pinz reported head-only jitter in idle, a smaller head on entering run, and an unnatural blink. The previous idle builder applied row-weighted one-pixel offsets to the upper silhouette. Run studies independently fitted each full pose to a target height, so foot alignment alone did not ensure matching head proportions.
@@ -10,7 +14,7 @@ Pinz reported head-only jitter in idle, a smaller head on entering run, and an u
 - Redrew the closed eyes for `idle_003` using built-in imagegen, then composited only the eye regions into the approved face and quantized to the existing palette. Mouth, head outline and hair remain from V4. Source: `art/concept/2026-10-24_aclaire_blink_revision_source.png`.
 - New versioned studies, before/after blink comparison and an idle/run transition APNG are in `art/previews/phase_b/2026-10-24_idle_run_revision/`. Earlier approved study folders are untouched. Production frames and atlas incorporate the requested correction.
 - Run frames were restored byte-for-byte from the original production packet (commit `1c94401`). Verification: asset validator PASS; 11 art tests PASS, including fixed idle horizontal eye position and hashes for the restored run frames. All soles remain on row 127. Browser review loads the real atlas at scale 0.5; level 1-1 was checked for movement and grounded return. Combat knockback occurred during a run sample, so that airborne screenshot is not evidence of a floor-anchor defect.
-- No changes to game code, manifests/config, protected references or handoff specification. Existing integration notes below still apply. Phase C remains paused for style approval.
+- No changes to game code, manifests/config, protected references or handoff specification. Existing integration notes below still apply. The style approval has since been granted as recorded above.
 
 This delivery follows merged PR #5 and is based on main `6a78a06` (including Claude's player V4 integration, PR #6). It supersedes earlier status notes below. Full Phase B is not complete.
 
