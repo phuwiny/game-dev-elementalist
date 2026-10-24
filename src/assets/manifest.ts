@@ -26,6 +26,8 @@ export interface AtlasDef {
   json: string;
   frameWidth: number;
   frameHeight: number;
+  /** Texture pixels per logical game pixel (player V4 uses density 2). */
+  density?: number;
   anims: AnimDef[];
   /** frame เดี่ยวที่ไม่ใช่ animation ชื่อ frame ตามที่เขียน (ไม่มีเลขต่อท้าย) */
   stills?: { name: string; width?: number; height?: number }[];
@@ -42,18 +44,20 @@ const sprite = (dir: string, key: string) => ({
 export const ATLASES: AtlasDef[] = [
   {
     ...sprite('player', 'player'),
-    frameWidth: 32,
-    frameHeight: 48,
+    // Atlas rectangles are physical pixels; 96×128 is 48×64 in the game.
+    frameWidth: 96,
+    frameHeight: 128,
+    density: 2,
     anims: [
       { name: 'idle', frames: 6, frameRate: 8, repeat: -1 },
-      { name: 'run', frames: 8, frameRate: 12, repeat: -1 },
+      { name: 'run', frames: 4, frameRate: 8, repeat: -1, width: 128, height: 128 },
       { name: 'jump_up', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'jump_peak', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'fall', frames: 2, frameRate: 10, repeat: -1 },
       { name: 'land', frames: 2, frameRate: 14, repeat: 0 },
-      { name: 'attack_1', frames: 4, frameRate: 16, repeat: 0, width: 64 },
-      { name: 'attack_2', frames: 4, frameRate: 16, repeat: 0, width: 64 },
-      { name: 'attack_3', frames: 5, frameRate: 16, repeat: 0, width: 64 },
+      { name: 'attack_1', frames: 4, frameRate: 16, repeat: 0, width: 128, height: 96 },
+      { name: 'attack_2', frames: 4, frameRate: 16, repeat: 0, width: 128, height: 96 },
+      { name: 'attack_3', frames: 5, frameRate: 16, repeat: 0, width: 128, height: 96 },
       { name: 'hurt', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'dead', frames: 6, frameRate: 10, repeat: 0 },
     ],
