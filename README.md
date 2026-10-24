@@ -7,6 +7,7 @@ Aclaire ตะลุยด่านจนถึงเส้นชัย โด�
 
 | ไฟล์ | เนื้อหา |
 | --- | --- |
+| `docs/STATUS.md` | สถานะงานล่าสุดและบันทึกส่งต่อ |
 | `docs/GDD.md` | Game Design Document |
 | `ART_HANDOFF.md` | สเปกงานภาพ และสัญญาระหว่างโค้ดกับ asset |
 | `AGENTS.md` | กติกาการทำงานของ Codex (งานภาพ) |
