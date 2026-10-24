@@ -68,20 +68,31 @@ export class PixelPen {
   }
 }
 
-/** สร้าง placeholder ให้ atlas หนึ่งชุด (ข้ามถ้ามี texture key นี้แล้ว) */
 /**
  * ตัวขยายของ placeholder ต่อ atlas: ภาพ Aclaire แบบหยาบวาดไว้สูง ~40 px
  * ขยาย 1.5 เท่าให้สูงใกล้ V4 (~62 px ในเกม)
  */
 const PAINT_SCALE: Record<string, number> = { player: 1.5 };
 
-export function createPlaceholderAtlas(textures: Phaser.Textures.TextureManager, atlas: AtlasDef): void {
-  if (textures.exists(atlas.key)) textures.remove(atlas.key);
+/**
+ * สร้าง placeholder ให้ atlas หนึ่งชุด
+ * - ไม่ระบุ options: แทน atlas ทั้งชุด (ไฟล์จริงยังไม่มีหรือโหลดไม่ได้)
+ * - ระบุ only: สร้างเฉพาะ frame เหล่านั้นลง texture แยก (key) ใช้เติมท่าที่ไฟล์จริงยังไม่มี
+ */
+export function createPlaceholderAtlas(
+  textures: Phaser.Textures.TextureManager,
+  atlas: AtlasDef,
+  options: { key?: string; only?: ReadonlySet<string> } = {},
+): void {
+  const key = options.key ?? atlas.key;
+  if (textures.exists(key)) textures.remove(key);
 
-  const frames = listFrames(atlas);
+  const only = options.only;
+  const frames = listFrames(atlas).filter((f) => !only || only.has(f.name));
+  if (frames.length === 0) return;
   const layout = packFrames(frames, 1024, 1);
-  const canvas = textures.createCanvas(atlas.key, layout.width, layout.height);
-  if (!canvas) throw new Error(`Cannot create placeholder texture "${atlas.key}"`);
+  const canvas = textures.createCanvas(key, layout.width, layout.height);
+  if (!canvas) throw new Error(`Cannot create placeholder texture "${key}"`);
 
   const ctx = canvas.context;
   ctx.imageSmoothingEnabled = false;
@@ -144,6 +155,12 @@ export function createGrayboxTiles(textures: Phaser.Textures.TextureManager, key
   pen.rect(s, tile - 2, tile, 2, C.neutral1);
 
   canvas.refresh();
+}
+
+/** ชื่อ frame ตาม manifest ที่ texture ที่โหลดมายังไม่มี */
+export function missingFrames(textures: Phaser.Textures.TextureManager, atlas: AtlasDef): Set<string> {
+  const texture = textures.get(atlas.key);
+  return new Set(listFrames(atlas).map((f) => f.name).filter((n) => !texture.has(n)));
 }
 
 function listFrames(atlas: AtlasDef): FrameInfo[] {

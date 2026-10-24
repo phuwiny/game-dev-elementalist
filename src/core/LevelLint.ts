@@ -5,7 +5,7 @@ import { linkTriggers } from './TriggerLinks';
  * ตรวจด่านแบบ static ว่าผ่านได้ด้วยการกระโดดปกติ (ไม่มี double jump)
  * ใช้กับด่านในโหมดผจญภัยของโลกที่ยังไม่มีภูตลม
  *
- * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~64 px (4 ช่อง) hitbox 14×38
+ * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~64 px (4 ช่อง) hitbox 11×31
  * วิ่งกระโดดเต็มแรงลอยไกล ~104 px (6.5 ช่อง)
  */
 export interface LintRules {

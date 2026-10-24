@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { TILE_SIZE } from '../config/constants';
 import { ElementType, type IElementReactive } from '../core/Element';
 import { OBJECT_SIZE, type LevelObject, type ObjectKind } from '../core/LevelParser';
+import { setAtlasFrame } from '../assets/frames';
 import { animKey } from '../assets/manifest';
 
 const objAnim = (name: string) => animKey('objects', name);
@@ -169,7 +170,7 @@ export class WaterSurface extends PuzzleObject {
     this.frozen = frozen;
     if (frozen) {
       this.sprite.stop();
-      this.sprite.setFrame('water_surface_frozen_000');
+      setAtlasFrame(this.sprite, 'objects', 'water_surface_frozen_000');
     } else {
       this.sprite.play(objAnim('water_surface_water'));
     }
@@ -252,7 +253,7 @@ export class MagicSeed extends PuzzleObject {
     if (element !== ElementType.Water || this.grown) return;
     this.grown = true;
     this.sprite.play(objAnim('magic_seed_grow'));
-    this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.sprite.setFrame('magic_seed_grown_000'));
+    this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => setAtlasFrame(this.sprite, 'objects', 'magic_seed_grown_000'));
     const x = this.col * TILE_SIZE + TILE_SIZE / 2;
     const ground = (this.row + 1) * TILE_SIZE;
     this.host.addOneWayPlatform(x, ground - 32, 24);
@@ -318,7 +319,7 @@ export class PressurePlate extends PuzzleObject implements Trigger {
   setPressed(pressed: boolean): void {
     if (this.pressed === pressed) return;
     this.pressed = pressed;
-    this.sprite.setFrame(pressed ? 'pressure_plate_down_000' : 'pressure_plate_up_000');
+    setAtlasFrame(this.sprite, 'objects', pressed ? 'pressure_plate_down_000' : 'pressure_plate_up_000');
     this.host.onChanged();
   }
 }
@@ -350,7 +351,7 @@ export class Gate extends PuzzleObject {
     } else {
       this.setBodyEnabled(true);
       this.sprite.stop();
-      this.sprite.setFrame('gate_door_closed_000');
+      setAtlasFrame(this.sprite, 'objects', 'gate_door_closed_000');
     }
   }
 }
@@ -377,7 +378,7 @@ export class ArenaGate extends PuzzleObject {
     this.setBodyEnabled(closed);
     if (closed) {
       this.sprite.stop();
-      this.sprite.setFrame('gate_door_closed_000');
+      setAtlasFrame(this.sprite, 'objects', 'gate_door_closed_000');
     } else {
       this.sprite.play(objAnim('gate_door_open'));
     }

@@ -39,6 +39,7 @@ import {
 import { animKey } from '../assets/manifest';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
+import { setAtlasFrame } from '../assets/frames';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
 export const REGISTRY_LEVEL = 'level';
@@ -325,7 +326,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const size = EB.blockSize;
     const sprite = this.add.sprite(spot.x + size / 2, spot.y + size, 'fx', 'earth_block_appear_000').setOrigin(0.5, 1).setDepth(3);
     sprite.play(animKey('fx', 'earth_block_appear'));
-    sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => sprite.setFrame('earth_block_idle_000'));
+    sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => setAtlasFrame(sprite, 'fx', 'earth_block_idle_000'));
     const zone = this.add.zone(spot.x + size / 2, spot.y + size / 2, size, size);
     this.solids.add(zone);
     this.earthBlocks.push({ sprite, zone });

@@ -20,9 +20,12 @@ export const PlayerBalance = {
   coyoteTimeMs: 100,
   jumpBufferMs: 100,
 
-  /** hitbox ตัวละคร px ในด่าน (ภาพ V4 ในด่าน 32×42.7, ผมและหางม้าเกิน hitbox ได้) */
-  bodyWidth: 14,
-  bodyHeight: 38,
+  /**
+   * hitbox ตัวละคร px ในด่าน = ~16×46 logical ตามสเปก V4 (ART_HANDOFF.md 5.1)
+   * คลุมจากเท้าถึงหน้าผาก ผมและหางม้าอยู่นอก hitbox
+   */
+  bodyWidth: 11,
+  bodyHeight: 31,
 
   hurtKnockbackX: 160,
   hurtKnockbackY: 220,
