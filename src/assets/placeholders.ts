@@ -185,6 +185,9 @@ function packFrames(frames: FrameInfo[], maxWidth: number, pad: number) {
 
 const PAINTERS: Record<string, Painter> = {
   player: paintAclaire,
+  boss_bramble_king: paintBrambleKing,
+  spirits: paintSpirits,
+  objects: paintObjects,
   enemies_w1: paintEnemiesW1,
   items: paintItems,
   fx: paintFx,
@@ -245,6 +248,25 @@ function paintAclaire(p: PixelPen, f: FrameInfo): void {
       legA = -2;
       legB = 1;
       break;
+    case 'double_jump':
+      tuck = 5;
+      legA = 2;
+      legB = 2;
+      break;
+    case 'dash':
+      legA = -3;
+      legB = 3;
+      bob = 2;
+      break;
+    case 'glide':
+      tuck = 1;
+      legA = -1;
+      legB = 1;
+      break;
+    case 'ground_slam':
+      tuck = f.index < 3 ? 4 : 0;
+      bob = f.index >= 3 ? 3 : 0;
+      break;
     default:
       break;
   }
@@ -295,7 +317,18 @@ function paintAclaire(p: PixelPen, f: FrameInfo): void {
   // สายสะพายดำพาดทแยงทับเกราะ
   p.line(cx - 4, top + 13, cx + 4, top + 19, 1, C.outline);
   // แขน
-  if (!attacking) {
+  if (f.anim === 'cast') {
+    // ยื่นมือไปข้างหน้าปล่อยพลัง
+    p.rect(cx - 7, top + 15, 2, 7, C.skin2);
+    p.rect(cx + 5, top + 15, 7, 2, C.skin2);
+    p.rect(cx + 12, top + 14, 2, 4, C.magic);
+  } else if (f.anim === 'glide') {
+    p.rect(cx - 13, top + 14, 8, 2, C.skin2);
+    p.rect(cx + 6, top + 14, 8, 2, C.skin2);
+  } else if (f.anim === 'dash') {
+    p.rect(cx - 9, top + 16, 4, 2, C.skin2);
+    p.rect(cx + 6, top + 16, 5, 2, C.skin2);
+  } else if (!attacking) {
     p.rect(cx - 7, top + 15, 2, 7, C.skin2);
     p.rect(cx + 6, top + 15, 2, 7, C.skin2);
     p.px(cx + 6, top + 20, C.gold);
@@ -375,6 +408,14 @@ function paintAclaireLying(p: PixelPen, f: FrameInfo, cx: number, t: number): vo
 }
 
 function paintEnemiesW1(p: PixelPen, f: FrameInfo): void {
+  if (f.anim.startsWith('leaf_wisp')) {
+    paintLeafWisp(p, f);
+    return;
+  }
+  if (f.anim.startsWith('thorn_beetle')) {
+    paintThornBeetle(p, f);
+    return;
+  }
   if (!f.anim.startsWith('moss_slime')) {
     paintUnknown(p, f);
     return;
@@ -470,6 +511,101 @@ function paintFx(p: PixelPen, f: FrameInfo): void {
     p.rect(7, 7, 2, 2, C.gold);
     return;
   }
+  if (f.anim === 'fireball') {
+    p.disc(8, 8, 5, C.fire2);
+    p.disc(8 + (f.index % 2), 8, 3, C.fire3);
+    p.rect(7, 7, 2, 2, C.gold);
+    p.rect(1, 7 + (f.index % 2), 3, 2, C.fire);
+    return;
+  }
+  if (f.anim === 'fire_burst' || f.anim === 'water_splash') {
+    const fire = f.anim === 'fire_burst';
+    const r = 3 + Math.round(t * 11);
+    for (let i = 0; i < 10; i += 1) {
+      const a = (i / 10) * Math.PI * 2;
+      p.rect(16 + Math.cos(a) * r - 1, 16 + Math.sin(a) * r - 1, 3, 3, fire ? (i % 2 ? C.fire3 : C.gold) : i % 2 ? C.water : C.water3);
+    }
+    return;
+  }
+  if (f.anim === 'burn_status') {
+    const h = 6 + (f.index % 2) * 3;
+    p.rect(5, 16 - h, 6, h, C.fire);
+    p.rect(7, 16 - h + 2, 2, h - 2, C.gold);
+    return;
+  }
+  if (f.anim === 'water_bubble') {
+    const r = 5 + (f.index % 2);
+    p.disc(8, 8, r, C.water);
+    p.disc(8, 8, r - 2, C.water3);
+    p.rect(5, 5, 2, 2, C.highlight);
+    return;
+  }
+  if (f.anim === 'freeze_overlay' || f.anim === 'freeze_shatter') {
+    if (f.anim === 'freeze_overlay') {
+      p.rect(3, 10, 26, 22, C.ice);
+      p.rect(5, 12, 22, 18, C.water3);
+      p.rect(7, 13, 4, 2, C.highlight);
+      return;
+    }
+    const spread = Math.round(t * 10);
+    for (let i = 0; i < 6; i += 1) {
+      const a = (i / 6) * Math.PI * 2;
+      p.rect(16 + Math.cos(a) * spread - 2, 20 + Math.sin(a) * spread - 2, 4, 4, C.ice);
+    }
+    return;
+  }
+  if (f.anim === 'wind_wave') {
+    const x = Math.round(t * 16);
+    for (let i = 0; i < 3; i += 1) {
+      p.rect(x + i * 4, 8 + i * 6, 14 - i * 2, 2, i === 1 ? C.wind3 : C.wind);
+    }
+    return;
+  }
+  if (f.anim === 'dash_trail') {
+    const a = 3 - f.index;
+    for (let i = 0; i < a; i += 1) p.rect(4 + i * 6, 14 + i * 8, 20, 2, C.wind3);
+    return;
+  }
+  if (f.anim === 'ground_slam_wave') {
+    const w = 10 + Math.round(t * 50);
+    p.rect(32 - w / 2, 26, w, 4, C.earth);
+    p.rect(32 - w / 2, 24, 4, 4, C.earth4);
+    p.rect(32 + w / 2 - 4, 24, 4, 4, C.earth4);
+    return;
+  }
+  if (f.anim.startsWith('stone_shield')) {
+    const t2 = f.count > 1 ? f.index / (f.count - 1) : 0;
+    const n = f.anim === 'stone_shield_appear' ? f.index + 1 : f.anim === 'stone_shield_break' ? Math.round(4 * (1 - t2)) : 4;
+    for (let i = 0; i < n; i += 1) {
+      p.disc(8, 4 + i * 8, 4, C.earth1);
+      p.disc(7, 3 + i * 8, 2, C.earth);
+    }
+    return;
+  }
+  if (f.anim.startsWith('earth_block')) {
+    let h = 32;
+    if (f.anim === 'earth_block_appear') h = Math.round(((f.index + 1) / f.count) * 32);
+    if (f.anim === 'earth_block_crumble') h = Math.round((1 - f.index / f.count) * 32);
+    const y = 32 - h;
+    p.rect(0, y, 32, h, C.earth2);
+    p.rect(1, y + 1, 30, Math.max(0, h - 2), C.earth);
+    if (h > 6) {
+      p.rect(2, y + 2, 28, 2, C.earth4);
+      p.rect(8, y + 10, 6, 2, C.earth1);
+      p.rect(18, y + 20, 8, 2, C.earth1);
+    }
+    return;
+  }
+  const aura = /^element_switch_aura_(\w+)$/.exec(f.anim);
+  if (aura) {
+    const color = ELEMENT_COLORS[aura[1]] ?? C.magic;
+    const r = 6 + f.index * 3;
+    for (let i = 0; i < 12; i += 1) {
+      const a = (i / 12) * Math.PI * 2 + f.index * 0.3;
+      p.rect(16 + Math.cos(a) * Math.min(r, 14) - 1, 26 + Math.sin(a) * r - 1, 2, 2, color);
+    }
+    return;
+  }
   if (f.anim === 'poof') {
     const r = 3 + Math.round(t * 10);
     for (let i = 0; i < 8; i += 1) {
@@ -527,6 +663,23 @@ function paintUi(p: PixelPen, f: FrameInfo): void {
       p.rect(1, 1, 10, 10, C.earth4);
       p.rect(1, 1, 5, 10, C.gold);
       return;
+    case 'boss_bar_frame':
+      p.rect(0, 0, f.w, f.h, C.outline);
+      p.rect(1, 1, f.w - 2, f.h - 2, C.neutral1);
+      return;
+    case 'boss_bar_fill':
+      p.rect(0, 0, f.w, f.h, C.fire2);
+      p.rect(0, 0, f.w, 2, C.fire);
+      return;
+    case 'world_map_node_locked':
+    case 'world_map_node_open':
+    case 'world_map_node_cleared': {
+      const fill = f.name.endsWith('locked') ? C.neutral2 : f.name.endsWith('open') ? C.fire : C.gold;
+      p.disc(8, 8, 7, C.outline);
+      p.disc(8, 8, 5, fill);
+      if (f.name.endsWith('cleared')) p.rect(5, 7, 6, 2, C.outline);
+      return;
+    }
     default:
       break;
   }
@@ -539,4 +692,317 @@ function paintUi(p: PixelPen, f: FrameInfo): void {
     return;
   }
   paintUnknown(p, f);
+}
+
+// ---------------------------------------------------------------------------
+// Spirits (art/reference/spirit_*.jpg) แบบหยาบ
+// ---------------------------------------------------------------------------
+
+function paintSpirits(p: PixelPen, f: FrameInfo): void {
+  const key = f.anim.split('_')[0];
+  const casting = f.anim.endsWith('_cast');
+  const bob = f.anim.endsWith('_idle') ? Math.round(Math.sin((f.index / f.count) * Math.PI * 2)) : 0;
+  const cy = 16 + bob;
+  switch (key) {
+    case 'burnil': {
+      // ก้อนไฟหนาม ตาคม ยิ้มมีเขี้ยว
+      const flick = f.index % 2;
+      for (let i = 0; i < 6; i += 1) {
+        const a = (i / 6) * Math.PI * 2 + flick * 0.4;
+        p.line(16, cy, 16 + Math.cos(a) * 12, cy + Math.sin(a) * 12, 3, C.fire);
+      }
+      p.disc(16, cy, 8, C.fire3);
+      p.disc(16, cy, 6, C.gold);
+      p.rect(12, cy - 3, 3, 3, C.outline);
+      p.rect(18, cy - 3, 3, 3, C.outline);
+      p.rect(13, cy + 3, 7, 1, C.outline);
+      p.px(14, cy + 4, C.highlight);
+      p.px(18, cy + 4, C.highlight);
+      if (casting) p.disc(27, cy, 3, C.fire2);
+      return;
+    }
+    case 'wata': {
+      // ก้อนน้ำทรงสไลม์ ตาโต แก้มแดง
+      const squash = f.anim.endsWith('_idle') ? f.index % 2 : 0;
+      p.disc(16, cy + 3, 10, C.water);
+      p.rect(6, cy + 3, 21, 8 - squash, C.water);
+      p.disc(16, cy + 2, 8, C.water3);
+      p.disc(16, cy - 8, 2, C.water3);
+      p.rect(11, cy, 3, 4, C.water1);
+      p.rect(19, cy, 3, 4, C.water1);
+      p.px(11, cy, C.highlight);
+      p.px(19, cy, C.highlight);
+      p.rect(9, cy + 5, 2, 1, C.pink2);
+      p.rect(22, cy + 5, 2, 1, C.pink2);
+      if (casting) p.disc(28, cy - 4, 3, C.water3);
+      return;
+    }
+    case 'valvaliz': {
+      // สาวจิ๋วผมเขียว ปีกขาว ชุดฟ้าอ่อน
+      const flap = f.index % 2 ? 2 : 0;
+      p.rect(3, cy - 6 + flap, 8, 4, C.highlight);
+      p.rect(21, cy - 6 + flap, 8, 4, C.highlight);
+      p.rect(11, cy, 10, 9, C.water3);
+      p.disc(16, cy - 5, 5, C.skin3);
+      p.rect(10, cy - 11, 12, 4, C.wind);
+      p.rect(10, cy - 7, 3, 10, C.wind);
+      p.rect(19, cy - 7, 3, 10, C.wind);
+      p.rect(14, cy - 5, 1, 2, C.wind2);
+      p.rect(17, cy - 5, 1, 2, C.wind2);
+      p.rect(13, cy + 9, 2, 4, C.outline);
+      p.rect(17, cy + 9, 2, 4, C.outline);
+      if (casting) {
+        for (let i = 0; i < 3; i += 1) p.rect(23, cy - 2 + i * 3, 6 - i, 1, C.wind3);
+      }
+      return;
+    }
+    case 'eathy': {
+      // ก้อนกลม ผมน้ำตาล คาดผ้าขาว ลูกหินรอบตัว
+      p.disc(16, cy + 1, 9, C.skin2);
+      p.rect(7, cy - 8, 18, 6, C.wood1);
+      p.rect(7, cy - 3, 18, 2, C.highlight);
+      p.rect(11, cy + 1, 3, 2, C.outline);
+      p.rect(18, cy + 1, 3, 2, C.outline);
+      p.rect(11, cy - 1, 4, 1, C.wood1);
+      p.rect(17, cy - 1, 4, 1, C.wood1);
+      for (let i = 0; i < 3; i += 1) {
+        const a = (i / 3) * Math.PI * 2 + (f.index / Math.max(1, f.count)) * Math.PI * 2;
+        p.disc(16 + Math.round(Math.cos(a) * 13), cy + Math.round(Math.sin(a) * 9), 2, C.neutral1);
+      }
+      if (casting) p.rect(26, cy, 4, 3, C.earth);
+      return;
+    }
+    default:
+      paintUnknown(p, f);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Puzzle objects
+// ---------------------------------------------------------------------------
+
+function paintObjects(p: PixelPen, f: FrameInfo): void {
+  const t = f.count > 1 ? f.index / (f.count - 1) : 0;
+  switch (f.anim) {
+    case 'burnable_vine_idle':
+    case 'burnable_vine_burn': {
+      const burning = f.anim.endsWith('burn');
+      const keep = burning ? 1 - t : 1;
+      p.rect(6, 0, 4, Math.round(16 * keep), C.foliage2);
+      p.rect(2, 3, 5, 3, C.foliage3);
+      p.rect(9, 9, 5, 3, C.foliage3);
+      if (burning) {
+        p.rect(3, Math.round(16 * keep) - 4, 10, 6, C.fire);
+        p.rect(5, Math.round(16 * keep) - 2, 6, 3, C.gold);
+      }
+      return;
+    }
+    case 'wooden_crate_idle':
+    case 'wooden_crate_burn': {
+      const burning = f.anim.endsWith('burn');
+      const h = burning ? Math.max(2, Math.round(16 * (1 - t))) : 16;
+      const y = 16 - h;
+      p.rect(0, y, 16, h, C.wood1);
+      p.rect(1, y + 1, 14, h - 2, C.wood2);
+      p.line(2, y + 2, 13, 13, 1, C.wood1);
+      if (burning) p.rect(2, y, 12, 4, C.fire);
+      return;
+    }
+    case 'torch_unlit':
+    case 'torch_lit': {
+      p.rect(6, 12, 4, 20, C.wood1);
+      p.rect(4, 10, 8, 3, C.neutral3);
+      if (f.anim === 'torch_lit') {
+        const h = 7 + (f.index % 2) * 2;
+        p.rect(4, 10 - h, 8, h, C.fire);
+        p.rect(6, 10 - h + 2, 4, h - 2, C.gold);
+      }
+      return;
+    }
+    case 'ice_block_idle':
+    case 'ice_block_melt': {
+      const h = f.anim === 'ice_block_melt' ? Math.max(2, Math.round(16 * (1 - t))) : 16;
+      p.rect(0, 16 - h, 16, h, C.water3);
+      p.rect(1, 17 - h, 14, h - 2, C.ice);
+      p.rect(3, 18 - h, 4, 2, C.highlight);
+      return;
+    }
+    case 'water_surface_water':
+      p.rect(0, 2, 16, 14, C.water2);
+      for (let x = 0; x < 16; x += 4) p.rect((x + f.index) % 16, 2, 2, 1, C.water3);
+      return;
+    case 'water_surface_frozen':
+      p.rect(0, 0, 16, 16, C.water3);
+      p.rect(0, 0, 16, 2, C.ice);
+      p.rect(3, 5, 6, 1, C.highlight);
+      return;
+    case 'magic_seed_seed':
+    case 'magic_seed_grow':
+    case 'magic_seed_grown': {
+      const grow = f.anim === 'magic_seed_seed' ? 0 : f.anim === 'magic_seed_grown' ? 1 : (f.index + 1) / f.count;
+      const h = Math.round(4 + grow * 60);
+      p.rect(5, 58, 6, 6, C.earth2);
+      p.rect(7, 64 - h, 2, h, C.foliage2);
+      if (grow >= 0.5) p.rect(1, 32, 14, 3, C.foliage3);
+      if (grow >= 1) p.rect(1, 0, 14, 3, C.foliage3);
+      return;
+    }
+    case 'windmill_idle':
+    case 'windmill_spin': {
+      p.rect(22, 20, 4, 28, C.wood1);
+      const a0 = f.anim === 'windmill_spin' ? (f.index / f.count) * Math.PI * 2 : 0.4;
+      for (let i = 0; i < 4; i += 1) {
+        const a = a0 + (i * Math.PI) / 2;
+        p.line(24, 20, 24 + Math.cos(a) * 18, 20 + Math.sin(a) * 18, 3, i % 2 ? C.highlight : C.wind);
+      }
+      p.disc(24, 20, 3, C.neutral4);
+      return;
+    }
+    case 'cracked_wall_idle':
+    case 'cracked_wall_break': {
+      const breaking = f.anim === 'cracked_wall_break';
+      const gap = breaking ? Math.round(t * 10) : 0;
+      p.rect(0 - gap, 0, 16, 32, C.neutral2);
+      p.rect(16 + gap, 0, 16, 32, C.neutral2);
+      p.line(10, 2, 18, 14, 1, C.outline);
+      p.line(18, 14, 12, 24, 1, C.outline);
+      p.line(12, 24, 20, 31, 1, C.outline);
+      return;
+    }
+    case 'pressure_plate_up':
+    case 'pressure_plate_down': {
+      const down = f.anim.endsWith('down');
+      p.rect(0, 6, 32, 2, C.neutral1);
+      p.rect(2, down ? 5 : 2, 28, down ? 2 : 4, down ? C.gold : C.neutral4);
+      return;
+    }
+    case 'gate_door_closed':
+    case 'gate_door_open': {
+      const open = f.anim === 'gate_door_open' ? (f.index + 1) / f.count : 0;
+      const h = Math.round(48 * (1 - open));
+      p.rect(0, 0, 32, Math.max(1, h), C.neutral3);
+      for (let x = 3; x < 32; x += 7) p.rect(x, 0, 3, Math.max(1, h), C.neutral1);
+      if (h > 4) p.rect(0, h - 4, 32, 4, C.gold);
+      return;
+    }
+    default:
+      paintUnknown(p, f);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// World 1 enemies
+// ---------------------------------------------------------------------------
+
+function paintLeafWisp(p: PixelPen, f: FrameInfo): void {
+  const t = f.count > 1 ? f.index / (f.count - 1) : 0;
+  const dying = f.anim.endsWith('death');
+  const r = dying ? Math.max(1, Math.round(7 * (1 - t))) : 7;
+  const flap = f.index % 2 ? 2 : 0;
+  const cy = 14;
+  const body = f.anim.endsWith('hurt') ? C.highlight : C.wind;
+  // ใบไม้ 2 ใบเป็นปีก
+  if (!dying) {
+    p.rect(4, cy - 6 + flap, 8, 4, C.foliage3);
+    p.rect(20, cy - 6 + flap, 8, 4, C.foliage3);
+  }
+  p.disc(16, cy, r, C.wind2);
+  p.disc(16, cy, Math.max(1, r - 2), body);
+  if (!dying) {
+    const eyeY = f.anim.endsWith('dive') ? cy + 1 : cy - 1;
+    p.rect(18, eyeY, 2, 2, C.outline);
+  }
+}
+
+function paintThornBeetle(p: PixelPen, f: FrameInfo): void {
+  const t = f.count > 1 ? f.index / (f.count - 1) : 0;
+  const flipped = f.anim.endsWith('flipped');
+  const dying = f.anim.endsWith('death');
+  const h = dying ? Math.max(2, Math.round(14 * (1 - t))) : 14;
+  const y = 32 - h;
+  if (flipped) {
+    // หงายท้อง: ท้องสีอ่อน ขาดิ้น
+    p.rect(5, 22, 22, 10, C.earth4);
+    for (let i = 0; i < 3; i += 1) p.rect(8 + i * 6, 18 + (f.index + i) % 2, 2, 4, C.outline);
+    return;
+  }
+  const body = f.anim.endsWith('hurt') ? C.highlight : C.earth;
+  p.rect(4, y + 2, 22, h - 2, C.earth1);
+  p.rect(5, y + 3, 20, h - 4, body);
+  // เกราะหนามด้านหน้า (หันขวา)
+  p.rect(24, y, 6, h, C.foliage1);
+  for (let i = 0; i < 3; i += 1) p.rect(29, y + 2 + i * 4, 3, 2, C.highlight);
+  if (!dying) {
+    p.rect(21, y + 4, 2, 2, C.outline);
+    const leg = f.anim.endsWith('walk') ? f.index % 2 : 0;
+    p.rect(8 + leg, 30, 2, 2, C.outline);
+    p.rect(16 - leg, 30, 2, 2, C.outline);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Bramble King
+// ---------------------------------------------------------------------------
+
+function paintBrambleKing(p: PixelPen, f: FrameInfo): void {
+  const t = f.count > 1 ? f.index / (f.count - 1) : 0;
+  switch (f.anim) {
+    case 'vine_whip': {
+      for (let x = 0; x < 64; x += 1) {
+        const y = 8 + Math.round(Math.sin(x / 5 + f.index) * 3);
+        p.rect(x, y - 1, 1, 3, C.foliage2);
+        if (x % 8 === f.index % 8) p.rect(x, y - 3, 2, 2, C.highlight);
+      }
+      return;
+    }
+    case 'vine_shield_idle':
+    case 'vine_shield_burn': {
+      const keep = f.anim.endsWith('burn') ? 1 - t : 1;
+      const h = Math.max(2, Math.round(32 * keep));
+      for (let i = 0; i < 4; i += 1) p.line(4 + i * 7, 32, 8 + i * 6, 32 - h, 2, i % 2 ? C.foliage3 : C.foliage2);
+      p.rect(2, 32 - h, 28, 3, C.foliage1);
+      if (f.anim.endsWith('burn')) {
+        p.rect(6, 32 - h - 4, 20, 6, C.fire);
+        p.rect(10, 32 - h - 2, 12, 3, C.gold);
+      }
+      return;
+    }
+    case 'thorn_seed':
+      p.disc(8, 8, 5, C.wood1);
+      p.rect(7, 1 + (f.index % 2), 2, 4, C.foliage3);
+      p.rect(3, 8, 2, 2, C.highlight);
+      return;
+    default:
+      break;
+  }
+
+  // ลำตัวต้นไม้ยักษ์ 192×192 หันซ้ายเข้าหาผู้เล่น
+  const dying = f.anim === 'death';
+  const sink = dying ? Math.round(t * 120) : 0;
+  const sway = f.anim === 'idle' ? Math.round(Math.sin((f.index / f.count) * Math.PI * 2) * 2) : 0;
+  const lean = f.anim === 'vine_attack' ? -Math.round(Math.sin(t * Math.PI) * 10) : 0;
+  const top = 40 + sink;
+  p.rect(56 + lean, top, 104, 192 - top, C.wood1);
+  p.rect(64 + lean, top + 4, 88, 192 - top - 4, C.wood2);
+  for (let i = 0; i < 5; i += 1) p.rect(70 + i * 16 + lean, top + 12, 3, 140, C.wood1);
+  // มงกุฎหนาม
+  if (!dying || t < 0.7) {
+    for (let i = 0; i < 7; i += 1) {
+      const x = 52 + i * 16 + sway + lean;
+      p.line(x, top + 6, x + 6, top - 26 - (i % 2) * 10, 3, C.foliage2);
+      p.rect(x + 4, top - 30 - (i % 2) * 10, 4, 4, C.fire);
+    }
+  }
+  // ตา
+  const roar = f.anim === 'roar';
+  p.rect(80 + lean, top + 34, 12, 8, roar ? C.fire : C.gold);
+  p.rect(116 + lean, top + 34, 12, 8, roar ? C.fire : C.gold);
+  if (roar) p.rect(88 + lean, top + 60, 32, 10 + (f.index % 2) * 6, C.outline);
+  // จุดอ่อน: แกนเรืองแสงด้านหน้าซ้ายล่าง
+  const exposed = f.anim === 'weak_exposed';
+  p.disc(44, 150, exposed ? 14 + (f.index % 2) * 2 : 10, exposed ? C.magic : C.wood1);
+  p.disc(44, 150, exposed ? 8 : 5, exposed ? C.pink3 : C.earth1);
+  // ราก
+  p.rect(30, 180, 140, 12, C.wood1);
+  if (f.anim === 'hurt') p.rect(56, top, 104, 6, C.highlight);
 }

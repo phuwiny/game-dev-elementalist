@@ -157,6 +157,8 @@ Asset ในเกมใช้สีต่อไปนี้เป็นค่�
 - ชื่อ frame ใน atlas: `<anim>_<NNN>` เช่น `run_000`, `run_001` (เลข 3 หลักเริ่มที่ 000)
 - Animation key ที่ใช้ในเกม: `<atlas>_<anim>` เช่น `player_run`, `enemies_w1_moss_slime_move`
 - ใน atlas ที่รวมหลายตัว ใส่ชื่อตัวไว้หน้า anim: `moss_slime_move_000`
+- Asset ที่มีหลายสถานะ (ตารางที่เขียนว่า "idle 1, burn 6" เป็นต้น) ตั้งชื่อ anim เป็น `<asset>_<state>` และชื่อ frame เป็น `<asset>_<state>_<NNN>` แม้มี frame เดียวก็ต้องมี `_000` เช่น `torch_unlit_000`, `torch_lit_000`…`torch_lit_003`, `earth_block_idle_000`, `freeze_shatter_004`
+- ภูตใน atlas `spirits` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
 - Frame นิ่งใน atlas `ui` ไม่มีเลขต่อท้าย ใช้ `<element>_<state>` เช่น `heart_full`, `heart_empty`, `energy_bar_fill_normal`, `element_icon_fire_locked` ส่วน element ที่มีสถานะเดียวใช้ชื่อ element ตรงๆ เช่น `energy_bar_frame`, `lives_icon`
 - รายชื่อ frame ที่เกมใช้อยู่ตอนนี้ดูได้ที่ `src/assets/manifest.ts` (เพิ่มตามแต่ละ phase ของการพัฒนา) asset ที่มีมากกว่าในไฟล์นั้นไม่ทำให้เกมพัง
 
@@ -307,15 +309,18 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | fireball (loop) | 16×16 | 4 |
 | fire_burst | 32×32 | 6 |
 | burn_status (loop) | 16×16 | 4 |
-| water_beam_head / water_beam_body (loop) | 16×16 | 4 / 4 |
-| freeze_overlay (ศัตรูถูกแช่แข็ง) | 32×32 | 1 + shatter 5 |
+| water_bubble (ฟองน้ำของ Wata, loop) | 16×16 | 4 |
+| water_splash (ฟองน้ำแตก) | 32×32 | 5 |
+| freeze (ศัตรูถูกแช่แข็ง) | 32×32 | `freeze_overlay` 1, `freeze_shatter` 5 |
 | wind_wave | 32×32 | 5 |
 | dash_trail | 32×48 | 3 |
 | ground_slam_wave | 64×32 | 6 |
-| stone_shield | 16×32 | appear 4, idle 1, break 4 |
+| stone_shield (โล่หินของ Eathy ตอนกด K ค้าง ตั้งอยู่หน้าตัวละคร origin กึ่งกลางล่าง) | 16×32 | appear 4, idle 1, break 4 |
 | earth_block | 32×32 | appear 4, idle 1, crumble 4 |
-| element_switch_aura (4 สีตามธาตุ) | 32×48 | 5 ต่อธาตุ |
+| element_switch_aura (4 สีตามธาตุ) | 32×48 | 5 ต่อธาตุ ชื่อ anim `element_switch_aura_fire`, `_water`, `_wind`, `_earth` |
 | checkpoint_spark | 16×16 | 5 |
+
+FX ที่ซ้อนบนศัตรูหรือตัวละคร (`freeze_overlay`, `burn_status`) วาดให้ฐานล่างตรงกับเท้า เพราะเกมวาง origin ที่กึ่งกลางล่าง
 
 ### 5.4 วัตถุ puzzle — atlas `objects`
 
@@ -326,9 +331,9 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | torch | 16×32 | unlit 1, lit 4 (loop) |
 | ice_block (ละลายได้) | 16×16 | idle 1, melt 5 |
 | water_surface | 16×16 | water 4 (loop), frozen 1 |
-| magic_seed → vine_stalk | 16×64 | seed 1, grow 8, grown 1 |
+| magic_seed (เมล็ด → ต้นที่มีใบให้เหยียบ) | 16×64 | seed 1, grow 8, grown 1 (ใบ 2 ชั้นที่สูง 32 และ 64 px จากพื้น ตรงกับแท่นเหยียบในเกม) |
 | windmill | 48×48 | idle 1, spin 8 (loop) |
-| cracked_wall | 32×32 | idle 1, break 6 |
+| cracked_wall | 32×32 | idle 1, break 6 (ในด่านวางซ้อน 2 ชิ้นเป็นกำแพงสูง 64 px ลายร้าวควรต่อกันได้) |
 | pressure_plate | 32×8 | up 1, down 1 |
 | gate_door | 32×48 | closed 1, open 6 |
 
@@ -360,6 +365,10 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | stone_sentinel | Earth | enemies_w4 | 48×48 | idle 4, shoot 5 | rock_bullet 12×12 (2) |
 | spirit_knight | สลับ | enemies_w5 | 32×48 | walk 6, attack 5, switch 4 | |
 
+ชื่อ anim ของ enemies_w1 ที่เกมใช้แล้ว (Phase 3): `moss_slime_idle/move/hurt/death`, `leaf_wisp_fly/dive/hurt/death`, `thorn_beetle_walk/flipped/hurt/death` เช่น frame `leaf_wisp_dive_002`, `thorn_beetle_flipped_000`
+- Leaf Wisp บินลอย ใช้ origin กึ่งกลาง (หัวข้อ 3.2) ท่า `dive` คือพุ่งเฉียงลงหาผู้เล่น
+- Thorn Beetle มีเกราะหนามด้านหน้า (ด้านขวาของภาพ เพราะวาดหันขวา) ให้เห็นชัดว่าด้านหลังไม่มีหนาม เพราะผู้เล่นต้องอ่านออกว่าต้องตีจากด้านหลัง ท่า `flipped` คือหงายท้องดิ้น
+
 Spirit Knight ต้องมี 4 ชุดสีเกราะตามสีประจำธาตุ ตั้งชื่อ frame เป็น `spirit_knight_fire_walk_000` เป็นต้น
 
 ---
@@ -373,6 +382,12 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | Tempest Roc (นกพายุยักษ์) | boss_tempest_roc | 192×160 | fly 8, dive 4, gust 6, hurt 2, death 10 | storm_feather 16×16 (2) |
 | Moat Hydra (ไฮดราน้ำ 3 หัว) | boss_moat_hydra | 128×128 ต่อหัว | rise 6, bite 6, spit 5, sink 6, hurt 2, death 8 | drain_valve 32×32 (closed 1, open 4), water_jet 16×16 (4) |
 | Hollow Warden (ผู้พิทักษ์วิหารเปลี่ยนธาตุ) | boss_hollow_warden | 160×192 | idle 6, attack_fire 8, attack_water 8, attack_wind 8, attack_earth 8, transition 8, hurt 2, death 12 | orb ต่อธาตุ 16×16 (4) |
+
+**Bramble King (ใช้ในเกมแล้ว Phase 3)** ทุกชิ้นอยู่ใน atlas `boss_bramble_king` ชื่อ anim:
+- ตัวบอส 192×192: `idle`, `vine_attack`, `roar`, `weak_exposed`, `hurt`, `death` (frame เช่น `idle_000`, `death_009`)
+- ชิ้นส่วน: `vine_whip` 64×16 (6, loop), `vine_shield_idle` 32×32 (1), `vine_shield_burn` 32×32 (6), `thorn_seed` 16×16 (2, loop) เมล็ดหนามที่ตกจากด้านบนใน phase 2–3
+- บอสวางด้วย origin **มุมล่างซ้าย** ของ frame (ไม่ใช่กึ่งกลางล่าง) และหันหน้าไปทางซ้าย (ผู้เล่นเข้ามาจากซ้าย)
+- ตำแหน่งในเกมนับจากมุมล่างซ้ายของ frame: จุดอ่อน (ปุ่มไม้/แกนกลางที่เปิดตอน `weak_exposed`) อยู่ที่ x 20–64, สูงจากพื้น 16–68 px ลำต้นที่เป็นกำแพงเริ่มที่ x 60 ไปทางขวา โล่เถาวัลย์ซ้อนกันขึ้นไปที่ x ประมาณ 6 (กึ่งกลางชิ้น) ชิ้นละ 32 px สูงสุด 3 ชั้น แส้เถาวัลย์กวาดไปทางซ้ายติดพื้น ให้วาดหันซ้าย
 
 ลำตัวส่วนที่อยู่ใต้น้ำของ Moat Hydra ให้วาดเป็นส่วนหนึ่งของ background ชั้น `near` ของด่านบอส (`bg_w4_boss_near.png` ขนาด 640×360)
 
@@ -391,6 +406,8 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | โลก | ไฟล์ | Decoration เฉพาะ |
 |---|---|---|
 | 1 | tiles_w1_ember_woods | ใบไม้แดง, รากไม้, ซากเสาหิน |
+
+ด่าน 1-1 ถึง 1-3 (`public/assets/maps/w1_*.json` ของฝั่งโค้ด) ตอนนี้อ้างถึง tileset ชั่วคราว `graybox` (3 tile: fill, top, หนาม) เกมอ่านเฉพาะ property `collides` / `hazard` จาก tile เมื่อ `tiles_w1_ember_woods` พร้อม Claude จะเปลี่ยนด่านและการวาดไปใช้ tileset จริง ดังนั้น tileset ต้องกำหนด property ตามหัวข้อ 3.4 ให้ครบ
 | 2 | tiles_w2_tidal_caverns | หินงอก, คริสตัลเรืองแสง, บ่อลาวา (animated 4) |
 | 3 | tiles_w3_sky_cliffs | สะพานเชือก, ธงผ้า, ก้อนเมฆ one-way |
 | 4 | tiles_w4_stone_citadel | อิฐปราการ, เฟือง, โซ่, ธงปราสาท |
@@ -411,11 +428,11 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | element_slot_select | 28×28 | กรอบเลือก |
 | lives_icon | 16×16 | — |
 | coin_icon | 12×12 | — |
-| boss_bar_frame / boss_bar_fill | 240×12 / 236×8 | — |
+| boss_bar_frame / boss_bar_fill | 240×12 / 236×8 | — (เกมตัด fill จากซ้ายตาม HP บอส) |
 | panel_9slice | 48×48 | ใช้ทำกล่องเมนู ขอบ 16 px |
 | button | 96×24 | normal, hover, pressed |
 | cursor_arrow | 8×8 | — |
-| world_map_node | 16×16 | locked, open, cleared |
+| world_map_node | 16×16 | locked, open, cleared (frame `world_map_node_locked` ฯลฯ เกมขยาย 2 เท่าบนแผนที่โลก) |
 
 **Bitmap font HUD** (`font_hud.png` + `font_hud.xml` รูปแบบ BMFont XML): ตัวเลข 0–9, A–Z, เครื่องหมาย `× : / - + !` ขนาด glyph 8×8
 

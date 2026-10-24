@@ -63,3 +63,86 @@ export const EnergyBalance = {
 export const EnemyBalance = {
   mossSlime: { hp: 1, speed: 35, contactDamage: 1 },
 } as const;
+
+/** GDD หัวข้อ 3 */
+export const ElementBalance = {
+  switchCooldownMs: 250,
+  castCooldownMs: 250,
+  fire: {
+    cost: 20,
+    speed: 260,
+    damage: 1,
+    lifetimeMs: 1200,
+    burnMs: 3000,
+    burnTickMs: 1000,
+    burnDamage: 1,
+  },
+  water: {
+    cost: 25,
+    speedX: 130,
+    speedY: -90,
+    /** แรงโน้มถ่วงสุทธิของฟองน้ำ (ให้ลอยเป็นวิถีโค้งลงช้าๆ) */
+    gravity: 450,
+    /** ฟองน้ำเด้งไปตามพื้น ชนพื้นครบจำนวนนี้แล้วแตก (ชนกำแพงแตกทันที) */
+    maxBounces: 3,
+    bounce: 0.6,
+    lifetimeMs: 1800,
+    freezeMs: 2000,
+    /** แช่แข็งผิวน้ำรอบจุดที่โดน ± จำนวนช่อง */
+    freezeRadiusTiles: 2,
+  },
+  wind: {
+    gustCost: 15,
+    gustWidth: 48,
+    gustHeight: 30,
+    gustPushX: 280,
+    gustPushY: 180,
+    dashCost: 15,
+    dashSpeed: 330,
+    dashMs: 170,
+    glideFallSpeed: 45,
+    glideCostPerSecond: 20,
+    airJumps: 1,
+    doubleJumpVelocity: 340,
+  },
+  earth: {
+    blockCost: 30,
+    maxBlocks: 2,
+    blockSize: 32,
+    /** หาพื้นด้านล่างจุดวางบล็อกได้ลึกสุดกี่ช่อง */
+    blockDropTiles: 3,
+    slamCost: 30,
+    slamSpeed: 560,
+    slamDamage: 2,
+    slamWidth: 96,
+    slamHeight: 36,
+    /** กดค้าง K บนพื้นนานเท่านี้ = ยกโล่หิน (ปล่อยก่อน = สร้างบล็อก) */
+    shieldHoldMs: 250,
+    shieldCostPerSecond: 15,
+    shieldMoveFactor: 0.5,
+  },
+} as const;
+
+export const BossBalance = {
+  brambleKing: {
+    hpPerPhase: 4,
+    shields: [1, 2, 3],
+    attackIntervalMs: [3000, 2400, 1900],
+    exposedMs: 4500,
+    whipTelegraphMs: 700,
+    whipSpeed: 420,
+    whipHeight: 14,
+    seedsPerVolley: [0, 3, 5],
+    seedTelegraphMs: 650,
+    seedFallSpeed: 260,
+    contactDamage: 1,
+    /** ระยะห่างจากผู้เล่นที่ทำให้สนามปิดและเริ่มสู้ (px หลังผ่านประตูสนาม) */
+    startOffset: 24,
+  },
+} as const;
+
+/** Leaf Wisp (ลม) และ Thorn Beetle (ดิน) GDD หัวข้อ 5 */
+export const W1EnemyBalance = {
+  leafWisp: { hp: 1, contactDamage: 1, patrolSpeed: 40, patrolRange: 48, waveAmplitude: 10, diveRange: 96, diveSpeed: 170, diveCooldownMs: 1800, diveTimeoutMs: 1200 },
+  thornBeetle: { hp: 3, contactDamage: 1, speed: 28, flippedMs: 4000 },
+} as const;

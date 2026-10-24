@@ -35,15 +35,36 @@ npm run build    # build เป็น static files ใน dist/
 
 เปิด `http://localhost:5173/?debug` เพื่อดู hitbox ของ physics
 
-## สถานะ: Phase 1 · Core Prototype
+## สถานะ: Phase 3 · Vertical Slice (โลก 1 Ember Woods)
 
-ด่าน graybox ทดสอบ: เดิน, กระโดดแบบกดค้าง (coyote time + jump buffer), ฟันดาบ 3 จังหวะ, HP 5 ช่อง, 3 ชีวิต, checkpoint, หนาม, หลุม, Moss Slime, เหรียญ, Heart Fruit, เส้นชัย, Pause และ Game Over / Continue
+หน้า Title มีเมนู (ลูกศรขึ้น/ลง แล้วกด Enter)
+
+| เมนู | เนื้อหา |
+| --- | --- |
+| Adventure | World Map โลก 1: ด่าน 1-1 Ember Trail, 1-2 Burning Canopy, 1-3 Bramble Hollow + บอส Bramble King ปลดล็อกทีละด่าน เซฟอัตโนมัติ |
+| Elements Lab (Phase 2) | เก็บภูตทีละตนแล้วผ่านห้องไฟ → น้ำ → ลม → ดิน → ห้องผสม |
+| Graybox (Phase 1) | เดิน, กระโดด, ฟันดาบ, HP, ชีวิต, checkpoint, หนาม, หลุม |
+
+ด่านโหมดผจญภัยอยู่ใน `public/assets/maps/` เป็นไฟล์ Tiled JSON และต้องผ่าน `LevelLint` (รันใน `npm run check`)
 
 | ปุ่ม | Action |
 | --- | --- |
 | A / D หรือ ← / → | เดิน |
-| Space | กระโดด (กดค้างกระโดดสูงขึ้น) |
-| J | ฟันดาบ (กดต่อเนื่องเป็น combo 3 จังหวะ) |
-| Esc | Pause |
+| Space | กระโดด (กดค้างสูงขึ้น, กดกลางอากาศ = double jump หลังได้ Valvaliz) |
+| J | ฟันดาบ (combo 3 จังหวะ) |
+| K | ใช้พลังธาตุที่เลือก |
+| Q / E | สลับธาตุ วนซ้าย / ขวา |
+| 1 / 2 / 3 / 4 | เลือก ไฟ / น้ำ / ลม / ดิน |
+| Esc | Pause (ระหว่าง Pause กด X ออกไป World Map) |
+| M | เปิด/ปิดเสียง |
 
-ภาพทั้งหมดตอนนี้เป็น placeholder ที่สร้างขณะรัน เมื่อ Codex วางไฟล์จริงตาม `ART_HANDOFF.md` เกมจะใช้ไฟล์จริงทันที
+| ธาตุ | K บนพื้น | K กลางอากาศ |
+| --- | --- | --- |
+| Burnil (ไฟ) | ยิง fireball | ยิง fireball |
+| Wata (น้ำ) | ปล่อยฟองน้ำ | ปล่อยฟองน้ำ |
+| Valvaliz (ลม) | คลื่นลม | air dash, กดค้างตอนตก = glide |
+| Eathy (ดิน) | กดสั้น = บล็อกหิน, กดค้าง = โล่หิน | ground slam |
+
+ตัวช่วยระหว่างพัฒนา: เติม `?unlock` ท้าย URL เพื่อได้ภูตครบ 4 ตนตั้งแต่เริ่ม และ `?debug` เพื่อดู hitbox
+
+ภาพที่ Codex ยังไม่ได้ส่งเป็น placeholder ที่สร้างขณะรัน เมื่อวางไฟล์จริงตาม `ART_HANDOFF.md` เกมจะใช้ไฟล์จริงทันที เสียงตอนนี้เป็น SFX ชั่วคราวที่สร้างด้วย Web Audio
