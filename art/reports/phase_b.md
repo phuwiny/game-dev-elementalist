@@ -1,3 +1,52 @@
+# Phase B — merge handoff, 2026-10-24
+
+This status supersedes the historical notes below. This PR consolidates approved Phase A concept work and Phase B Aclaire studies; it is not completion of all Phase B production assets.
+
+## 1. Files created or changed
+
+- Restored `src/assets/manifest.ts` from `origin/main` as explicitly requested. There is no final diff in `src/`, `tests/`, `docs/`, or project configuration versus main.
+- Merged `origin/main` into `art/phase-b` without conflicts. Preserved the main additions for enemies_w1, Bramble King, graybox tiles, world-map nodes and boss bars. Restored main's scope restrictions; retained the existing V4 art additions.
+- Updated this report. Existing Phase A concept/palette files, Phase B idle/run/jump previews, build scripts, V4 palette and validator are included in the PR. Approved reference files and seed images are unchanged.
+- Full branch file inventory: [2026-10-24_phase_b_changed_files.txt](2026-10-24_phase_b_changed_files.txt).
+
+## 2. Validation results
+
+- Ran `tools/validate_assets.py` with the bundled Python 3 interpreter: **exit 1**, `no production assets to validate`, `Validation: FAILED (1 errors)`.
+- `public/assets/` contains only game-owned maps, which are excluded from art validation. No production player atlas or animations.json exists yet. The validator was not weakened to make an empty asset set pass.
+- Pinz explicitly chose: open the PR with this failed result disclosed, then wait for merge before producing the atlas.
+- Existing validator regression suite: `python -m unittest discover -s tools/art -p test_validate_assets.py`, **5 tests passed**. This is not a production-validation pass.
+- Node is installed but npm is absent from PATH. Installed dependencies with bundled pnpm, without changing package.json or lockfiles, and ran the same dev script via `pnpm run dev --host 127.0.0.1 --port 5174`.
+- Browser smoke check: Title -> Adventure world map -> level 1-1 rendered successfully. Screenshots were inspected; the game still displays main's placeholders. V4 scale, floor contact and motion/jitter have NOT been verified in Phaser.
+
+## 3. Assumptions and approved production contract
+
+- Aclaire V4 is the chosen style, with the exact approved 247-color palette; other sprites remain at 16 master-palette colors and tilesets at 24.
+- Density 2, runtime scale 0.5, bottom-center origin, soles on the last frame row.
+- `idle`, `jump_up`, `jump_peak`, `fall`, `land`, `double_jump`, `cast`, `dash`, `glide`, `hurt`, `dead`: 48x64 logical / 96x128 physical.
+- `run`: 64x64 logical / 128x128 physical, four frames.
+- `attack_1`, `attack_2`, `attack_3`: 96x64 logical / 192x128 physical, replacing the temporary 64x48 allocation. Body stays at the same bottom-center anchor as idle; blade extends at most 40 logical px right of the body center.
+- Body artwork should fit approximately 16x46 logical; hair and ponytail may exceed this. Claude owns the corresponding game hitbox changes.
+- Names and counts remain table 5.1, except the already approved four-frame run. First production delivery after merge: idle 6, run 4, jump_up 2, jump_peak 2, fall 2, land 2 (18 frames total). Other actions may use game placeholders.
+- Production destination: `public/assets/sprites/player/player.png` and `player.json`, Phaser JSON Hash, no trimming or rotation, 2px padding; add matching entries to `public/assets/animations.json`.
+
+## 4. Specification/runtime differences and ownership
+
+- Claude owns `src/assets/manifest.ts` and the player-frame size sections of `ART_HANDOFF.md` in `feat/player-v4`. This cleanup does not implement those new size edits; existing V4 sections retain historical attack dimensions until Claude updates them. The contract above is the user's newer instruction and takes precedence.
+- `tools/validate_assets.py` still contains historical 128x96 attack checks; update to 192x128 when production work begins under the new contract. No attack assets are currently shipped.
+- GDD/runtime may still describe older player dimensions. Runtime scaling, body offsets, placeholder fallback for missing animations and scene rendering need reconciliation by Claude before V4 gameplay acceptance.
+- Full Phase B (`spirits`, `fx`, `objects`, `items`, `ui`, font and complete player moveset) remains unfinished.
+
+## 5. Decisions and next gate
+
+- Wait for the Phase B consolidation PR to merge before beginning production atlas work. Do not merge it automatically.
+- After merge, produce the six movement animations above and verify floor contact and jitter in the 640x360 game after Claude's integration.
+- Before Phase C, produce one 640x360 style comparison with Aclaire V4, Moss Slime, Thorn Beetle and 3-4 master-palette floor tiles. Stop for Pinz's visual approval before World 1 production.
+- No additional style choice is needed now; merge is the current gate. PR #3 is superseded by this branch, which includes its commits.
+
+---
+
+# Historical study notes (superseded where inconsistent)
+
 # Phase B — Aclaire working report (24 October 2026)
 
 ## Scope and review state
