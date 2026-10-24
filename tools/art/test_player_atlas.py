@@ -8,6 +8,24 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class MovementPacketTests(unittest.TestCase):
+    def test_idle_run_face_scale_and_idle_horizontal_stability(self):
+        def eyes(name):
+            frame = Image.open(ROOT/f'art/frames/player/{name}.png').convert('RGBA')
+            points = [(x,y) for y in range(65) for x in range(frame.width)
+                      if (lambda p: p[3] and p[2] > p[0]+25 and p[2] > p[1]+8)(frame.getpixel((x,y)))]
+            return (min(x for x,y in points), min(y for x,y in points),
+                    max(x for x,y in points), max(y for x,y in points))
+        base = eyes('idle_000')
+        for i in (1,2,4,5):
+            box = eyes(f'idle_{i:03}')
+            self.assertEqual((base[0],base[2]), (box[0],box[2]))
+            self.assertLessEqual(abs(box[1]-base[1]), 1)
+            self.assertEqual(base[3]-base[1], box[3]-box[1])
+        for i in range(4):
+            box = eyes(f'run_{i:03}')
+            self.assertEqual((base[2]-base[0],base[3]-base[1]),
+                             (box[2]-box[0],box[3]-box[1]))
+
     def test_roundtrip_coverage_and_baseline(self):
         data=json.loads((ROOT/'public/assets/sprites/player/player.json').read_text())
         atlas=Image.open(ROOT/'public/assets/sprites/player/player.png').convert('RGBA')

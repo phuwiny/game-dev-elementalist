@@ -8,6 +8,7 @@ from pathlib import Path
 import json
 from PIL import Image, ImageDraw
 from pack_atlas import pack
+from build_player_idle_run_revision import build as build_idle_run
 
 ROOT = Path(__file__).resolve().parents[2]
 PREVIEW = ROOT / 'art/previews/phase_b'
@@ -57,15 +58,16 @@ def anchor(source, size, scale=1.0):
 
 
 def build():
+    build_idle_run()
     DEST.mkdir(parents=True, exist_ok=True)
     REVIEW.mkdir(parents=True, exist_ok=True)
     result = {}
-    folders = {'idle':'2026-10-24_aclaire_idle', 'run':'2026-10-24_aclaire_run_v4_redraw',
+    folders = {'idle':'2026-10-24_idle_run_revision/idle', 'run':'2026-10-24_idle_run_revision/run',
                'jump_up':'2026-10-24_aclaire_jump_up_v4_study'}
     for anim, folder in folders.items():
         for i, path in enumerate(sorted((PREVIEW/folder).glob('*.png'))):
             source = Image.open(path).convert('RGBA')
-            if anim == 'idle':
+            if anim in ('idle', 'run'):
                 frame = indexed(source)
             else:
                 frame = anchor(source, (128 if anim == 'run' else 96, 128), .94 if anim == 'jump_up' else 1)
@@ -83,6 +85,23 @@ def build():
                          'opaque_colors':len({p[:3] for p in frame.get_flattened_data() if p[3]}),
                          'sole_row':frame.getbbox()[3]-1}
     assert len(result) == 18
+    revision = PREVIEW / '2026-10-24_idle_run_revision'
+    blink_board = Image.new('RGBA', (576, 292), '#2b2440')
+    pen = ImageDraw.Draw(blink_board)
+    blink_samples = [result['idle_000'], Image.open(PREVIEW/'2026-10-24_aclaire_idle/04.png').convert('RGBA'), result['idle_003']]
+    for i, (sample, label) in enumerate(zip(blink_samples, ('V4 open', 'Previous blink', 'Revised blink'))):
+        blink_board.alpha_composite(sample.resize((192,256), Image.Resampling.NEAREST), (i*192,8))
+        pen.text((i*192+32,276),label,fill='#f2efe6')
+    blink_board.save(revision/'blink_comparison.png')
+    transition = []
+    for anim, repeats in [('idle',2),('run',3),('idle',2)]:
+        for _ in range(repeats):
+            for i in range(ANIMS[anim][0]):
+                frame = result[f'{anim}_{i:03}']
+                canvas = Image.new('RGBA', (128,128), '#2b2440')
+                canvas.alpha_composite(frame, ((128-frame.width)//2,0))
+                transition.append(canvas.resize((256,256),Image.Resampling.NEAREST))
+    transition[0].save(revision/'idle_run_transition.png',save_all=True,append_images=transition[1:],duration=125,loop=0,disposal=2,blend=0)
     for anim, (count, fps, repeat) in ANIMS.items():
         frames = [result[f'{anim}_{i:03}'] for i in range(count)]
         frames[0].save(REVIEW/f'{anim}_motion.png',save_all=True,append_images=frames[1:],

@@ -3,6 +3,16 @@
 Tool: built-in `image_gen`, transparent_background=true. No CLI/API fallback.
 Normalization/atlas packing uses the project's Python + Pillow art workflow.
 
+## Blink correction
+
+Reference: `art/previews/phase_a/2026-10-23_aclaire_seed_v4_256color_density2.png`.
+Output: `art/concept/2026-10-24_aclaire_blink_revision_source.png`.
+Only the aligned eye regions are composited into the original seed, not the generated full body.
+
+Prompt:
+
+> Edit this exact pixel sprite with a tiny localized edit: change ONLY her two blue open eyes into natural softly closed eyelids for a single blink animation frame. Preserve everything else exactly: same canvas aspect ratio 96:128, same character position, same scale and pixel grid, same orange hair, head silhouette, bangs, eyebrows, nose, open smiling mouth, costume, body and feet. The eyes should be closed relaxed shallow curves following the existing eye perspective, delicate dark brown one-pixel eyelash contours, smooth natural skin around them, no large black triangles, no harsh thick zigzags, no squinting or angry expression, no extra eyelashes. High fidelity localized edit; do not redraw or resize the character. Transparent background. One single full-body sprite, no labels.
+
 ## Movement sheet
 
 References, in order: approved V4 idle PNG; approved jump-up V4 key PNG; owner `aclaire_character_sheet_v2.png`.
