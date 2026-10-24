@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { ElementType } from '../core/Element';
 import { animKey, SPIRIT_KEYS } from '../assets/manifest';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
-import type { Player } from './Player';
+import { PlayerLayout, type Player } from './Player';
 
 /** ชื่อภูตตามธาตุ (ใช้เป็น prefix ของ frame ใน atlas spirits) */
 export function spiritKey(element: ElementType): string {
@@ -29,7 +29,7 @@ export class SpiritCompanion {
     scene: Phaser.Scene,
     private readonly player: Player,
   ) {
-    this.sprite = scene.add.sprite(player.x, player.y - 44, 'spirits', 'burnil_idle_000').setDepth(7).setVisible(false);
+    this.sprite = scene.add.sprite(player.x, player.y - PlayerLayout.overheadY, 'spirits', 'burnil_idle_000').setDepth(7).setVisible(false);
   }
 
   setElement(element: ElementType | null): void {
@@ -69,6 +69,6 @@ export class SpiritCompanion {
   }
 
   private target(): { x: number; y: number } {
-    return { x: this.player.x - this.player.facing * 16, y: this.player.y - 46 };
+    return { x: this.player.x - this.player.facing * 18, y: this.player.y - PlayerLayout.overheadY };
   }
 }

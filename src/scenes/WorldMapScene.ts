@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, SceneKey } from '../config/constants';
 import { PALETTE, hex } from '../assets/palette';
-import { animKey } from '../assets/manifest';
+import { animKey, textureScale } from '../assets/manifest';
 import { textStyle } from '../ui/text';
 import { ADVENTURE_LEVELS } from '../levels';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
@@ -58,7 +58,7 @@ export class WorldMapScene extends Phaser.Scene {
       });
     }
 
-    const cursor = this.add.sprite(nodeX(selected, n), NODE_Y - 8, 'player', 'idle_000').setOrigin(0.5, 1);
+    const cursor = this.add.sprite(nodeX(selected, n), NODE_Y - 8, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player'));
     cursor.play(animKey('player', 'idle'));
 
     const info = this.add.text(cx, 270, '', textStyle(12, PALETTE.neutral4)).setOrigin(0.5);

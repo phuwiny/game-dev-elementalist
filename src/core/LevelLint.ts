@@ -5,8 +5,8 @@ import { linkTriggers } from './TriggerLinks';
  * ตรวจด่านแบบ static ว่าผ่านได้ด้วยการกระโดดปกติ (ไม่มี double jump)
  * ใช้กับด่านในโหมดผจญภัยของโลกที่ยังไม่มีภูตลม
  *
- * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~64 px (4 ช่อง)
- * วิ่งกระโดดไกลสุด ~104 px โดยต้องเผื่อความกว้างตัว 14 px และหนามด้านข้าง
+ * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~80 px (5 ช่อง) hitbox 16×46
+ * หลุม/หนาม/ขั้นยังจำกัดเท่าเดิม (ตัวใหญ่ขึ้นแต่กระโดดได้มากขึ้น จึงเหลือที่เผื่อมากขึ้น)
  */
 export interface LintRules {
   /** หลุม (คอลัมน์ที่ไม่มีพื้นในแถวล่างสุด) กว้างได้ไม่เกิน */
@@ -16,10 +16,15 @@ export interface LintRules {
   /** ขั้นพื้นที่ต้องปีนขึ้นสูงได้ไม่เกิน */
   maxStepUpTiles: number;
   /**
-   * ช่องว่างเหนือหลุม/หนามที่ต้องไม่มีพื้นกั้น (ตัวสูง ~2.5 ช่อง + กระโดด 4 ช่อง)
+   * ช่องว่างเหนือหลุม/หนามที่ต้องไม่มีพื้นกั้น (hitbox สูง ~3 ช่อง + กระโดด 5 ช่อง)
    * กันกรณีวาง platform เหนือหลุมแล้วหัวชนจนตกหลุม
    */
   minHeadroomTiles: number;
+  /**
+   * พื้นราบก่อนหลุม/หนามแต่ละจุด (ไม่มีขั้น หลุม หรือหนามอื่น) ให้มีที่ลงหลังอุปสรรคก่อนหน้า
+   * และที่ตั้งหลักกระโดด: กระโดดเต็มแรงลอยไกล ~7 ช่อง จึงต้องไม่วางอุปสรรคติดกันเกินไป
+   */
+  minRunupTiles: number;
   /** วัตถุ puzzle ที่อนุญาต (ตามธาตุที่ผู้เล่นมีในโลกนั้น) */
   allowedObjects: readonly ObjectKind[];
 }
@@ -28,7 +33,8 @@ export const SINGLE_JUMP_RULES: LintRules = {
   maxPitTiles: 4,
   maxSpikeTiles: 3,
   maxStepUpTiles: 3,
-  minHeadroomTiles: 6,
+  minHeadroomTiles: 8,
+  minRunupTiles: 5,
   allowedObjects: ['vine', 'crate', 'ice', 'torch', 'gate', 'arenaGate', 'spirit'],
 };
 
@@ -104,6 +110,26 @@ export function lintLevel(level: ParsedLevel, rules: LintRules): string[] {
       let end = c;
       while (end + 1 < width && tiles[r][end + 1] === Tile.Spike) end += 1;
       checkHeadroom(c, end, r, 'spikes');
+    }
+  }
+
+  // 3.6) พื้นราบก่อนอุปสรรค
+  const hazardAt = (c: number): boolean => {
+    if (surface[c] === null) return !solid(0, c); // หลุม (ไม่ใช่กำแพงขอบด่าน)
+    const top = surface[c] as number;
+    return top > 0 && tiles[top - 1][c] === Tile.Spike;
+  };
+  for (let c = 1; c < width; c += 1) {
+    if (!hazardAt(c) || hazardAt(c - 1)) continue;
+    const lip = surface[c - 1];
+    for (let k = 1; k <= rules.minRunupTiles; k += 1) {
+      const cc = c - k;
+      if (cc <= 0) break;
+      if (surface[cc] === null && solid(0, cc)) break; // ถึงกำแพงขอบด่าน
+      if (hazardAt(cc) || surface[cc] !== lip) {
+        issues.push(`hazard at col ${c} needs ${rules.minRunupTiles} flat tiles before it (col ${cc} differs)`);
+        break;
+      }
     }
   }
 

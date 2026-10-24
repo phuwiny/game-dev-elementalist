@@ -104,4 +104,11 @@ describe('lintLevel', () => {
     const open = rows.map((r) => r.replace('##.', '...'));
     expect(lintLevel(parseLevel(open), SINGLE_JUMP_RULES).filter((i) => i.includes('ceiling'))).toEqual([]);
   });
+
+  it('needs flat run-up ground before a hazard (a full jump lands about 7 tiles away)', () => {
+    const tight = ['#..................#', '#P.......^^^.....G.#', '#####..#############'];
+    expect(lintLevel(parseLevel(tight), SINGLE_JUMP_RULES).some((i) => i.startsWith('hazard at col 9'))).toBe(true);
+    const roomy = ['#......................#', '#P...........^^^.....G.#', '#####..#################'];
+    expect(lintLevel(parseLevel(roomy), SINGLE_JUMP_RULES).filter((i) => i.includes('flat tiles'))).toEqual([]);
+  });
 });
