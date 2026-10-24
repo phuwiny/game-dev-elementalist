@@ -66,7 +66,9 @@ def build():
                'jump_up':'2026-10-24_aclaire_jump_up_v4_study'}
     for anim, folder in folders.items():
         for i, path in enumerate(sorted((PREVIEW/folder).glob('*.png'))):
-            source = Image.open(path).convert('RGBA')
+            source_path = (ROOT/'art/concept/2026-10-24_aclaire_idle_003_user.png'
+                           if anim == 'idle' and i == 3 else path)
+            source = Image.open(source_path).convert('RGBA')
             if anim == 'idle':
                 frame = indexed(source)
             else:
