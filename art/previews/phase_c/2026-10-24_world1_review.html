@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Ember Woods production art review</title>
+<style>
+body{background:#0f0b1a;color:#f2efe6;margin:16px auto;width:min(640px,calc(100vw - 32px));font:14px system-ui;display:grid;gap:12px}
+h1{font-size:20px;margin:0}p{margin:0;color:#b4b2c9}button{background:#2b2440;border:1px solid #7b7896;color:#f2efe6;padding:8px;font:inherit}canvas{max-width:100%;height:auto!important;image-rendering:pixelated}
+</style>
+<h1>Ember Woods · Phase C atlas review</h1>
+<p>640 × 360 · production backgrounds and sprites · toggle the boss arena. Tile/map integration is owned by game code.</p>
+<button id="arena">Show boss arena</button><div id="preview"></div><p id="status">Loading atlases…</p>
+<script type="module">
+import Phaser from '/node_modules/phaser/dist/phaser.esm.js';
+let gameScene, bossMode=false;
+new Phaser.Game({type:Phaser.AUTO,parent:'preview',width:640,height:360,pixelArt:true,roundPixels:true,backgroundColor:'#2b2440',scene:{
+ preload(){
+  this.load.image('far','/assets/backgrounds/w1/bg_w1_far.png');
+  this.load.image('mid','/assets/backgrounds/w1/bg_w1_mid.png');
+  this.load.image('near','/assets/backgrounds/w1/bg_w1_near.png');
+  this.load.image('boss_far','/assets/backgrounds/w1/bg_w1_boss_far.png');
+  this.load.atlas('player','/assets/sprites/player/player.png','/assets/sprites/player/player.json');
+  this.load.atlas('enemies','/assets/sprites/enemies/enemies_w1.png','/assets/sprites/enemies/enemies_w1.json');
+  this.load.atlas('boss','/assets/sprites/bosses/boss_bramble_king.png','/assets/sprites/bosses/boss_bramble_king.json');
+  this.load.json('motions','/assets/animations.json');
+ },
+ create(){
+  gameScene=this;
+  const data=this.cache.json.get('motions');
+  for(const [atlas,prefix,names] of [
+   ['enemies','enemies_w1',['moss_slime_idle','moss_slime_move','leaf_wisp_fly','thorn_beetle_walk','thorn_beetle_flipped']],
+   ['boss','boss_bramble_king',['idle','vine_attack','weak_exposed','roar']]]){
+   for(const name of names){const a=data[prefix+'_'+name];if(!a)continue;
+    this.anims.create({key:prefix+'_'+name,frames:Array.from({length:a.frames},(_,i)=>({key:atlas,frame:name+'_'+String(i).padStart(3,'0')})),frameRate:a.frameRate,repeat:-1});
+   }
+  }
+  window.drawArena=()=>{
+   this.children.removeAll(true);
+   this.add.image(0,0,bossMode?'boss_far':'far').setOrigin(0);
+   if(!bossMode){this.add.image(0,0,'mid').setOrigin(0);this.add.image(0,0,'near').setOrigin(0)}
+   this.add.rectangle(320,297,640,20,0x5a3a2e).setStrokeStyle(2,0x6fa83c);
+   this.add.sprite(bossMode?150:76,287,'player','idle_000').setOrigin(.5,1).setScale(.5);
+   if(bossMode){this.add.sprite(338,287,'boss','idle_000').setOrigin(0,1).setScale(1.5).play('boss_bramble_king_idle')}
+   else{
+    this.add.sprite(238,287,'enemies','moss_slime_idle_000').setOrigin(.5,1).setScale(1.5).play('enemies_w1_moss_slime_idle');
+    this.add.sprite(382,194,'enemies','leaf_wisp_fly_000').setOrigin(.5,.5).setScale(1.5).play('enemies_w1_leaf_wisp_fly');
+    this.add.sprite(490,287,'enemies','thorn_beetle_walk_000').setOrigin(.5,1).setScale(1.5).play('enemies_w1_thorn_beetle_walk');
+   }
+  };
+  window.drawArena();document.querySelector('#status').textContent='Production atlases loaded. Animations running.';
+ }
+}});
+document.querySelector('#arena').onclick=e=>{bossMode=!bossMode;window.drawArena?.();e.target.textContent=bossMode?'Show World 1 enemies':'Show boss arena';};
+</script>
+</html>
