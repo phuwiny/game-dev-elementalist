@@ -5,8 +5,8 @@ import { linkTriggers } from './TriggerLinks';
  * ตรวจด่านแบบ static ว่าผ่านได้ด้วยการกระโดดปกติ (ไม่มี double jump)
  * ใช้กับด่านในโหมดผจญภัยของโลกที่ยังไม่มีภูตลม
  *
- * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~80 px (5 ช่อง) hitbox 16×46
- * หลุม/หนาม/ขั้นยังจำกัดเท่าเดิม (ตัวใหญ่ขึ้นแต่กระโดดได้มากขึ้น จึงเหลือที่เผื่อมากขึ้น)
+ * ค่าเริ่มต้นมาจาก physics ใน balance.ts: กระโดดสูงสุด ~64 px (4 ช่อง) hitbox 14×38
+ * วิ่งกระโดดเต็มแรงลอยไกล ~104 px (6.5 ช่อง)
  */
 export interface LintRules {
   /** หลุม (คอลัมน์ที่ไม่มีพื้นในแถวล่างสุด) กว้างได้ไม่เกิน */
@@ -16,7 +16,7 @@ export interface LintRules {
   /** ขั้นพื้นที่ต้องปีนขึ้นสูงได้ไม่เกิน */
   maxStepUpTiles: number;
   /**
-   * ช่องว่างเหนือหลุม/หนามที่ต้องไม่มีพื้นกั้น (hitbox สูง ~3 ช่อง + กระโดด 5 ช่อง)
+   * ช่องว่างเหนือหลุม/หนามที่ต้องไม่มีพื้นกั้น (hitbox สูง ~2.5 ช่อง + กระโดด 4 ช่อง)
    * กันกรณีวาง platform เหนือหลุมแล้วหัวชนจนตกหลุม
    */
   minHeadroomTiles: number;
@@ -33,7 +33,7 @@ export const SINGLE_JUMP_RULES: LintRules = {
   maxPitTiles: 4,
   maxSpikeTiles: 3,
   maxStepUpTiles: 3,
-  minHeadroomTiles: 8,
+  minHeadroomTiles: 6,
   minRunupTiles: 5,
   allowedObjects: ['vine', 'crate', 'ice', 'torch', 'gate', 'arenaGate', 'spirit'],
 };

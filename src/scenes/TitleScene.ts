@@ -3,6 +3,7 @@ import { GAME_WIDTH, SceneKey } from '../config/constants';
 import { PALETTE } from '../assets/palette';
 import { animKey, textureScale } from '../assets/manifest';
 import { textStyle } from '../ui/text';
+import { useUiCamera } from '../ui/screen';
 import { DEV_LEVELS } from '../levels';
 import { sfx } from '../systems/Sfx';
 
@@ -21,12 +22,13 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create(): void {
+    useUiCamera(this);
     this.cameras.main.setBackgroundColor(PALETTE.outline);
     const cx = GAME_WIDTH / 2;
 
     this.add.text(cx, 64, 'ELEMENTAL SPIRIT', textStyle(28, PALETTE.gold)).setOrigin(0.5);
     this.add.text(cx, 94, 'Phase 3 · Vertical Slice', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
-    this.add.sprite(cx, 170, 'player', 'idle_000').setOrigin(0.5, 1).setScale(1.5 * textureScale('player')).play(animKey('player', 'idle'));
+    this.add.sprite(cx, 176, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player')).play(animKey('player', 'idle'));
 
     const menu: MenuItem[] = [
       { label: 'Adventure', run: () => this.scene.start(SceneKey.WorldMap) },

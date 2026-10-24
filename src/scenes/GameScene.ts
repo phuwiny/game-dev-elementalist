@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SceneKey, TILE_SIZE } from '../config/constants';
+import { SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
 import { BossBalance, ElementBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
@@ -195,8 +195,9 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const cam = this.cameras.main;
     cam.setBounds(0, 0, worldW, worldH);
     cam.setRoundPixels(true);
+    cam.setZoom(WORLD_ZOOM);
     cam.startFollow(this.player, true, 0.15, 0.15);
-    cam.setDeadzone(48, 40);
+    cam.setDeadzone(32, 28);
 
     if (!this.scene.isActive(SceneKey.UI)) this.scene.launch(SceneKey.UI);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.player.removeAllListeners());
@@ -595,12 +596,23 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         gate.setClosed(true);
         sfx.play('gate');
         boss.start(() => this.onBossDefeated());
+        this.frameBossFight(true);
       }
     }
     boss.update(delta);
   }
 
+  /**
+   * ระหว่างสู้บอส: วางผู้เล่นไว้ฝั่งซ้ายของจอ ให้เห็นบอสที่อยู่ทางขวา
+   * (มุมกล้องในด่านแคบกว่าสนามบอส)
+   */
+  private frameBossFight(on: boolean): void {
+    const cam = this.cameras.main;
+    cam.setFollowOffset(on ? -cam.worldView.width * 0.28 : 0, 0);
+  }
+
   private onBossDefeated(): void {
+    this.frameBossFight(false);
     this.arenaGate?.setClosed(false);
     this.time.delayedCall(1200, () => {
       this.goalFlag?.setVisible(true);
@@ -873,6 +885,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       // ตายระหว่างสู้บอส: บอสกลับเป็นเต็มเลือด เปิดประตูสนามให้เดินเข้าใหม่
       if (this.boss?.isActive) {
         this.boss.reset();
+        this.frameBossFight(false);
         this.arenaGate?.setClosed(false);
       }
       this.companion.snap();
@@ -944,7 +957,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
   private floatText(x: number, y: number, text: string, color: string): void {
     const t = this.add
-      .text(x, y, text, { fontFamily: 'monospace', fontSize: '10px', color, stroke: PALETTE.outline, strokeThickness: 3 })
+      .text(x, y, text, { fontFamily: 'monospace', fontSize: '7px', color, stroke: PALETTE.outline, strokeThickness: 2, resolution: 6 })
       .setOrigin(0.5)
       .setDepth(20);
     this.tweens.add({ targets: t, y: y - 16, alpha: 0, duration: 1200, onComplete: () => t.destroy() });

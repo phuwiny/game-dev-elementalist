@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { useUiCamera } from '../ui/screen';
 import { GAME_HEIGHT, GAME_WIDTH, SceneKey, TILE_SIZE } from '../config/constants';
 import { ANIMATIONS_JSON, ATLASES } from '../assets/manifest';
 import { createGrayboxTiles, createPlaceholderAtlas } from '../assets/placeholders';
@@ -22,6 +23,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload(): void {
+    useUiCamera(this);
     const bar = this.add.rectangle(GAME_WIDTH / 2 - 100, GAME_HEIGHT / 2, 0, 6, hex(PALETTE.magic)).setOrigin(0, 0.5);
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 204, 10).setStrokeStyle(1, hex(PALETTE.neutral3));
     this.load.on(Phaser.Loader.Events.PROGRESS, (v: number) => bar.setSize(200 * v, 6));

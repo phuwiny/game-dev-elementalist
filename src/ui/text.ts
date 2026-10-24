@@ -11,6 +11,7 @@ export function textStyle(size: number, color: string = PALETTE.highlight): Phas
     color,
     stroke: PALETTE.outline,
     strokeThickness: Math.max(2, Math.round(size / 5)),
-    resolution: 2,
+    // canvas จริงใหญ่ 2 เท่าของพิกัด logical
+    resolution: 4,
   };
 }

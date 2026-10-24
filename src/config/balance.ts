@@ -11,8 +11,8 @@ export const PlayerBalance = {
   airDecel: 600,
 
   gravity: 1100,
-  /** กระโดดสูงสุด v²/2g ≈ 80 px (5 ช่อง) ตัวละคร V4 สูง ~62 px */
-  jumpVelocity: 420,
+  /** กระโดดสูงสุด v²/2g ≈ 66 px (~4 ช่อง) ตัวละครในด่านสูง ~41 px */
+  jumpVelocity: 380,
   /** ปล่อยปุ่มกระโดดก่อนถึงจุดสูงสุด ความเร็วขาขึ้นจะถูกคูณด้วยค่านี้ */
   jumpCutMultiplier: 0.45,
   maxFallSpeed: 520,
@@ -20,9 +20,9 @@ export const PlayerBalance = {
   coyoteTimeMs: 100,
   jumpBufferMs: 100,
 
-  /** hitbox ตัวละคร px ในเกม (ภาพ V4 48×64, ผมและหางม้าเกิน hitbox ได้) */
-  bodyWidth: 16,
-  bodyHeight: 46,
+  /** hitbox ตัวละคร px ในด่าน (ภาพ V4 ในด่าน 32×42.7, ผมและหางม้าเกิน hitbox ได้) */
+  bodyWidth: 14,
+  bodyHeight: 38,
 
   hurtKnockbackX: 160,
   hurtKnockbackY: 220,
@@ -43,8 +43,8 @@ export const AttackBalance = {
   comboWindowMs: 220,
   damage: [1, 1, 2],
   /** ระยะฟันจากกึ่งกลางตัวละคร */
-  reach: 40,
-  hitboxHeight: 40,
+  reach: 30,
+  hitboxHeight: 28,
 } as const;
 
 export const VitalsBalance = {
@@ -95,7 +95,7 @@ export const ElementBalance = {
   wind: {
     gustCost: 15,
     gustWidth: 48,
-    gustHeight: 40,
+    gustHeight: 30,
     gustPushX: 280,
     gustPushY: 180,
     dashCost: 15,
@@ -104,7 +104,7 @@ export const ElementBalance = {
     glideFallSpeed: 45,
     glideCostPerSecond: 20,
     airJumps: 1,
-    doubleJumpVelocity: 375,
+    doubleJumpVelocity: 340,
   },
   earth: {
     blockCost: 30,
@@ -116,7 +116,7 @@ export const ElementBalance = {
     slamSpeed: 560,
     slamDamage: 2,
     slamWidth: 96,
-    slamHeight: 44,
+    slamHeight: 36,
     /** กดค้าง K บนพื้นนานเท่านี้ = ยกโล่หิน (ปล่อยก่อน = สร้างบล็อก) */
     shieldHoldMs: 250,
     shieldCostPerSecond: 15,

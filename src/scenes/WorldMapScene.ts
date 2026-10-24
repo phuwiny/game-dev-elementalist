@@ -3,6 +3,7 @@ import { GAME_WIDTH, SceneKey } from '../config/constants';
 import { PALETTE, hex } from '../assets/palette';
 import { animKey, textureScale } from '../assets/manifest';
 import { textStyle } from '../ui/text';
+import { useUiCamera } from '../ui/screen';
 import { ADVENTURE_LEVELS } from '../levels';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import type { Progress } from '../core/Progress';
@@ -25,6 +26,7 @@ export class WorldMapScene extends Phaser.Scene {
   create(data?: { focus?: string }): void {
     const progress = this.registry.get(REGISTRY_PROGRESS) as Progress;
     const vitals = this.registry.get(REGISTRY_VITALS) as Vitals;
+    useUiCamera(this);
     this.cameras.main.setBackgroundColor(PALETTE.foliage1);
     const cx = GAME_WIDTH / 2;
     const n = ADVENTURE_LEVELS.length;

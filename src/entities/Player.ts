@@ -4,6 +4,7 @@ import { Action } from '../core/Bindings';
 import { Combo } from '../core/Combo';
 import { JumpAssist } from '../core/JumpAssist';
 import { animKey, textureScale } from '../assets/manifest';
+import { WORLD_SCALE } from '../config/constants';
 import type { InputManager } from '../systems/InputManager';
 
 export type PlayerState =
@@ -30,20 +31,23 @@ export const PlayerEvent = {
 } as const;
 
 const ATLAS = 'player';
-/** pixel ของ texture ต่อ 1 pixel ในเกม (V4 = 2) */
-const DENSITY = 1 / textureScale(ATLAS);
+/**
+ * pixel ของ texture ต่อ 1 pixel ในด่าน: ภาพ V4 วาดที่ density 2 ของจอ logical
+ * และด่านถูกขยาย WORLD_SCALE (1.5) เท่า จึงได้ 3 (ภาพ 96×128 = 32×42.7 px ในด่าน)
+ */
+const DENSITY = WORLD_SCALE / textureScale(ATLAS);
 
 /**
- * ตำแหน่งบนตัว Aclaire V4 วัดจากฝ่าเท้าขึ้นไป (px ในเกม) ใช้วาง FX และจุดยิง
- * ตัวที่วาดสูงประมาณ 62 px (ART_HANDOFF.md หัวข้อ 5.1)
+ * ตำแหน่งบนตัว Aclaire วัดจากฝ่าเท้าขึ้นไป (px ในด่าน) ใช้วาง FX และจุดยิง
+ * ตัวที่วาดสูงประมาณ 41 px ในด่าน (62 px แบบ logical, ART_HANDOFF.md หัวข้อ 5.1)
  */
 export const PlayerLayout = {
   /** กลางลำตัว: FX ที่ซ้อนตัวละคร เช่น slash, aura */
-  chestY: 32,
+  chestY: 22,
   /** มือที่ปล่อยพลัง: ต่ำพอให้กระสุนโดนศัตรูตัวเตี้ย */
-  muzzleY: 22,
+  muzzleY: 18,
   /** เหนือหัว: ข้อความลอย, ภูตที่ตามอยู่ */
-  overheadY: 70,
+  overheadY: 48,
 } as const;
 const anim = (name: string) => animKey(ATLAS, name);
 const W = ElementBalance.wind;
@@ -87,7 +91,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.setOrigin(0.5, 1);
-    this.setScale(textureScale(ATLAS));
+    this.setScale(1 / DENSITY);
     this.setDepth(6);
     // ขนาด body ระบุเป็น pixel ของ texture แล้ว Phaser คูณ scale ให้เป็นขนาดในเกม
     this.body.setSize(B.bodyWidth * DENSITY, B.bodyHeight * DENSITY);
