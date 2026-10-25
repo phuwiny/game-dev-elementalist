@@ -17,7 +17,7 @@ P=lambda i:COLORS[i]+(255,)
 ANIMS={
  'moss_slime_idle':(4,6,-1),'moss_slime_move':(6,8,-1),'moss_slime_hurt':(2,10,0),'moss_slime_death':(5,12,0),
  'leaf_wisp_fly':(6,10,-1),'leaf_wisp_dive':(3,12,-1),'leaf_wisp_hurt':(2,10,0),'leaf_wisp_death':(5,12,0),
- 'thorn_beetle_walk':(6,8,-1),'thorn_beetle_flipped':(4,8,-1),'thorn_beetle_hurt':(2,10,0),'thorn_beetle_death':(6,12,0),
+ 'thorn_beetle_walk':(6,8,-1),'thorn_beetle_flipped':(4,8,-1),'thorn_beetle_hurt':(2,10,0),'thorn_beetle_death':(5,12,0),
 }
 
 
@@ -81,10 +81,13 @@ def build() -> None:
             elif action=='move': frame=offset(base,dx=(0,1,2,1,0,-1)[i],sy=(1,.94,1,1.03,1,.94)[i])
             elif action=='walk': frame=offset(base,dx=(0,1,1,0,-1,-1)[i],dy=(0,-1,0,0,-1,0)[i])
             elif action=='flipped':
-                frame=base.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-                frame=offset(frame,dy=(0,-1,0,1)[i])
+                inverted=base.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+                box=inverted.getbbox()
+                cropped=inverted.crop(box)
+                frame=Image.new('RGBA',(32,32))
+                frame.alpha_composite(cropped,((32-cropped.width)//2,32-cropped.height+(0,-1,0,-1)[i]))
             elif action=='fly': frame=offset(base,dy=(0,-1,-2,-1,0,1)[i])
-            elif action=='dive': frame=offset(base,dx=(0,-2,-4)[i],dy=(0,2,4)[i])
+            elif action=='dive': frame=offset(base,dx=(0,-2,0)[i],dy=(0,2,0)[i])
             elif action=='hurt':frame=hit(offset(base,dx=(-1,1)[i]),i)
             elif action=='death':frame=dissolve(base,i,count,1000+len(name))
             else:raise ValueError(action)
@@ -93,6 +96,10 @@ def build() -> None:
                 box=frame.getbbox()
                 frame=offset(frame,dy=31-(box[3]-1)) if box and box[3]!=32 else frame
             frame.save(OUT/f'{name}_{i:03}.png')
+    expected={f'{name}_{i:03}' for name,(count,_,_) in ANIMS.items() for i in range(count)}
+    for path in OUT.glob('*.png'):
+        if path.stem not in expected and any(path.stem.startswith(name+'_') for name in ANIMS):
+            path.unlink()
     atlas=pack(OUT,ROOT/'public/assets/sprites/enemies/enemies_w1')
     for name,info in atlas['frames'].items():
         if name.startswith('leaf_wisp_'):

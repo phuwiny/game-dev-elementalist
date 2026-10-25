@@ -22,23 +22,37 @@ def tile(index: int) -> Image.Image:
     image = Image.new('RGBA', (16, 16), TRANSPARENT)
     draw = ImageDraw.Draw(image)
     if index < 16:
-        # Terrain topology: top/fill/sides/ceiling/corners, in two variants.
+        # 0/1 top, 2/3 fill, 4/5 sides, 6 ceiling,
+        # 7-10 outer corners, 11-14 inner corners, 15 single-tile cap.
         sample = ('moss_soil' if index % 2 == 0 else 'old_roots')
         image.alpha_composite(Image.open(SAMPLES/f'{sample}.png').convert('RGBA'))
+        if index not in (0, 1, 7, 8, 11, 12, 15):
+            image = Image.new('RGBA', (16, 16), P(24 if index % 2 == 0 else 6))
+            soil = ImageDraw.Draw(image)
+            for _ in range(40):
+                x, y = rng.randrange(16), rng.randrange(16)
+                soil.rectangle((x, y, min(x + rng.randrange(1, 4), 15), y),
+                               fill=P(rng.choice((24, 25, 6, 7, 26))))
         draw = ImageDraw.Draw(image)
-        if index in (0, 1, 4, 5, 8, 9, 12, 13):
+        if index in (0, 1, 7, 8, 11, 12, 15):
             draw.rectangle((0, 0, 15, 2), fill=P(0))
             draw.line((0, 0, 15, 0), fill=P(30))
             for x in (1, 4, 9, 13):
                 draw.point((x, 1), fill=P(29 if x % 2 else 27))
-        if index in (2, 3, 6, 7):
-            draw.line((0, 0, 0, 15), fill=P(0) if index % 2 == 0 else P(6), width=2)
-        if index in (10, 11, 14, 15):
+        if index in (6, 9, 10, 13, 14):
             draw.rectangle((0, 13, 15, 15), fill=P(0))
             draw.line((0, 14, 15, 14), fill=P(27))
-        if index in (5, 7, 9, 11):
-            draw.rectangle((11, 3, 13, 10), fill=P(24))
-            draw.point((12, 5), fill=P(27))
+        if index in (4, 7, 9, 11, 13, 15):
+            draw.rectangle((0, 0, 1, 15), fill=P(0))
+            draw.line((1, 2, 1, 12), fill=P(27))
+        if index in (5, 8, 10, 12, 14, 15):
+            draw.rectangle((14, 0, 15, 15), fill=P(0))
+            draw.line((14, 2, 14, 12), fill=P(27))
+        if index in (11, 12, 13, 14):
+            x0 = 2 if index in (11, 13) else 10
+            y0 = 2 if index in (11, 12) else 10
+            draw.rectangle((x0, y0, x0 + 3, y0 + 3), fill=P(24))
+            draw.line((x0, y0 + 3, x0 + 3, y0 + 3), fill=P(27))
     elif index < 19:  # one-way timber bridges: left, middle, right
         draw.rectangle((0, 5, 15, 8), fill=P(0))
         draw.rectangle((0, 5, 15, 6), fill=P(26))

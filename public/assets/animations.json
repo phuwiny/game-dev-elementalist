@@ -121,7 +121,7 @@
   "enemies_w1_thorn_beetle_death": {
     "atlas": "enemies_w1",
     "prefix": "thorn_beetle_death_",
-    "frames": 6,
+    "frames": 5,
     "frameRate": 12,
     "repeat": 0
   },

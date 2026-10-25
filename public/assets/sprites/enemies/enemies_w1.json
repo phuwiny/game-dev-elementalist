@@ -912,7 +912,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_death_005": {
+    "thorn_beetle_flipped_000": {
       "frame": {
         "x": 274,
         "y": 36,
@@ -936,7 +936,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_flipped_000": {
+    "thorn_beetle_flipped_001": {
       "frame": {
         "x": 308,
         "y": 36,
@@ -960,7 +960,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_flipped_001": {
+    "thorn_beetle_flipped_002": {
       "frame": {
         "x": 342,
         "y": 36,
@@ -984,7 +984,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_flipped_002": {
+    "thorn_beetle_flipped_003": {
       "frame": {
         "x": 376,
         "y": 36,
@@ -1008,7 +1008,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_flipped_003": {
+    "thorn_beetle_hurt_000": {
       "frame": {
         "x": 410,
         "y": 36,
@@ -1032,7 +1032,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_hurt_000": {
+    "thorn_beetle_hurt_001": {
       "frame": {
         "x": 444,
         "y": 36,
@@ -1056,7 +1056,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_hurt_001": {
+    "thorn_beetle_walk_000": {
       "frame": {
         "x": 478,
         "y": 36,
@@ -1080,7 +1080,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_walk_000": {
+    "thorn_beetle_walk_001": {
       "frame": {
         "x": 512,
         "y": 36,
@@ -1104,7 +1104,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_walk_001": {
+    "thorn_beetle_walk_002": {
       "frame": {
         "x": 546,
         "y": 36,
@@ -1128,7 +1128,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_walk_002": {
+    "thorn_beetle_walk_003": {
       "frame": {
         "x": 580,
         "y": 36,
@@ -1152,7 +1152,7 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_walk_003": {
+    "thorn_beetle_walk_004": {
       "frame": {
         "x": 614,
         "y": 36,
@@ -1176,33 +1176,9 @@
         "y": 1.0
       }
     },
-    "thorn_beetle_walk_004": {
-      "frame": {
-        "x": 648,
-        "y": 36,
-        "w": 32,
-        "h": 32
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 32
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 32
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 1.0
-      }
-    },
     "thorn_beetle_walk_005": {
       "frame": {
-        "x": 682,
+        "x": 648,
         "y": 36,
         "w": 32,
         "h": 32
