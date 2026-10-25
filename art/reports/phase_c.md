@@ -15,6 +15,7 @@
 - `art/previews/phase_c/2026-10-25_world1_motion_contact.png`, `2026-10-25_world1_tile_legend.png`, `2026-10-25_world1_tile_adjacency.png`, `2026-10-25_world1_seam_review.png`, and `2026-10-25_world1_frame_metrics.json`: visual QA and frame-bound measurements.
 - `art/previews/phase_c/2026-10-25_world1_animations.html` and `animations/*.gif`: 22 review-only animations at the rates specified by `animations.json`.
 - `tools/art/inspect_world1_pack.py`, `build_world1_animation_previews.py`, and `art/reports/2026-10-25_world1_integration_guide.md`: repeatable QA output and tile/integration notes for Claude.
+- `art/concept/2026-10-25_vine_whip_detailed_source.png` and `art/reports/2026-10-25_vine_whip_imagegen_prompt.md`: transparent imagegen source and exact prompt for the more detailed vine whip requested by Pinz. `tools/art/build_world1_boss.py` converts it to six 64×16 frames in the existing atlas. The review strip is `art/previews/phase_c/2026-10-25_vine_whip_animation_strip.png`.
 
 ## 2. Validation
 
@@ -23,6 +24,7 @@
 - Game maps `public/assets/maps/w1_*.json` still use the `graybox` tileset. The mockups and Phaser art review verify the new tiles visually, while in-game tile seam/collision behavior awaits Claude's map integration. No map, game code, or config was changed by art.
 - Frame-bound inspection: Moss Slime idle and move keep the last pixel on the floor; Thorn Beetle walk keeps floor contact and flipped now has a 0–1 px bottom gap (previously 9–11 px). Leaf Wisp dive centers vary 14.5–16.5 px and return to their starting placement at the loop boundary. Main boss frames retain floor contact.
 - The 22 generated GIFs loaded in the local browser at their authored frame rates. A 2× tile adjacency board and full-height background seam board were inspected. The new mirrored edge treatment removes the sharp silhouette break visible in the first seam review. Runtime parallax scrolling remains untested until the game loads the new backgrounds.
+- The revised `vine_whip` frames are 64×16 with binary alpha, 11–13 master-palette colors per frame, and leftward reach from 18 to 63 opaque pixel columns; the root remains anchored on the right. The atlas and refreshed GIF loaded in the local browser, and the validator still reports 0 errors.
 
 ## 3. Assumptions
 
@@ -30,6 +32,7 @@
 - All boss poses retain the 192×192 frame and bottom-left anchor. The exposed hit spot is highlighted within frame x=25–61 and y=124–160, corresponding to a height of 32–68px above the bottom, within the game target zone x=20–64, height 16–68. The shield is a separate frame for the game to stack.
 - Background far is based on the Phase A keyframe direction and a generated pixel-art source, then reduced to muted master-palette values to keep Aclaire and enemies readable. Mid/near and the tileset are deterministic pixel art. Extreme-column equality is enforced during export.
 - The enemy and boss pose families are first production motion sets; further hand-keyed motion refinement can follow Pinz's review. Empty final death frames intentionally represent full disappearance.
+- Pinz's “vine” feedback was interpreted as `vine_whip` on the open animation review page. The generated image is a concept source; the game uses its reduced, palette-cleaned frames.
 
 ## 4. Differences from gameplay/specification
 

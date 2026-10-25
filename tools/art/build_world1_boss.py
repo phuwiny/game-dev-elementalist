@@ -10,6 +10,7 @@ from pack_atlas import pack
 
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=ROOT/'art/concept/2026-10-24_bramble_king_sprite_source.png'
+VINE_SOURCE=ROOT/'art/concept/2026-10-25_vine_whip_detailed_source.png'
 OUT=ROOT/'art/frames/boss_bramble_king'
 PREVIEW=ROOT/'art/previews/phase_c'
 MASTER=[tuple(bytes.fromhex(s.strip()[1:])) for s in (ROOT/'art/palette/master_palette.hex').read_text().splitlines() if s.strip()]
@@ -82,13 +83,22 @@ def boss_pose(base:Image.Image,action:str,i:int,count:int)->Image.Image:
     return frame
 
 
-def vine_whip(i:int)->Image.Image:
-    frame=Image.new('RGBA',(64,16));d=ImageDraw.Draw(frame)
-    reach=15+i*9
-    d.line((63,11,44,9,64-reach,5),fill=P(0),width=7)
-    d.line((63,11,44,9,64-reach,5),fill=P(29),width=4)
-    for x in range(62,64-reach,-12):
-        d.polygon([(x,8),(x-3,0),(x+3,5)],fill=P(30))
+def vine_base()->Image.Image:
+    source=Image.open(VINE_SOURCE).convert('RGBA')
+    box=source.getchannel('A').point(lambda a:255 if a>=96 else 0).getbbox()
+    return indexed(source.crop(box).resize((64,16),Image.Resampling.NEAREST))
+
+
+def vine_whip(i:int,base:Image.Image)->Image.Image:
+    reach=(18,27,36,45,54,64)[i]
+    left=64-reach
+    frame=Image.new('RGBA',(64,16))
+    frame.alpha_composite(base.crop((left,0,64,16)),(left,0))
+    if i<5:
+        d=ImageDraw.Draw(frame)
+        d.rectangle((left,0,left+3,15),fill=(0,0,0,0))
+        d.polygon([(left,9),(left+5,6),(left+5,12)],fill=P(0))
+        d.line((left+2,9,left+5,8),fill=P(29),width=2)
     return frame
 
 
@@ -123,9 +133,10 @@ def seed(i:int)->Image.Image:
 def build() -> None:
     OUT.mkdir(parents=True,exist_ok=True);PREVIEW.mkdir(parents=True,exist_ok=True)
     base=base_boss()
+    whip_base=vine_base()
     for name,(count,fps,repeat) in ANIMS.items():
         for i in range(count):
-            if name=='vine_whip':frame=vine_whip(i)
+            if name=='vine_whip':frame=vine_whip(i,whip_base)
             elif name=='vine_shield_idle':frame=shield(0,False)
             elif name=='vine_shield_burn':frame=shield(i,True)
             elif name=='thorn_seed':frame=seed(i)
@@ -148,6 +159,14 @@ def build() -> None:
         board.alpha_composite(frame,(14+i*206,63))
         d.text((15+i*206,260),name,fill=P(5))
     board.save(PREVIEW/'2026-10-24_bramble_king_review.png')
+    strip=Image.new('RGB',(640,6*112),'#2b2440')
+    labels=ImageDraw.Draw(strip)
+    for i in range(6):
+        frame=Image.open(OUT/f'vine_whip_{i:03}.png').convert('RGBA')
+        labels.text((12,i*112+8),f'vine_whip_{i:03}',fill=P(5))
+        enlarged=frame.resize((384,96),Image.Resampling.NEAREST)
+        strip.paste(enlarged,(120,i*112+16),enlarged)
+    strip.save(PREVIEW/'2026-10-25_vine_whip_animation_strip.png')
     print(f"Built {len(atlas['frames'])} boss/part frames and {len(ANIMS)} animations: {atlas['meta']['size']}")
 
 
