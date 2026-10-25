@@ -16,6 +16,7 @@
 - `art/previews/phase_c/2026-10-25_world1_animations.html` and `animations/*.gif`: 22 review-only animations at the rates specified by `animations.json`.
 - `tools/art/inspect_world1_pack.py`, `build_world1_animation_previews.py`, and `art/reports/2026-10-25_world1_integration_guide.md`: repeatable QA output and tile/integration notes for Claude.
 - `art/concept/2026-10-25_vine_whip_detailed_source.png` and `art/reports/2026-10-25_vine_whip_imagegen_prompt.md`: transparent imagegen source and exact prompt for the more detailed vine whip requested by Pinz. `tools/art/build_world1_boss.py` converts it to six 64×16 frames in the existing atlas. The review strip is `art/previews/phase_c/2026-10-25_vine_whip_animation_strip.png`.
+- `art/concept/2026-10-25_vine_attack_detailed_source.png`, `2026-10-25_vine_shield_idle_source.png`, `2026-10-25_vine_shield_burn_source.png`, and `2026-10-25_thorn_seed_source.png`: four built-in imagegen redraws requested by Pinz. Exact prompts and reference roles are recorded in `art/reports/2026-10-25_bramble_parts_imagegen_prompts.md`. The builder converts them to the fixed 192×192, 32×32, and 16×16 frames while preserving the boss body across the attack. Review board: `art/previews/phase_c/2026-10-25_bramble_parts_redraw_review.png`.
 
 ## 2. Validation
 
