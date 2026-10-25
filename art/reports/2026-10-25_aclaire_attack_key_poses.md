@@ -8,17 +8,17 @@ Three key poses are ready for Pinz's review. They are concept frames only; the p
 - `art/previews/phase_b/2026-10-25_attack_keys/2026-10-25_aclaire_attack_keys_x2.png`: enlarged frame review.
 - `art/previews/phase_b/2026-10-25_attack_keys/attack_{1,2,3}_key.png`: three 192×128 physical frames, density 2, bottom-center origin.
 - `art/previews/phase_b/2026-10-25_attack_keys/2026-10-25_aclaire_attack_key_metrics.json`: frame bounds, eye alignment, sole row and sword reach.
-- `art/concept/2026-10-25_aclaire_attack_{1,2,3}_key_source.png` (attack 1 selects `_v2`): transparent built-in imagegen sources, not loaded by the game.
+- `art/concept/2026-10-25_aclaire_attack_{1,2,3}_key_source.png` and versioned revisions: transparent built-in imagegen sources, not loaded by the game. The selected revisions are attack 1 `_v3`, attack 2 `_v2`, and attack 3 `_v2`.
 
 ## Pose direction
 
 | Pose | Peak action | Sword reach from body center | Frame |
 | --- | --- | ---: | --- |
-| `attack_1` | forward horizontal slash | 39.5 logical px | 192×128 |
+| `attack_1` | forward horizontal slash | 40.0 logical px | 192×128 |
 | `attack_2` | diagonal rising slash | 38.5 logical px | 192×128 |
-| `attack_3` | heavy downward ground contact | 36.5 logical px | 192×128 |
+| `attack_3` | heavy downward ground contact | 36.0 logical px | 192×128 |
 
-All three frames have binary alpha, colors mapped to the approved V4 palette (183, 184 and 183 opaque colors), and a sole on row 127. The eye is near frame x=105, matching approved idle's +9 physical px eye offset from the bottom-center pivot. The sheath stays on the back while the sword is drawn. After Pinz noted that `attack_3` read taller, its whole pose was reduced uniformly by 10% and re-anchored to the same sole row. Its top opaque row is now 27, close to `attack_1` row 25; `attack_2` reaches higher because its sword points upward.
+All three frames have binary alpha, colors mapped to the approved V4 palette (201, 184 and 191 opaque colors), and a sole on row 127. The eye is near frame x=105, matching approved idle's +9 physical px eye offset from the bottom-center pivot. The sheath stays on the back while the sword is drawn. After Pinz noted that `attack_3` read taller, its whole pose was reduced uniformly by 10% and re-anchored to the same sole row. Its top opaque row is now 26, close to `attack_1` row 25; `attack_2` reaches higher because its sword points upward. Pinz then approved the poses conditional on concealing the red pommel ball that protruded beyond the grip; three separate built-in imagegen edits removed it without changing the pose direction.
 
 ## Built-in imagegen prompt set
 
@@ -58,4 +58,26 @@ Inputs: approved `idle_000.png`, initial `attack_1` and selected `attack_2` sour
 
 ## Review gate
 
-Pinz should approve or revise the three key poses before the full `attack_1`–`attack_3` animations are drawn. Motion timing, intermediate frames, FX and runtime hit registration are outside this key-pose review.
+Pinz approved the three key poses after the `attack_3` height correction, conditional on hiding the red grip pommel. The correction is now applied to all three poses. Motion timing, intermediate frames, FX and runtime hit registration are outside this key-pose review.
+
+## Final grip correction prompts
+
+Each selected source was edited separately with built-in imagegen. The original pose was the edit target in each case.
+
+### attack_1
+
+```text
+Use case: precise-object-edit. Edit target: this Aclaire V4 horizontal sword attack key pose. Make exactly ONE tiny change: conceal the bright red round ball at the rear of the sword grip where it protrudes past her hands. The short rear end of the hilt should terminate cleanly at or behind the nearest fist; no visible red circular pommel next to the hands. Preserve every other character pixel impression: identical face and head size, hair, expression, costume, feet, both hands and arms, sword blade length, straight sword angle, empty black back scabbard, pose, framing, pixel-art shading and transparent background. Do not change red/orange hair or any costume accents. No new effects or objects.
+```
+
+### attack_2
+
+```text
+Use case: precise-object-edit. Edit target: this Aclaire V4 rising diagonal sword attack key pose. Make exactly ONE tiny change: hide the bright red round ball protruding at the rear of the sword grip below and behind her raised fists. The hilt should end cleanly beneath the gripping hand with no visible red orb. Preserve the full character, face, eye and head scale, orange hair, costume, exact raised-arm pose, leg position, sword angle and length, empty black back scabbard, crisp pixel art, framing, and transparent background. Keep all other colors and pixels visually unchanged. Do not remove the gold wrist bracelet, sword guard, hair tie, or belt. No new objects, effects, background, blur or antialias.
+```
+
+### attack_3
+
+```text
+Use case: precise-object-edit. Edit target: this Aclaire V4 downward finisher key pose. Make exactly ONE tiny change: hide the bright red round ball protruding near the rear of the sword grip beside her lower fist. Her grip should read as two hands holding a single straight sword, with the hilt end concealed by the hand and no visible red circular knob. Preserve the exact face, head and body proportions, orange ponytail, pink outfit, empty black sheath, lowered sword angle and tip, all boot positions, stance, pixel-art style, framing and genuine transparent background. Do not remove the gold wrist bracelets or gold sword guard. No changes to hair or clothing, no extra effects, ground, blur, antialias or additional objects.
+```

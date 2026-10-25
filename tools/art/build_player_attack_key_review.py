@@ -9,9 +9,9 @@ from build_player_movement_atlas import eye_center, indexed
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'art/previews/phase_b/2026-10-25_attack_keys'
 SOURCES = {
-    'attack_1': ROOT / 'art/concept/2026-10-25_aclaire_attack_1_key_source_v2.png',
-    'attack_2': ROOT / 'art/concept/2026-10-25_aclaire_attack_2_key_source.png',
-    'attack_3': ROOT / 'art/concept/2026-10-25_aclaire_attack_3_key_source.png',
+    'attack_1': ROOT / 'art/concept/2026-10-25_aclaire_attack_1_key_source_v3.png',
+    'attack_2': ROOT / 'art/concept/2026-10-25_aclaire_attack_2_key_source_v2.png',
+    'attack_3': ROOT / 'art/concept/2026-10-25_aclaire_attack_3_key_source_v2.png',
 }
 FRAME = (192, 128)
 EYE_X = 105  # Same +9 physical px offset from bottom-center as approved idle.
