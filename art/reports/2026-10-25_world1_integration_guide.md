@@ -7,9 +7,11 @@
 - ภาพรวม: `art/mockups/2026-10-24_world1_gameplay_mockup.png` และ `2026-10-24_world1_boss_mockup.png` ที่ 640×360
 - เฟรม animation: `art/previews/phase_c/2026-10-25_world1_motion_contact.png`
 - แผนผัง tile ID: `art/previews/phase_c/2026-10-25_world1_tile_legend.png`
-- ตรวจรอยต่อ background: `art/previews/phase_c/2026-10-25_world1_seam_review.png` (เส้นสีส้มคือจุดต่อ)
+- วาง tile ต่อกัน: `art/previews/phase_c/2026-10-25_world1_tile_adjacency.png`
+- ตรวจรอยต่อ background: `art/previews/phase_c/2026-10-25_world1_seam_review.png` (ขีดสีส้มด้านบนคือจุดต่อ)
 - วัดกรอบภาพ: `art/previews/phase_c/2026-10-25_world1_frame_metrics.json`
 - พรีวิว Phaser: `art/previews/phase_c/2026-10-24_world1_review.html`
+- พรีวิว GIF ทุกท่า: `art/previews/phase_c/2026-10-25_world1_animations.html` (ศัตรู 12 และบอส 10 ท่า)
 
 ## Tileset และ Tiled
 
@@ -45,6 +47,8 @@ Tile ID ในตารางคือเลข 0-based ของ atlas; ค่�
 5. วาง Bramble King ด้วย origin `(0, 1)` ที่ `left,bottom` ตามโค้ดปัจจุบัน จุดอ่อนอยู่ `x = left+20..64`, สูงจากพื้น 16..68 px; โล่กึ่งกลางที่ `left+6` และแส้แยกเป็น sprite ต่างหาก ตรวจการซ้อนภาพโล่กับจุดอ่อนในเกม เพราะตำแหน่งโล่ในโค้ดอยู่ทางซ้ายของวงจุดอ่อนเป็นส่วนใหญ่
 6. Background 4 ภาพขนาด 640×360: `bg_w1_far` ทึบ, `mid`/`near` โปร่งใส และ `bg_w1_boss_far` ทึบ. ชั้น `far/mid/near` สำหรับด่านปกติ; boss far สำหรับสนามบอส. ตั้ง parallax และลองเลื่อนกล้องผ่านขอบ 640 px เพื่อดูรอยต่อจริง
 
+`public/assets/animations.json` เป็นจังหวะเล่นของภาพจริงและทับ timing ใน manifest ได้ เช่น `boss_bramble_king_roar` ใช้ 8 fps และ `vine_whip` ใช้ 12 fps ในไฟล์นี้ พรีวิว GIF ใช้ค่าจาก JSON เดียวกัน
+
 ## ตรวจหลังแปลงด่าน
 
 - เปิด `w1_1`, `w1_2`, `w1_3` ที่ 640×360 และเดินผ่านพื้น, หนาม, one-way platform; ตรวจภาพบนพื้นกับ collision ตรงกัน
@@ -54,5 +58,5 @@ Tile ID ในตารางคือเลข 0-based ของ atlas; ค่�
 
 ## ข้อจำกัดที่พบในการตรวจภาพ
 
-- Validator ตรวจว่าคอลัมน์ซ้ายสุดและขวาสุดของ background ตรงกัน แต่ภาพนิ่งรอบจุดต่อยังเห็นการเปลี่ยนรูปทรงของซากหินและพุ่มไม้บางจุด จึงต้องทดสอบตอนกล้องเลื่อนจริงก่อนรับงาน Phase C
+- Background ทั้ง 4 ชั้นปรับแถบขวา 64 px ให้ต่อรูปทรงกับแถบซ้ายเมื่อวนภาพ ภาพนิ่งสองภาพที่วางต่อกันไม่มีเส้นตัดคมแบบเดิมแล้ว แต่ยังต้องทดสอบตอนกล้องเลื่อนจริงหลังเชื่อม parallax ก่อนรับงาน Phase C
 - Bramble King มีรายละเอียดและ contrast สูงกว่าศัตรู 32×32 มาก ภาพ mockup อ่านได้ แต่ความกลมกลืนของสไตล์ต้องให้ Pinz ตัดสินจากพรีวิว 640×360

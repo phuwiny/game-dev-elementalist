@@ -24,7 +24,7 @@ def tile(index: int) -> Image.Image:
     if index < 16:
         # 0/1 top, 2/3 fill, 4/5 sides, 6 ceiling,
         # 7-10 outer corners, 11-14 inner corners, 15 single-tile cap.
-        sample = ('moss_soil' if index % 2 == 0 else 'old_roots')
+        sample = ('moss_soil' if index % 2 == 0 or index in (7, 11, 15) else 'old_roots')
         image.alpha_composite(Image.open(SAMPLES/f'{sample}.png').convert('RGBA'))
         if index not in (0, 1, 7, 8, 11, 12, 15):
             image = Image.new('RGBA', (16, 16), P(24 if index % 2 == 0 else 6))
@@ -138,9 +138,31 @@ def tileset() -> None:
 
 
 def finish(image: Image.Image, path: Path) -> None:
-    # The engine loops horizontally. Match the extreme columns exactly.
-    for y in range(image.height):
-        image.putpixel((image.width-1,y),image.getpixel((0,y)))
+    # Mirror a short strip from the left into the right edge. This gives the
+    # repeated image matching colors and silhouettes across the join, while
+    # easing out of the original right-side composition over 64 pixels.
+    source = image.copy()
+    band = 64
+    opaque_palette = [P(i) for i in range(len(COLORS))]
+    for step in range(band):
+        x = image.width - band + step
+        mirror_x = band - 1 - step
+        weight = step / (band - 1)
+        for y in range(image.height):
+            original = source.getpixel((x, y))
+            mirrored = source.getpixel((mirror_x, y))
+            alpha = 255 if (original[3] * (1 - weight) + mirrored[3] * weight) >= 128 else 0
+            if alpha == 0:
+                image.putpixel((x, y), TRANSPARENT)
+                continue
+            if original[3] == 0:
+                color = mirrored
+            elif mirrored[3] == 0:
+                color = original
+            else:
+                mixed = tuple(round(original[c] * (1 - weight) + mirrored[c] * weight) for c in range(3))
+                color = min(opaque_palette, key=lambda p: sum((p[c] - mixed[c]) ** 2 for c in range(3)))
+            image.putpixel((x, y), color)
     image.save(path)
 
 

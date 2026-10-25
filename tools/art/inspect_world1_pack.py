@@ -77,14 +77,45 @@ def main() -> None:
         legend.paste(tile, (x, y), tile)
         legend_draw.text((x, y + 49), f"{index:02}", fill="#f2efe6")
     legend.save(OUT / "2026-10-25_world1_tile_legend.png")
-    seam_board = Image.new("RGBA", (640, 4 * 180), "#2b2440")
+    adjacency = Image.new("RGB", (640, 360), "#2b2440")
+    adjacency_draw = ImageDraw.Draw(adjacency)
+    adjacency_draw.text((12, 8), "TILE ADJACENCY / 2x", fill="#f2efe6")
+
+    def stamp(index: int, col: int, row: int, x0: int, y0: int) -> None:
+        sx = 1 + (index % 16) * 18
+        sy = 1 + (index // 16) * 18
+        tile = tileset.crop((sx, sy, sx + 16, sy + 16)).resize((32, 32), Image.Resampling.NEAREST)
+        adjacency.paste(tile, (x0 + col * 32, y0 + row * 32), tile)
+
+    for col in range(12):
+        stamp(7 if col == 0 else 8 if col == 11 else (0 if col % 4 else 1), col, 0, 12, 32)
+        for row in range(1, 4):
+            stamp(4 if col == 0 else 5 if col == 11 else (2 if (col + row) % 3 else 3), col, row, 12, 32)
+    adjacency_draw.text((414, 32), "WALL", fill="#f2efe6")
+    for row in range(3):
+        for col in range(6):
+            stamp(22 + ((row * 6 + col) % 12), col, row, 414, 52)
+    adjacency_draw.text((12, 180), "INNER CORNERS", fill="#f2efe6")
+    for col, index in enumerate((11, 12, 13, 14)):
+        stamp(index, col, 0, 12, 204)
+    adjacency_draw.text((200, 180), "ONE WAY", fill="#f2efe6")
+    for col, index in enumerate((16, 17, 17, 17, 18)):
+        stamp(index, col, 0, 200, 204)
+    adjacency_draw.text((416, 180), "HAZARDS", fill="#f2efe6")
+    for col, index in enumerate((19, 20, 21)):
+        stamp(index, col, 0, 416, 204)
+    adjacency_draw.text((12, 274), "DECORATION", fill="#f2efe6")
+    for col, index in enumerate((34, 38, 42, 46, 50, 54)):
+        stamp(index, col, 0, 12, 296)
+    adjacency.save(OUT / "2026-10-25_world1_tile_adjacency.png")
+    seam_board = Image.new("RGBA", (640, 4 * 360), "#2b2440")
     for row, layer in enumerate(("far", "mid", "near", "boss_far")):
         path = ROOT / "public" / "assets" / "backgrounds" / "w1" / f"bg_w1_{layer}.png"
         background = Image.open(path).convert("RGBA")
-        seam_board.alpha_composite(background.crop((480, 90, 640, 270)), (160, row * 180))
-        seam_board.alpha_composite(background.crop((0, 90, 160, 270)), (320, row * 180))
-        ImageDraw.Draw(seam_board).line((320, row * 180, 320, row * 180 + 179), fill="#ff9a3c")
-        ImageDraw.Draw(seam_board).text((8, row * 180 + 8), layer, fill="#f2efe6")
+        seam_board.alpha_composite(background.crop((480, 0, 640, 360)), (160, row * 360))
+        seam_board.alpha_composite(background.crop((0, 0, 160, 360)), (320, row * 360))
+        ImageDraw.Draw(seam_board).line((320, row * 360, 320, row * 360 + 8), fill="#ff9a3c")
+        ImageDraw.Draw(seam_board).text((8, row * 360 + 8), layer, fill="#f2efe6")
     seam_board.convert("RGB").save(OUT / "2026-10-25_world1_seam_review.png")
     (OUT / "2026-10-25_world1_frame_metrics.json").write_text(
         json.dumps(data, indent=2) + "\n", encoding="utf-8", newline="\n"
