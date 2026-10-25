@@ -194,5 +194,26 @@
     "frames": 2,
     "frameRate": 8,
     "repeat": -1
+  },
+  "player_attack_1": {
+    "atlas": "player",
+    "prefix": "attack_1_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_attack_2": {
+    "atlas": "player",
+    "prefix": "attack_2_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_attack_3": {
+    "atlas": "player",
+    "prefix": "attack_3_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
   }
 }
