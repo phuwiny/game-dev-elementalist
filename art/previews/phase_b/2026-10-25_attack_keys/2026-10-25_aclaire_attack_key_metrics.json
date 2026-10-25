@@ -1,0 +1,65 @@
+{
+  "attack_1": {
+    "source": "2026-10-25_aclaire_attack_1_key_source_v2.png",
+    "frame": [
+      192,
+      128
+    ],
+    "bounds": [
+      59,
+      25,
+      175,
+      128
+    ],
+    "eye": [
+      104.6842105263158,
+      55.36842105263158
+    ],
+    "sole_row": 127,
+    "right_reach_logical": 39.5,
+    "scale_from_source": 0.1266,
+    "opaque_colors": 183
+  },
+  "attack_2": {
+    "source": "2026-10-25_aclaire_attack_2_key_source.png",
+    "frame": [
+      192,
+      128
+    ],
+    "bounds": [
+      56,
+      10,
+      173,
+      128
+    ],
+    "eye": [
+      105.2,
+      55.4
+    ],
+    "sole_row": 127,
+    "right_reach_logical": 38.5,
+    "scale_from_source": 0.1257,
+    "opaque_colors": 184
+  },
+  "attack_3": {
+    "source": "2026-10-25_aclaire_attack_3_key_source.png",
+    "frame": [
+      192,
+      128
+    ],
+    "bounds": [
+      31,
+      15,
+      176,
+      128
+    ],
+    "eye": [
+      105.0,
+      48.9
+    ],
+    "sole_row": 127,
+    "right_reach_logical": 40.0,
+    "scale_from_source": 0.1173,
+    "opaque_colors": 195
+  }
+}
