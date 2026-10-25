@@ -48,18 +48,18 @@
       128
     ],
     "bounds": [
-      31,
-      15,
-      176,
+      38,
+      27,
+      169,
       128
     ],
     "eye": [
-      105.0,
-      48.9
+      105.22222222222223,
+      57.333333333333336
     ],
     "sole_row": 127,
-    "right_reach_logical": 40.0,
-    "scale_from_source": 0.1173,
-    "opaque_colors": 195
+    "right_reach_logical": 36.5,
+    "scale_from_source": 0.1056,
+    "opaque_colors": 183
   }
 }

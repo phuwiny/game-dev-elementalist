@@ -16,9 +16,9 @@ Three key poses are ready for Pinz's review. They are concept frames only; the p
 | --- | --- | ---: | --- |
 | `attack_1` | forward horizontal slash | 39.5 logical px | 192×128 |
 | `attack_2` | diagonal rising slash | 38.5 logical px | 192×128 |
-| `attack_3` | heavy downward ground contact | 40.0 logical px | 192×128 |
+| `attack_3` | heavy downward ground contact | 36.5 logical px | 192×128 |
 
-All three frames have binary alpha, colors mapped to the approved V4 palette (183, 184 and 195 opaque colors), and a sole on row 127. The eye is near frame x=105, matching approved idle's +9 physical px eye offset from the bottom-center pivot. The sheath stays on the back while the sword is drawn.
+All three frames have binary alpha, colors mapped to the approved V4 palette (183, 184 and 183 opaque colors), and a sole on row 127. The eye is near frame x=105, matching approved idle's +9 physical px eye offset from the bottom-center pivot. The sheath stays on the back while the sword is drawn. After Pinz noted that `attack_3` read taller, its whole pose was reduced uniformly by 10% and re-anchored to the same sole row. Its top opaque row is now 27, close to `attack_1` row 25; `attack_2` reaches higher because its sword points upward.
 
 ## Built-in imagegen prompt set
 

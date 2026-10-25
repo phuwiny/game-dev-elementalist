@@ -25,6 +25,10 @@ def key_frame(path: Path) -> tuple[Image.Image, dict]:
     eye = eye_center(source)
     scale = .985 * min(120 / (box[3] - box[1]),
                       (TIP_LIMIT - EYE_X) / (box[2] - eye[0]))
+    if path == SOURCES['attack_3']:
+        # The generated finisher reads larger than the first two poses.
+        # Reduce it uniformly while keeping the planted sole on the baseline.
+        scale *= .90
     cropped = source.crop(box)
     size = (round(cropped.width * scale), round(cropped.height * scale))
     image = indexed(cropped.resize(size, Image.Resampling.NEAREST))
