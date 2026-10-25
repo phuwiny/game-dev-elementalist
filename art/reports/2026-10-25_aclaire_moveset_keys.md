@@ -23,4 +23,4 @@ The selected transparent source sheets are in `art/concept/` with names `2026-10
 - `hurt_key` shows a brief recoil without injury details.
 - `dead_key` is a compact seated collapse so the pose fits the specified 48×64 logical frame.
 
-These are proposals awaiting visual approval. After approval, finish the second batch's animation strips, check timing, test all seven actions in Phaser, and add them to the player atlas and `animations.json`.
+Pinz approved these key poses ("ok ครับ"). The production follow-up now uses them as the action anchors. Details of strip completion and atlas integration are in `phase_b.md`.

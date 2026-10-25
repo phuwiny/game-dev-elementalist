@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aclaire V4 — remaining moveset review</title>
+  <style>
+    :root { color-scheme: dark; font-family: ui-monospace, Consolas, monospace; background: #171427; color: #f2efe6; }
+    body { margin: 0; padding: 24px; }
+    main { max-width: 1000px; margin: auto; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    p { color: #b4b2c9; margin: 0 0 18px; line-height: 1.5; }
+    .stage { width: 640px; height: 360px; max-width: 100%; box-sizing: border-box; background: #2b2440; border: 2px solid #4e476b; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); margin-bottom: 28px; }
+    .slot { display: flex; flex-direction: column; align-items: center; justify-content: end; padding-bottom: 22px; box-sizing: border-box; font-size: 11px; }
+    .slot img { width: 48px; height: 64px; image-rendering: pixelated; }
+    .floor { width: 94px; height: 2px; background: #48c9a0; margin: 2px 0 6px; }
+    .reviews { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .review { min-height: 196px; background: #2b2440; border: 1px solid #4e476b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+    .review img { width: 96px; height: 128px; image-rendering: pixelated; }
+    .review strong { font-size: 12px; }
+    @media (max-width: 700px) { body { padding: 12px; } .stage { width: 100%; } .slot { font-size: 9px; } .floor { width: 65px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Aclaire V4 — remaining moveset</h1>
+    <p>Top panel is exactly 640×360 logical pixels. Sprites are shown at 48×64 logical pixels. The larger cards below show the physical frames. Review GIFs loop; game animations follow their one-shot or loop settings.</p>
+    <section class="stage" aria-label="640 by 360 game-scale preview">
+      <div class="slot"><img src="2026-10-25_moveset_key_review/double_jump_motion.gif" alt="double jump"><span class="floor"></span>double_jump</div>
+      <div class="slot"><img src="2026-10-25_moveset_key_review/cast_motion.gif" alt="cast"><span class="floor"></span>cast</div>
+      <div class="slot"><img src="2026-10-25_moveset_key_review/dash_motion.gif" alt="dash"><span class="floor"></span>dash</div>
+      <div class="slot"><img src="2026-10-25_moveset_key_review/glide_motion.gif" alt="glide"><span class="floor"></span>glide</div>
+      <div class="slot"><img src="2026-10-25_moveset_motion/ground_slam_motion.gif" alt="ground slam"><span class="floor"></span>ground_slam</div>
+      <div class="slot"><img src="2026-10-25_moveset_motion/hurt_motion.gif" alt="hurt"><span class="floor"></span>hurt</div>
+      <div class="slot"><img src="2026-10-25_moveset_motion/dead_motion.gif" alt="dead"><span class="floor"></span>dead</div>
+    </section>
+    <div class="reviews" aria-label="Physical-size animation review">
+      <div class="review"><img src="2026-10-25_moveset_key_review/double_jump_motion.gif" alt="double jump enlarged"><strong>double_jump · 4 / 14 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_key_review/cast_motion.gif" alt="cast enlarged"><strong>cast · 4 / 12 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_key_review/dash_motion.gif" alt="dash enlarged"><strong>dash · 3 / 16 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_key_review/glide_motion.gif" alt="glide enlarged"><strong>glide · 4 / 10 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_motion/ground_slam_motion.gif" alt="ground slam enlarged"><strong>ground_slam · 5 / 14 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_motion/hurt_motion.gif" alt="hurt enlarged"><strong>hurt · 2 / 10 fps</strong></div>
+      <div class="review"><img src="2026-10-25_moveset_motion/dead_motion.gif" alt="dead enlarged"><strong>dead · 6 / 10 fps</strong></div>
+    </div>
+  </main>
+</body>
+</html>
