@@ -6,6 +6,7 @@ import { textStyle } from '../ui/text';
 import { useUiCamera } from '../ui/screen';
 import { DEV_LEVELS } from '../levels';
 import { sfx } from '../systems/Sfx';
+import { addSaveWarning } from '../ui/saveWarning';
 
 interface MenuItem {
   label: string;
@@ -25,6 +26,7 @@ export class TitleScene extends Phaser.Scene {
     useUiCamera(this);
     this.cameras.main.setBackgroundColor(PALETTE.outline);
     const cx = GAME_WIDTH / 2;
+    addSaveWarning(this);
 
     this.add.text(cx, 64, 'ELEMENTAL SPIRIT', textStyle(28, PALETTE.gold)).setOrigin(0.5);
     this.add.text(cx, 94, 'Phase 3 · Vertical Slice', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);

@@ -9,6 +9,7 @@ import { ELEMENT_ORDER } from '../core/ElementSelector';
 import type { Progress } from '../core/Progress';
 import type { Vitals } from '../core/Vitals';
 import { sfx } from '../systems/Sfx';
+import { addSaveWarning } from '../ui/saveWarning';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
 const NODE_Y = 190;
@@ -30,6 +31,7 @@ export class WorldMapScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(PALETTE.foliage1);
     const cx = GAME_WIDTH / 2;
     const n = ADVENTURE_LEVELS.length;
+    addSaveWarning(this);
 
     this.add.text(cx, 40, 'WORLD 1 · EMBER WOODS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
 

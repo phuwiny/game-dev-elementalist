@@ -8,6 +8,7 @@ import { REGISTRY_LEVEL, type GameScene, type HudState } from './GameScene';
 import { isAdventure } from '../levels';
 import { setAtlasFrame } from '../assets/frames';
 import { sfx } from '../systems/Sfx';
+import { addSaveWarning } from '../ui/saveWarning';
 
 const BOSS_FILL_WIDTH = 236;
 const BOSS_BAR_X = (GAME_WIDTH - 240) / 2;
@@ -42,6 +43,7 @@ export class UIScene extends Phaser.Scene {
 
   create(): void {
     useUiCamera(this);
+    addSaveWarning(this);
     this.lastKey = '';
     this.hearts = [];
     for (let i = 0; i < 9; i += 1) {
