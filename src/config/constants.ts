@@ -27,6 +27,7 @@ export const SceneKey = {
   WorldMap: 'WorldMapScene',
   Game: 'GameScene',
   UI: 'UIScene',
+  Settings: 'SettingsScene',
   GameOver: 'GameOverScene',
   StageClear: 'StageClearScene',
 } as const;

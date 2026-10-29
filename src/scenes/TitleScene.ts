@@ -6,6 +6,8 @@ import { textStyle } from '../ui/text';
 import { useUiCamera } from '../ui/screen';
 import { DEV_LEVELS } from '../levels';
 import { sfx } from '../systems/Sfx';
+import { controlsHint, loadBindings } from '../core/Bindings';
+import { SaveStore } from '../core/SaveStore';
 import { addSaveWarning } from '../ui/saveWarning';
 
 interface MenuItem {
@@ -34,6 +36,7 @@ export class TitleScene extends Phaser.Scene {
 
     const menu: MenuItem[] = [
       { label: 'Adventure', run: () => this.scene.start(SceneKey.WorldMap) },
+      { label: 'Settings', run: () => this.scene.start(SceneKey.Settings) },
       ...DEV_LEVELS.map((l) => ({ label: l.name, run: () => this.scene.start(SceneKey.Game, { level: l.key }) })),
     ];
 
@@ -50,7 +53,7 @@ export class TitleScene extends Phaser.Scene {
     refreshMute();
 
     this.add
-      .text(cx, 304, 'A/D move  SPACE jump  J sword  K element  Q/E or 1-4 switch  ESC pause', textStyle(10, PALETTE.neutral3))
+      .text(cx, 304, controlsHint(loadBindings(new SaveStore())), textStyle(10, PALETTE.neutral3))
       .setOrigin(0.5);
     this.add.text(cx, 322, 'UP/DOWN select  ENTER start', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
 

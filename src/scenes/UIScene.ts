@@ -35,6 +35,7 @@ export class UIScene extends Phaser.Scene {
   private bossFill!: Phaser.GameObjects.Image;
   private bossName!: Phaser.GameObjects.Text;
   private shownBossHp = -1;
+  private settingsOpen = false;
   private lastKey = '';
 
   constructor() {
@@ -81,17 +82,34 @@ export class UIScene extends Phaser.Scene {
       .setDepth(100);
 
     const kb = this.input.keyboard;
-    kb?.on('keydown-ESC', () => this.togglePause());
+    this.settingsOpen = false;
+    kb?.on('keydown-ESC', () => {
+      if (!this.settingsOpen) this.togglePause();
+    });
     kb?.on('keydown-M', () => {
+      if (this.settingsOpen) return;
       sfx.toggleMute();
       this.refreshPauseHint();
     });
     // ออกจากด่านได้เฉพาะตอนหยุดเกม
     kb?.on('keydown-X', () => {
-      if (!this.pauseLayer.visible) return;
+      if (!this.pauseLayer.visible || this.settingsOpen) return;
       const level = this.registry.get(REGISTRY_LEVEL) as string | undefined;
       this.scene.stop(SceneKey.Game);
       this.scene.start(level && isAdventure(level) ? SceneKey.WorldMap : SceneKey.Title, { focus: level });
+    });
+    // ตั้งปุ่มระหว่างหยุดเกม: เปิดหน้า Settings ซ้อนทับ แล้วให้เกมอ่านปุ่มใหม่ตอนปิด
+    kb?.on('keydown-S', () => {
+      if (!this.pauseLayer.visible || this.settingsOpen) return;
+      this.settingsOpen = true;
+      this.pauseLayer.setVisible(false);
+      this.scene.launch(SceneKey.Settings, { overlay: true });
+      this.scene.get(SceneKey.Settings).events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+        this.settingsOpen = false;
+        (this.scene.get(SceneKey.Game) as GameScene).reloadControls();
+        this.pauseLayer.setVisible(true);
+        this.refreshPauseHint();
+      });
     });
     // สลับแท็บแล้วหยุดเกมไว้ ไม่ให้ตัวละครตายตอนผู้เล่นไม่อยู่
     const onHidden = () => this.setPaused(true);
@@ -142,7 +160,7 @@ export class UIScene extends Phaser.Scene {
   private refreshPauseHint(): void {
     const level = this.registry.get(REGISTRY_LEVEL) as string | undefined;
     const exit = level && isAdventure(level) ? 'World Map' : 'Title';
-    this.pauseHint.setText(`ESC resume   M sound ${sfx.muted ? 'OFF' : 'ON'}   X quit to ${exit}`);
+    this.pauseHint.setText(`ESC resume   S settings   M sound ${sfx.muted ? 'OFF' : 'ON'}   X quit to ${exit}`);
   }
 
   private togglePause(): void {

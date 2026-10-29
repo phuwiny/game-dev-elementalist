@@ -9,6 +9,7 @@ import { WorldMapScene } from './scenes/WorldMapScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { GameOverScene, StageClearScene } from './scenes/EndScenes';
+import { SettingsScene } from './scenes/SettingsScene';
 
 const game = new Phaser.Game({
   type: Phaser.WEBGL,
@@ -29,7 +30,8 @@ const game = new Phaser.Game({
       debug: new URLSearchParams(window.location.search).has('debug'),
     },
   },
-  scene: [BootScene, PreloadScene, TitleScene, WorldMapScene, GameScene, UIScene, GameOverScene, StageClearScene],
+  // SettingsScene อยู่หลัง UIScene เพื่อให้เปิดซ้อนบนหน้า Pause ได้
+  scene: [BootScene, PreloadScene, TitleScene, WorldMapScene, GameScene, UIScene, SettingsScene, GameOverScene, StageClearScene],
 });
 
 // เปิดให้ทดสอบผ่าน console / automated test ได้
