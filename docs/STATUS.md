@@ -59,6 +59,7 @@ python3 tests/e2e/lab_test.py                   # Elements Lab 38 checks
 python3 tests/e2e/flow.py                       # เมนู, World Map, เซฟ, Game Over
 python3 tests/e2e/boss_reset.py                 # สนามบอส: ประตูปิด, ตายแล้วรีเซ็ต, phase 1→3
 python3 tests/e2e/oneway.py                     # แท่น one-way: ทะลุจากล่าง ลงยืนจากบน
+python3 tests/e2e/player_anims.py               # Aclaire: 59 frame ชิดพื้น/กึ่งกลาง และกดปุ่มจริงแล้วเล่นท่าถูก (run, combo, jump, double jump, cast, dash, slam, hurt, dead)
 ```
 
 - สคริปต์ใช้ `?lowres` (วาด 640×360) เพราะ software GL ที่ 1280×720 ได้ ~44 fps จน bot กดปุ่มไม่ทัน ตั้ง `GAME_URL` และ `SHOT_DIR` ได้ทาง env
