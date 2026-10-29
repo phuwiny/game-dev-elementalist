@@ -19,7 +19,7 @@ SPECS = {
     'attack_1': ('2026-10-29_aclaire_attack_1_clean_source.png', 2, 4, .252, 192),
     'attack_2': ('2026-10-29_aclaire_attack_2_production_source.png', 2, 4, .248, 192),
     'attack_3': ('2026-10-29_aclaire_attack_3_production_source.png', 3, 5, .252, 192),
-    'cast': ('2026-10-29_aclaire_cast_right_hand_source.png', 2, 4, .252, 96),
+    'cast': ('2026-10-29_aclaire_cast_compact_source.png', 2, 4, .252, 96),
     'hurt': ('2026-10-28_aclaire_hurt_proportions_v2_review.png', 3, 3, 124/741, 96),
     'dead': ('2026-10-29_aclaire_dead_proportions_v3_review.png', 3, 6, 124/474, 96),
 }
