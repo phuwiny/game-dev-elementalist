@@ -274,3 +274,7 @@ At Pinz's request, all four Cast frames now use the anatomical right (near-side)
 ### Cast cancellation — 29 October 2026
 
 Pinz cancelled the right-hand revision. Production Cast is restored to the original compact source (2026-10-29_aclaire_cast_compact_source.png), exactly as shipped in c82edd6. The right-hand source remains an unused study. Validator and current atlas checks pass.
+
+### Final artwork selection and closeout — 30 October 2026
+
+Pinz rejected the pixel-cleanup experiment and chose the original approved combat artwork. All 59 production frames, the player atlas and animations.json are byte-identical to c82edd6; the experiment never entered production or PR #13. Rejected study files and helpers are preserved in a local untracked archive. Asset validator: PASS (0 errors). Current combat atlas tests: PASS (2 tests). No spec conflict or further art decision remains for this revision. See [closeout report](2026-10-30_aclaire_art_closeout.md).
