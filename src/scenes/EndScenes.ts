@@ -51,7 +51,7 @@ export class StageClearScene extends Phaser.Scene {
     super(SceneKey.StageClear);
   }
 
-  create(data: { coins?: number; level?: string; next?: string | null }): void {
+  create(data: { coins?: number; level?: string; next?: string | null; shards?: { have: number; total: number; added: number } }): void {
     useUiCamera(this).setBackgroundColor(PALETTE.outline);
     addSaveWarning(this);
     const cx = GAME_WIDTH / 2;
@@ -59,6 +59,11 @@ export class StageClearScene extends Phaser.Scene {
     const adventure = exit === SceneKey.WorldMap;
     this.add.text(cx, 120, 'STAGE CLEAR', textStyle(28, PALETTE.gold)).setOrigin(0.5);
     this.add.text(cx, 165, `Coins collected: ${data.coins ?? 0}`, textStyle(12)).setOrigin(0.5);
+    const sh = data.shards;
+    if (sh && sh.total > 0) {
+      const fresh = sh.added > 0 ? `  (+${sh.added} new)` : '';
+      this.add.text(cx, 184, `Spirit Shards: ${sh.have}/${sh.total}${fresh}`, textStyle(12, PALETTE.pink3)).setOrigin(0.5);
+    }
 
     const kb = this.input.keyboard;
     if (adventure) {

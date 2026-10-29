@@ -18,6 +18,21 @@ describe('World 1 Tiled maps', () => {
     });
   }
 
+  it('each World 1 level hides three Spirit Shards (slots 0-2) in empty, unique cells', () => {
+    for (const def of ADVENTURE_LEVELS) {
+      const level = parseTiledMap(load(def.map!));
+      expect(level.shards.map((x) => x.slot).sort(), def.key).toEqual([0, 1, 2]);
+      const cells = new Set(level.shards.map((x) => `${x.col},${x.row}`));
+      expect(cells.size, def.key).toBe(3);
+      for (const x of level.shards) {
+        expect(level.tiles[x.row][x.col], `${def.key} shard ${x.slot} in a solid tile`).toBe(Tile.Empty);
+        // never over a pit: ground, a block or a one-way ledge lies within 6 tiles straight below
+        const below = Array.from({ length: 6 }, (_, i) => level.tiles[x.row + 1 + i]?.[x.col]);
+        expect(below.some((t) => t === Tile.Solid || t === Tile.OneWay), `${def.key} shard ${x.slot} has nothing under it`).toBe(true);
+      }
+    }
+  });
+
   it('1-1 gives Burnil and 1-3 ends with the boss arena', () => {
     const w11 = parseTiledMap(load('assets/maps/w1_1.json'));
     expect(w11.objects.filter((o) => o.kind === 'spirit').map((o) => o.slot)).toEqual([0]);
@@ -63,6 +78,31 @@ describe('parseTiledMap', () => {
     expect(level.goal).toEqual({ col: 3, row: 1 });
     expect(level.objects).toEqual([{ kind: 'torch', col: 1, row: 1 }]);
     expect(level.enemies).toEqual([{ kind: 'leaf_wisp', col: 2, row: 0 }]);
+  });
+
+  it('reads Spirit Shards with their slot and rejects bad or repeated slots', () => {
+    const base = [
+      { id: 1, class: 'player', x: 0, y: 16, width: 16, height: 16 },
+      { id: 2, type: 'goal', x: 48, y: 16, width: 16, height: 16 },
+    ];
+    const shard = (id: number, x: number, slot: unknown) => ({
+      id,
+      class: 'shard',
+      x,
+      y: 0,
+      width: 16,
+      height: 16,
+      properties: slot === undefined ? undefined : [{ name: 'slot', type: 'int', value: slot }],
+    });
+    const level = parseTiledMap(tiny([...base, shard(3, 16, 2), shard(4, 32, 0)]));
+    expect(level.shards).toEqual([
+      { col: 1, row: 0, slot: 2 },
+      { col: 2, row: 0, slot: 0 },
+    ]);
+    expect(parseTiledMap(tiny(base)).shards).toEqual([]);
+    expect(() => parseTiledMap(tiny([...base, shard(3, 16, 3)]))).toThrow(/slot/);
+    expect(() => parseTiledMap(tiny([...base, shard(3, 16, undefined)]))).toThrow(/slot/);
+    expect(() => parseTiledMap(tiny([...base, shard(3, 16, 1), shard(4, 32, 1)]))).toThrow(/twice/);
   });
 
   it('rejects unknown classes and maps without player or goal', () => {

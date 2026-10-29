@@ -19,6 +19,7 @@ export type SfxName =
   | 'coin'
   | 'one_up'
   | 'heart'
+  | 'shard'
   | 'checkpoint'
   | 'spirit'
   | 'switch'
@@ -70,6 +71,11 @@ const SOUNDS: Record<SfxName, Tone[]> = {
     { wave: 'square', from: 1320, ms: 160, gain: 0.1, delayMs: 180 },
   ],
   heart: [{ wave: 'triangle', from: 520, to: 1040, ms: 200, gain: 0.15 }],
+  shard: [
+    { wave: 'triangle', from: 880, to: 1320, ms: 110, gain: 0.14 },
+    { wave: 'triangle', from: 1320, to: 1760, ms: 160, gain: 0.14, delayMs: 100 },
+    { wave: 'square', from: 1760, ms: 120, gain: 0.05, delayMs: 200 },
+  ],
   checkpoint: [
     { wave: 'triangle', from: 523, ms: 100, gain: 0.15 },
     { wave: 'triangle', from: 784, ms: 200, gain: 0.15, delayMs: 100 },

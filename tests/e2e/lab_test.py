@@ -27,7 +27,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda e: errors.append(f'pageerror: {e}'))
     page.goto(URL)
     page.wait_for_function("() => window.__game && window.__game.scene.isActive('TitleScene')", timeout=15000)
-    page.wait_for_timeout(300); page.keyboard.press('ArrowDown'); page.wait_for_timeout(100); page.keyboard.press('Enter')
+    page.wait_for_timeout(300); page.keyboard.press('ArrowDown'); page.wait_for_timeout(150); page.keyboard.press('ArrowDown'); page.wait_for_timeout(150); page.keyboard.press('Enter')  # Adventure, Settings, Elements Lab
     page.wait_for_function("() => window.__game.scene.isActive('GameScene')", timeout=5000)
     page.wait_for_timeout(600)
 

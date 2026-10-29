@@ -3,6 +3,7 @@ import {
   type GridPoint,
   type LevelArt,
   LevelParseError,
+  SHARDS_PER_LEVEL,
   type LevelObject,
   type ObjectKind,
   type ParsedLevel,
@@ -21,7 +22,7 @@ import {
  * - object layer ชื่อ "objects": ใช้ class (หรือ type ใน Tiled รุ่นเก่า) เป็นชนิดวัตถุ
  *   ตำแหน่งวัตถุอ่านจากมุมล่างซ้ายของสี่เหลี่ยม (หรือจุด) แล้วปัดเป็นช่อง
  *
- * class ที่รองรับ: player, goal, checkpoint, coin, heart, boss,
+ * class ที่รองรับ: player, goal, checkpoint, coin, heart, shard (property `slot` 0–2), boss,
  *   moss_slime, leaf_wisp, thorn_beetle,
  *   vine, crate, ice, water, torch, seed, windmill, cracked_wall, plate, gate, arena_gate,
  *   spirit (property `slot` 0–3 = ไฟ น้ำ ลม ดิน)
@@ -140,6 +141,7 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     checkpoints: [],
     coins: [],
     hearts: [],
+    shards: [],
     enemies: [],
     objects: [],
     boss: null,
@@ -174,6 +176,15 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
       case 'heart':
         level.hearts.push(p);
         break;
+      case 'shard': {
+        const slot = Number(prop(o, 'slot') ?? Number.NaN);
+        if (!Number.isInteger(slot) || slot < 0 || slot >= SHARDS_PER_LEVEL) {
+          throw new LevelParseError(`Shard (id ${o.id}) needs slot 0-${SHARDS_PER_LEVEL - 1}`);
+        }
+        if (level.shards.some((s) => s.slot === slot)) throw new LevelParseError(`Shard slot ${slot} is used twice`);
+        level.shards.push({ ...p, slot });
+        break;
+      }
       case 'boss':
         if (level.boss) throw new LevelParseError('Tiled map has more than one boss');
         level.boss = p;

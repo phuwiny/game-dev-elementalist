@@ -31,6 +31,9 @@ export enum Tile {
   OneWay = 3,
 }
 
+/** Spirit Shard ต่อด่าน (GDD หัวข้อ 4) */
+export const SHARDS_PER_LEVEL = 3;
+
 export interface GridPoint {
   col: number;
   row: number;
@@ -49,6 +52,11 @@ export type ObjectKind =
   | 'gate'
   | 'arenaGate'
   | 'spirit';
+
+/** Spirit Shard ที่ซ่อนในด่าน: slot 0–2 ใช้จำว่าชิ้นไหนเก็บแล้ว */
+export interface ShardSpawn extends GridPoint {
+  slot: number;
+}
 
 export type EnemyKind = 'moss_slime' | 'leaf_wisp' | 'thorn_beetle';
 
@@ -88,6 +96,7 @@ export interface ParsedLevel {
   checkpoints: GridPoint[];
   coins: GridPoint[];
   hearts: GridPoint[];
+  shards: ShardSpawn[];
   enemies: EnemySpawn[];
   objects: LevelObject[];
   /** จุดวางบอส (มุมล่างซ้าย) ถ้าด่านมีบอส */
@@ -216,6 +225,7 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
     checkpoints,
     coins,
     hearts,
+    shards: [],
     enemies,
     objects,
     boss,

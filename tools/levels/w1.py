@@ -21,6 +21,19 @@ class Level:
         self.fill(0, width - 1, G, H - 1)
         self.fill(0, 0, 0, H - 1)
         self.fill(width - 1, width - 1, 0, H - 1)
+        self.shards = []  # (col, row, slot): Spirit Shards are Tiled objects, not ASCII cells
+
+    def shard(self, c, r, slot):
+        assert self.g[r][c] == '.', f'shard over {self.g[r][c]!r} at col {c} row {r}'
+        assert all(s[2] != slot for s in self.shards), f'shard slot {slot} used twice'
+        self.shards.append((c, r, slot))
+
+    def crate_nest(self, c, slot):
+        """3x3 ring of crates (burn them with fire) hiding a Spirit Shard at the bottom centre"""
+        for r in (17, 18, 19):
+            self.put(c, r, 'b'); self.put(c + 2, r, 'b')
+        self.put(c + 1, 17, 'b'); self.put(c + 1, 18, 'b')
+        self.shard(c + 1, 19, slot)
 
     def put(self, c, r, ch):
         assert self.g[r][c] == '.', f'overwrite {self.g[r][c]!r} at col {c} row {r} with {ch!r}'
@@ -96,6 +109,10 @@ def w1_1():
     L.pit(142, 144)
     L.coins(150, 154, G - 2)
     L.put(162, G - 1, 'G')
+    # Spirit Shards: a tower of one-way ledges by the start, a ledge over the platform, a crate nest
+    L.platform(5, 7, 17); L.platform(8, 10, 14); L.platform(11, 13, 11); L.shard(12, 10, 0)
+    L.platform(48, 49, 12); L.shard(48, 11, 1)
+    L.crate_nest(146, 2)                        # the pit at 142-144 comes first
     return L
 
 
@@ -134,6 +151,10 @@ def w1_2():
     L.put(175, G - 1, 's'); L.put(178, G - 1, 'r')
     L.coins(182, 186, G - 2)
     L.put(192, G - 1, 'G')
+    # Spirit Shards: ledge over the pyramid, a crate nest, a ledge guarded by a leaf wisp
+    L.platform(28, 30, 14); L.shard(29, 9, 0)    # float 4 tiles above the ledge: jump again from it
+    L.crate_nest(44, 1)
+    L.platform(135, 137, 12); L.shard(136, 11, 2); L.put(133, 10, 'f')
     return L
 
 
@@ -168,6 +189,10 @@ def w1_3():
     L.gate(170, ch='A')                         # arena gate (open until the fight starts)
     L.put(180, G - 1, 'G')                      # goal appears when the boss is defeated
     L.put(188, G - 1, 'B')                      # Bramble King (12x12 tiles, bottom-left)
+    # Spirit Shards: a ledge over the spikes, a crate nest, a ledge next to the wisp by the pyramid
+    L.platform(29, 31, 15); L.shard(30, 10, 0)
+    L.crate_nest(52, 1)
+    L.platform(128, 129, 14); L.shard(129, 9, 2)
     return L
 
 
@@ -310,7 +335,7 @@ def ruins(rows, name, rng):
     return walls, vines
 
 
-def to_tiled(rows, name):
+def to_tiled(rows, name, shards=()):
     W = len(rows[0])
     objects = []
     rng = random.Random('terrain:' + name)
@@ -335,6 +360,10 @@ def to_tiled(rows, name):
             if props:
                 obj['properties'] = props
             objects.append(obj)
+    for c, r, slot in shards:
+        objects.append({'id': len(objects) + 1, 'name': '', 'class': 'shard', 'x': c * 16, 'y': r * 16,
+                        'width': 16, 'height': 16, 'rotation': 0, 'visible': True,
+                        'properties': [{'name': 'slot', 'type': 'int', 'value': slot}]})
     return {
         'type': 'map', 'version': '1.10', 'tiledversion': '1.10.2', 'orientation': 'orthogonal',
         'renderorder': 'right-down', 'width': W, 'height': H, 'tilewidth': 16, 'tileheight': 16,
@@ -358,9 +387,10 @@ if __name__ == '__main__':
     out = sys.argv[1]
     os.makedirs(out, exist_ok=True)
     for key, fn, name in (('w1_1', w1_1, 'Ember Trail'), ('w1_2', w1_2, 'Burning Canopy'), ('w1_3', w1_3, 'Bramble Hollow')):
-        rows = fn().rows()
+        level = fn()
+        rows = level.rows()
         with open(os.path.join(out, f'{key}.json'), 'w', newline='\n') as f:
-            json.dump(to_tiled(rows, name), f, separators=(',', ':'))
+            json.dump(to_tiled(rows, name, level.shards), f, separators=(',', ':'))
             f.write('\n')
         print(f'== {key} {name} ({len(rows[0])}x{len(rows)})')
         for i in range(0, len(rows[0]), 100):
