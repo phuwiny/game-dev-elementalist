@@ -4,7 +4,10 @@ usage: python3 w1.py <out_dir>   (writes w1_1.json, w1_2.json, w1_3.json and pri
 """
 import json
 import os
+import random
 import sys
+from pathlib import Path
+from xml.etree import ElementTree as ET
 
 H, G = 23, 20  # rows, ground row (G..H-1 are ground)
 SIZES = {'v': (1, 1), 'b': (1, 1), 'i': (1, 1), '~': (1, 1), 't': (1, 2), 'w': (1, 1), 'm': (3, 3),
@@ -36,7 +39,8 @@ class Level:
         self.fill(c0, c1, G - height, G - 1)
 
     def platform(self, c0, c1, row):
-        self.fill(c0, c1, row, row)
+        """floating one-way platform (stand on it from above, jump up through it)"""
+        self.fill(c0, c1, row, row, '-')
 
     def gate(self, c, ch='D', floor=G):
         self.fill(c, c + 1, 0, floor - 4)
@@ -167,14 +171,49 @@ def w1_3():
     return L
 
 
-TILESET = {
-    'firstgid': 1, 'name': 'graybox', 'tilewidth': 16, 'tileheight': 16, 'tilecount': 3, 'columns': 3,
-    'image': 'graybox_tiles.png', 'imagewidth': 48, 'imageheight': 16, 'margin': 0, 'spacing': 0,
-    'tiles': [
-        {'id': 0, 'properties': [{'name': 'collides', 'type': 'bool', 'value': True}]},
-        {'id': 1, 'properties': [{'name': 'collides', 'type': 'bool', 'value': True}]},
-        {'id': 2, 'properties': [{'name': 'hazard', 'type': 'bool', 'value': True}]},
-    ],
+TSX = Path(__file__).resolve().parents[2] / 'public/assets/tilesets/tiles_w1_ember_woods.tsx'
+FLIP_H = 0x80000000
+
+
+def load_tileset():
+    """Embed the tileset from the TSX (single source of truth for margin, spacing and tile properties)."""
+    root = ET.parse(TSX).getroot()
+    image = root.find('image')
+    tiles = []
+    for tile in root.findall('tile'):
+        props = [{'name': p.get('name'), 'type': p.get('type'), 'value': p.get('value') == 'true'}
+                 for p in tile.find('properties')]
+        tiles.append({'id': int(tile.get('id')), 'properties': props})
+    return {
+        'firstgid': 1, 'name': root.get('name'), 'tilewidth': 16, 'tileheight': 16,
+        'tilecount': int(root.get('tilecount')), 'columns': int(root.get('columns')),
+        'image': '../tilesets/' + image.get('source'), 'imagewidth': int(image.get('width')),
+        'imageheight': int(image.get('height')), 'margin': int(root.get('margin')),
+        'spacing': int(root.get('spacing')), 'tiles': tiles,
+    }
+
+
+# Tile roles in tiles_w1_ember_woods (art/reports/2026-10-25_world1_integration_guide.md)
+T_TOP = (0, 0, 1)             # grass cap, two variants
+T_FILL = (2, 3)               # soil, two variants
+T_LEFT, T_RIGHT, T_CEILING = 4, 5, 6
+T_OUTER = {'tl': 7, 'tr': 8, 'bl': 9, 'br': 10}   # convex corners
+T_INNER = {'tl': 11, 'tr': 12, 'bl': 13, 'br': 14}  # concave corners (unused, see solid_tile)
+T_CAP = 15                    # single-tile platform cap
+T_ONEWAY = (16, 17, 18)       # left end, middle, right end
+T_HAZARD = (19, 19, 20, 21)
+# ground decoration: leaves 34-37, roots 38-41, rubble 46-49, mushrooms 50-53, ember flowers 54-57
+DECOR_GROUND = list(range(34, 42)) + list(range(46, 58))
+DECOR_CHANCE = 0.3
+# background ruins: ruined masonry 22-33 behind the play lane, wall vines 42-45 hanging from the broken top
+WALL_TILES = tuple(range(22, 34))
+VINE_TILES = tuple(range(42, 46))
+VINE_CHANCE = 0.4
+# (first col, last col, max height in tiles) per level; cells holding an object or enemy are left empty
+RUINS = {
+    'Ember Trail': [(60, 70, 5), (148, 158, 4)],
+    'Burning Canopy': [(60, 68, 5), (150, 160, 4)],
+    'Bramble Hollow': [(60, 66, 4), (176, 198, 6)],
 }
 CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'heart', 's': 'moss_slime',
            'f': 'leaf_wisp', 'r': 'thorn_beetle', 'v': 'vine', 'b': 'crate', 'i': 'ice', '~': 'water',
@@ -182,18 +221,106 @@ CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'hea
            'A': 'arena_gate', 'B': 'boss'}
 
 
+def solid_tile(solid, r, c, rng):
+    """pick the terrain tile for a solid cell from its 8 neighbours (out of the map counts as solid)"""
+    u, d, l, rt = solid(r - 1, c), solid(r + 1, c), solid(r, c - 1), solid(r, c + 1)
+    if not u and not d:
+        return T_CAP
+    if not u:
+        if not l:
+            return T_OUTER['tl']
+        if not rt:
+            return T_OUTER['tr']
+        return rng.choice(T_TOP)
+    if not d:
+        if not l:
+            return T_OUTER['bl']
+        if not rt:
+            return T_OUTER['br']
+        return T_CEILING
+    if not l:
+        return T_LEFT
+    if not rt:
+        return T_RIGHT
+    # T_INNER (11-14) is not used: each draws a grass cap or edge lines across a tile that sits inside the soil,
+    # so a concave corner shows as a green block. Plain fill reads cleanly until the art intent is confirmed.
+    return rng.choice(T_FILL)
+
+
+def autotile(rows, rng):
+    """terrain gids from the ASCII layout: '#' solid, '-' one-way, '^' hazard"""
+    H_, W_ = len(rows), len(rows[0])
+
+    def solid(r, c):
+        return r < 0 or r >= H_ or c < 0 or c >= W_ or rows[r][c] == '#'
+
+    def oneway(r, c):
+        return 0 <= r < H_ and 0 <= c < W_ and rows[r][c] == '-'
+
+    data = []
+    for r in range(H_):
+        for c in range(W_):
+            ch = rows[r][c]
+            tid = None
+            if ch == '#':
+                tid = solid_tile(solid, r, c, rng)
+            elif ch == '-':
+                tid = T_ONEWAY[0] if not oneway(r, c - 1) else T_ONEWAY[2] if not oneway(r, c + 1) else T_ONEWAY[1]
+            elif ch == '^':
+                tid = rng.choice(T_HAZARD)
+            data.append(0 if tid is None else 1 + tid)
+    return data
+
+
+def decorate(rows, rng):
+    """sparse ground decoration on grass caps, away from objects, enemies and spawns"""
+    H_, W_ = len(rows), len(rows[0])
+    data = [0] * (H_ * W_)
+    for r in range(1, H_):
+        last = -9
+        for c in range(W_):
+            if rows[r][c] != '#' or rows[r - 1][c] != '.':
+                continue
+            near = rows[r - 1][max(0, c - 2):c + 3]
+            if set(near) != {'.'} or c - last < 2:
+                continue
+            if rng.random() < DECOR_CHANCE:
+                data[(r - 1) * W_ + c] = 1 + rng.choice(DECOR_GROUND)
+                last = c
+    return data
+
+
+def ruins(rows, name, rng):
+    """(wall gids, vine gids): masonry rising from the ground with an uneven top, vines hanging from it"""
+    H_, W_ = len(rows), len(rows[0])
+    walls, vines = [0] * (H_ * W_), [0] * (H_ * W_)
+    for c0, c1, h in RUINS.get(name, []):
+        for c in range(c0, c1 + 1):
+            if rows[G][c] != '#':
+                continue  # no wall standing over a pit
+            height = max(2, h - rng.choice((0, 0, 1, 2)))
+            top = G - height
+            for r in range(top, G):
+                if rows[r][c] == '.':
+                    walls[r * W_ + c] = 1 + rng.choice(WALL_TILES)
+            if walls[top * W_ + c] and rng.random() < VINE_CHANCE:
+                for r in (top, top + 1):
+                    if walls[r * W_ + c]:
+                        vines[r * W_ + c] = 1 + rng.choice(VINE_TILES)
+    return walls, vines
+
+
 def to_tiled(rows, name):
     W = len(rows[0])
-    data, objects = [], []
+    objects = []
+    rng = random.Random('terrain:' + name)
+    data = autotile(rows, rng)
+    ground = decorate(rows, random.Random('decor:' + name))
+    walls, vines = ruins(rows, name, random.Random('ruins:' + name))
+    over = [v or g for v, g in zip(vines, ground)]
     for r, line in enumerate(rows):
         for c, ch in enumerate(line):
-            if ch == '#':
-                data.append(1 if r > 0 and rows[r - 1][c] == '#' else 2)
-            elif ch == '^':
-                data.append(3)
-            else:
-                data.append(0)
-            if ch in '.#^':
+            if ch in '.#^-':
                 continue
             if ch in '1234':
                 cls, w, h, props = 'spirit', 1, 1, [{'name': 'slot', 'type': 'int', 'value': int(ch) - 1}]
@@ -211,10 +338,14 @@ def to_tiled(rows, name):
     return {
         'type': 'map', 'version': '1.10', 'tiledversion': '1.10.2', 'orientation': 'orthogonal',
         'renderorder': 'right-down', 'width': W, 'height': H, 'tilewidth': 16, 'tileheight': 16,
-        'infinite': False, 'nextlayerid': 3, 'nextobjectid': len(objects) + 1,
+        'infinite': False, 'nextlayerid': 5, 'nextobjectid': len(objects) + 1,
         'properties': [{'name': 'name', 'type': 'string', 'value': name}],
-        'tilesets': [TILESET],
+        'tilesets': [load_tileset()],
         'layers': [
+            {'id': 3, 'name': 'decor', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
+             'opacity': 1, 'visible': True, 'data': walls},
+            {'id': 4, 'name': 'decor_over', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
+             'opacity': 1, 'visible': True, 'data': over},
             {'id': 1, 'name': 'terrain', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
              'opacity': 1, 'visible': True, 'data': data},
             {'id': 2, 'name': 'objects', 'type': 'objectgroup', 'draworder': 'topdown', 'x': 0, 'y': 0,

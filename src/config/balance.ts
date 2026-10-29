@@ -140,6 +140,8 @@ export const BossBalance = {
     seedTelegraphMs: 650,
     seedFallSpeed: 260,
     contactDamage: 1,
+    /** กึ่งกลางโล่เถาวัลย์เทียบกับขอบซ้ายของบอส (px) ให้คลุมจุดอ่อนที่ x 20–64 (ART_HANDOFF.md) */
+    shieldOffsetX: 42,
     /** ระยะห่างจากผู้เล่นที่ทำให้สนามปิดและเริ่มสู้ (px หลังผ่านประตูสนาม) */
     startOffset: 24,
   },

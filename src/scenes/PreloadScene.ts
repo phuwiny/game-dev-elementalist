@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { useUiCamera } from '../ui/screen';
 import { GAME_HEIGHT, GAME_WIDTH, SceneKey, TILE_SIZE } from '../config/constants';
-import { ANIMATIONS_JSON, ATLASES, fillTextureKey } from '../assets/manifest';
+import { ANIMATIONS_JSON, ATLASES, TILESETS, WORLD1_BACKGROUND, fillTextureKey } from '../assets/manifest';
 import { createGrayboxTiles, createPlaceholderAtlas, missingFrames } from '../assets/placeholders';
 import { registerAnimations } from '../assets/animations';
 import { PALETTE, hex } from '../assets/palette';
@@ -38,6 +38,9 @@ export class PreloadScene extends Phaser.Scene {
       if (available.has(atlas.json)) this.load.atlas(atlas.key, atlas.png, atlas.json);
       else this.failed.add(atlas.key);
     }
+    // tileset และ background เป็นภาพเดี่ยว ถ้าโหลดไม่ได้ GameScene ใช้ graybox / สีพื้นแทน
+    for (const t of TILESETS) this.load.image(t.key, t.png);
+    for (const b of [...WORLD1_BACKGROUND.layers, WORLD1_BACKGROUND.bossFar]) this.load.image(b.key, b.png);
     if (available.has(ANIMATIONS_JSON)) this.load.json(ANIMATIONS_KEY, ANIMATIONS_JSON);
     else this.failed.add(ANIMATIONS_KEY);
     // ด่าน Tiled เป็นของฝั่งโค้ด ต้องมีเสมอ ถ้าโหลดไม่ได้ให้ error ชัด ๆ

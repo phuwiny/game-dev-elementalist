@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
+import { ONE_WAY_DECK_OFFSET, SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
 import { BossBalance, ElementBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
@@ -36,10 +36,12 @@ import {
   WaterSurface,
   Windmill,
 } from '../puzzles/PuzzleObjects';
-import { animKey } from '../assets/manifest';
+import { animKey, backgroundForTileset } from '../assets/manifest';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
 import { setAtlasFrame } from '../assets/frames';
+import { buildArtTerrain } from '../systems/TerrainArt';
+import { ParallaxBackground } from '../systems/ParallaxBackground';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
 export const REGISTRY_LEVEL = 'level';
@@ -108,6 +110,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private progress!: Progress;
   private boss: BrambleKing | null = null;
   private arenaGate: ArenaGate | null = null;
+  private background: ParallaxBackground | null = null;
   private goalFlag: Phaser.GameObjects.Sprite | null = null;
 
   constructor() {
@@ -134,6 +137,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.puzzleDirty = true;
     this.boss = null;
     this.arenaGate = null;
+    this.background = null;
     this.goalFlag = null;
 
     const def = findLevel(data?.level ?? (this.registry.get(REGISTRY_LEVEL) as string | undefined));
@@ -147,6 +151,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
     this.level = def.rows ? parseLevel(def.rows) : parseTiledMap(this.cache.json.get(mapCacheKey(def.key)) as TiledMap);
     this.layer = this.buildTerrain(this.level);
+    this.buildBackground();
     const worldW = this.level.width * TILE_SIZE;
     const worldH = this.level.height * TILE_SIZE;
     this.physics.world.setBounds(0, 0, worldW, worldH);
@@ -158,6 +163,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.sensors = this.physics.add.staticGroup();
     this.oneWays = this.physics.add.staticGroup();
     this.projectiles = this.physics.add.group({ allowGravity: false });
+    this.buildOneWayTerrain();
 
     const start = this.footOf(this.level.player);
     this.respawnPoint = start;
@@ -221,6 +227,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.updatePlates();
     if (this.puzzleDirty) this.updateGates();
     this.updateBoss(delta);
+    this.background?.update();
 
     if (!this.player.isDead && this.player.y > worldBottom + FALL_DEATH_MARGIN) {
       this.killPlayer();
@@ -368,6 +375,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   // ---------------------------------------------------------------------------
 
   private buildTerrain(level: ParsedLevel): Phaser.Tilemaps.TilemapLayer {
+    // ด่าน Tiled ที่มี tileset จริง: วาดตาม gid ในไฟล์แผนที่ ที่เหลือใช้ graybox จาก grid
+    if (level.art && this.textures.exists(level.art.tileset)) return buildArtTerrain(this, level.art);
     // tile index: 0 = พื้นทึบ, 1 = พื้นผิวบน, 2 = หนาม (ไม่ชน แยก hitbox ไว้ที่ buildSpikes)
     const data = level.tiles.map((row, r) =>
       row.map((t, c) => {
@@ -384,6 +393,32 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     if (!layer) throw new Error('Cannot create terrain layer');
     layer.setCollision([0, 1]);
     return layer;
+  }
+
+  private buildBackground(): void {
+    const art = this.level.art;
+    const def = art ? backgroundForTileset(art.tileset) : null;
+    if (!def) return;
+    const background = new ParallaxBackground(this, def, this.cameras.main);
+    if (!background.isEmpty) this.background = background;
+  }
+
+  /** แท่น one-way จาก tile ในแผนที่: รวม tile ที่ติดกันเป็นแผ่นเดียว */
+  private buildOneWayTerrain(): void {
+    this.level.tiles.forEach((row, r) => {
+      let c = 0;
+      while (c < row.length) {
+        if (row[c] !== Tile.OneWay) {
+          c += 1;
+          continue;
+        }
+        let end = c;
+        while (end + 1 < row.length && row[end + 1] === Tile.OneWay) end += 1;
+        const width = (end - c + 1) * TILE_SIZE;
+        this.addOneWayPlatform(c * TILE_SIZE + width / 2, r * TILE_SIZE + ONE_WAY_DECK_OFFSET, width);
+        c = end + 1;
+      }
+    });
   }
 
   private buildPuzzleObjects(): void {
@@ -598,6 +633,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         sfx.play('gate');
         boss.start(() => this.onBossDefeated());
         this.frameBossFight(true);
+        this.background?.setBossArena(true);
       }
     }
     boss.update(delta);
@@ -651,6 +687,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     // ศัตรู
     this.physics.add.collider(this.enemies, this.layer);
     this.physics.add.collider(this.enemies, this.solids);
+    this.physics.add.collider(this.enemies, this.oneWays);
     this.physics.add.collider(this.enemies, this.waters, undefined, frozenWater);
     this.physics.add.overlap(this.enemies, this.waters, (e) => (e as Enemy).vanish(), openWater);
 
@@ -887,6 +924,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       if (this.boss?.isActive) {
         this.boss.reset();
         this.frameBossFight(false);
+        this.background?.setBossArena(false);
         this.arenaGate?.setClosed(false);
       }
       this.companion.snap();

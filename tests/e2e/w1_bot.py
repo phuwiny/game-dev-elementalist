@@ -32,7 +32,7 @@ STATE_JS = """() => {
     for (let r = footRow; r <= footRow + 4; r++) {
       const t = tile(c, r);
       if (t === 2) return 'spike';
-      if (t === 1) return null;
+      if (t === 1 || t === 3) return null;
     }
     return 'pit';
   };

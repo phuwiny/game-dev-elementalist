@@ -39,6 +39,48 @@ export interface AtlasDef {
 
 export const ANIMATIONS_JSON = 'assets/animations.json';
 
+/**
+ * tileset ของด่าน Tiled: key ตรงกับ name ใน .tsx / แผนที่ (LevelArt.tileset)
+ * margin และ spacing อ่านจากแผนที่ ไม่ต้องประกาศที่นี่
+ */
+export interface TilesetDef {
+  key: string;
+  png: string;
+}
+
+export const TILESETS: readonly TilesetDef[] = [
+  { key: 'tiles_w1_ember_woods', png: 'assets/tilesets/tiles_w1_ember_woods.png' },
+];
+
+/** ชั้น background 640×360 วนซ้ำแนวนอน (ART_HANDOFF.md) */
+export interface BackgroundDef {
+  key: string;
+  png: string;
+}
+
+export interface WorldBackground {
+  /** ชั้นไกลสุดไปใกล้สุด พร้อมสัดส่วนที่เลื่อนตามกล้อง (0 = นิ่ง, 1 = เท่ากล้อง) */
+  layers: readonly (BackgroundDef & { parallax: number })[];
+  /** ชั้นไกลสุดที่ใช้แทนในสนามบอส */
+  bossFar: BackgroundDef;
+}
+
+const bg = (key: string): BackgroundDef => ({ key, png: `assets/backgrounds/w1/${key}.png` });
+
+export const WORLD1_BACKGROUND: WorldBackground = {
+  layers: [
+    { ...bg('bg_w1_far'), parallax: 0.1 },
+    { ...bg('bg_w1_mid'), parallax: 0.3 },
+    { ...bg('bg_w1_near'), parallax: 0.6 },
+  ],
+  bossFar: bg('bg_w1_boss_far'),
+};
+
+/** background ของด่านที่ใช้ tileset นี้ */
+export function backgroundForTileset(tileset: string): WorldBackground | null {
+  return tileset === 'tiles_w1_ember_woods' ? WORLD1_BACKGROUND : null;
+}
+
 /** texture ที่เก็บ placeholder ของ frame ที่ไฟล์จริงยังไม่มี (atlas ส่งมาไม่ครบทุกท่า) */
 export const fillTextureKey = (atlasKey: string): string => `${atlasKey}__fill`;
 
@@ -139,7 +181,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'thorn_beetle_walk', frames: 6, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_flipped', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_hurt', frames: 2, frameRate: 10, repeat: 0 },
-      { name: 'thorn_beetle_death', frames: 5, frameRate: 12, repeat: 0 },
+      { name: 'thorn_beetle_death', frames: 6, frameRate: 12, repeat: 0 },
     ],
   },
   {
@@ -149,11 +191,11 @@ export const ATLASES: AtlasDef[] = [
     anims: [
       { name: 'idle', frames: 6, frameRate: 6, repeat: -1 },
       { name: 'vine_attack', frames: 8, frameRate: 12, repeat: 0 },
-      { name: 'roar', frames: 6, frameRate: 10, repeat: 0 },
+      { name: 'roar', frames: 6, frameRate: 8, repeat: 0 },
       { name: 'weak_exposed', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'hurt', frames: 2, frameRate: 10, repeat: 0 },
       { name: 'death', frames: 10, frameRate: 10, repeat: 0 },
-      { name: 'vine_whip', frames: 6, frameRate: 14, repeat: -1, width: 64, height: 16 },
+      { name: 'vine_whip', frames: 6, frameRate: 12, repeat: -1, width: 64, height: 16 },
       { name: 'vine_shield_idle', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 32 },
       { name: 'vine_shield_burn', frames: 6, frameRate: 12, repeat: 0, width: 32, height: 32 },
       { name: 'thorn_seed', frames: 2, frameRate: 8, repeat: -1, width: 16, height: 16 },

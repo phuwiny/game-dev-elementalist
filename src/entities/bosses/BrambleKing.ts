@@ -218,7 +218,7 @@ export class BrambleKing {
     const scene = this.host.puzzleScene;
     const count = this.phases.shieldsLeft;
     for (let i = 0; i < count; i += 1) {
-      const shield = new VineShield(scene, this.left + 6, this.bottom - i * 32, () => this.onShieldBurned());
+      const shield = new VineShield(scene, this.left + B.shieldOffsetX, this.bottom - i * 32, () => this.onShieldBurned());
       this.host.addSolid(shield.zone);
       this.shields.push(shield);
     }
