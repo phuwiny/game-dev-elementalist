@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aclaire combat idle — transition review</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #171427; color: #f3efe7; }
+    body { margin: 0; padding: 20px; }
+    main { max-width: 1000px; margin: auto; }
+    h1 { font-size: 22px; margin: 0 0 6px; }
+    p { color: #c0bdd0; line-height: 1.55; margin: 0 0 14px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    button { border: 1px solid #706b91; border-radius: 6px; background: #302b49; color: #f3efe7; padding: 8px 13px; cursor: pointer; font: inherit; }
+    button[aria-pressed="true"] { border-color: #f6c453; background: #5c443a; }
+    button:hover { border-color: #f6c453; }
+    canvas { display: block; width: min(100%, 640px); height: auto; image-rendering: pixelated; background: #2b2440; border: 2px solid #706b91; box-sizing: border-box; }
+    .legend { display: flex; gap: 12px; width: min(100%, 640px); margin: 8px 0 18px; }
+    .legend span { width: 50%; text-align: center; font-weight: 700; }
+    .metrics { font-family: ui-monospace, Consolas, monospace; color: #d9d5e8; font-size: 13px; }
+    .note { font-size: 13px; max-width: 720px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Aclaire — combat idle transition review</h1>
+  <p>ซ้ายเป็น idle เดิม ขวาเป็นร่างใหม่ที่ปรับความสูงให้เท่ากัน ทั้งสองฝั่งใช้ frame ท่าอื่นจาก atlas เดียวกัน สลับท่าเพื่อดูจังหวะต่อและขนาดศีรษะ</p>
+  <div class="controls" id="actions" aria-label="เลือกท่าที่จะต่อจาก idle"></div>
+  <div class="controls"><button id="pause" type="button">หยุดภาพ</button><button id="restart" type="button">เริ่มจังหวะใหม่</button></div>
+  <canvas id="stage" width="1280" height="720" aria-label="เปรียบเทียบ idle เดิมและร่างใหม่ที่ขนาดเกม 640 คูณ 360"></canvas>
+  <div class="legend"><span>Idle เดิม → ท่าอื่น</span><span>Idle ร่างใหม่ → ท่าอื่น</span></div>
+  <p>มุมขยาย 2 เท่า สำหรับเทียบใบหน้า เส้นผม และช่วงตัว</p>
+  <canvas id="detail" width="1280" height="360" aria-label="มุมขยายตัวละครสองฝั่ง"></canvas>
+  <p class="metrics" id="metrics"></p>
+  <p class="note">ภาพร่างใหม่ยังเป็น concept ที่ถูกย่อจากต้นฉบับเพื่อดูสัดส่วนเท่านั้น ขอบพิกเซล สี และจำนวน frame ยังไม่ใช่ production atlas</p>
+</main>
+<script>
+  const atlasUrl = '../../../public/assets/sprites/player/player.png';
+  const jsonUrl = '../../../public/assets/sprites/player/player.json';
+  const draftUrl = '../../concept/2026-10-28_aclaire_combat_idle_draft.png';
+  const sequences = {
+    run: { label: 'Idle → Run', names: ['run_000','run_001','run_002','run_003'], fps: 8, duration: 880 },
+    jump: { label: 'Idle → Jump → Land', names: ['jump_up_000','jump_up_001','jump_peak_000','jump_peak_001','fall_000','fall_001','land_000','land_001'], fps: 9, duration: 1050 },
+    attack: { label: 'Idle → Attack 1', names: ['attack_1_000','attack_1_001','attack_1_002','attack_1_003'], fps: 12, duration: 750 },
+    cast: { label: 'Idle → Cast', names: ['cast_000','cast_001','cast_002','cast_003'], fps: 12, duration: 700 },
+    hurt: { label: 'Idle → Hurt', names: ['hurt_000','hurt_001'], fps: 10, duration: 650 }
+  };
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const detailCtx = document.getElementById('detail').getContext('2d');
+  detailCtx.imageSmoothingEnabled = false;
+  const metrics = document.getElementById('metrics');
+  const actions = document.getElementById('actions');
+  let selected = 'run', paused = false, started = performance.now(), held = 0;
+  let atlas, draft, frames, draftBox, draftWidth;
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = url;
+    });
+  }
+  function opaqueBounds(img) {
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    const rgba = g.getImageData(0, 0, c.width, c.height).data;
+    let left = c.width, top = c.height, right = 0, bottom = 0;
+    for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+      if (rgba[(y*c.width+x)*4+3] < 16) continue;
+      left = Math.min(left,x); right = Math.max(right,x+1);
+      top = Math.min(top,y); bottom = Math.max(bottom,y+1);
+    }
+    return { x:left, y:top, w:right-left, h:bottom-top };
+  }
+  function choose(key) {
+    selected = key; started = performance.now(); held = 0;
+    for (const b of actions.children) b.setAttribute('aria-pressed', String(b.dataset.key === key));
+  }
+  for (const [key, seq] of Object.entries(sequences)) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.key = key;
+    b.textContent = seq.label; b.addEventListener('click', () => choose(key)); actions.append(b);
+  }
+  choose(selected);
+  document.getElementById('pause').addEventListener('click', e => {
+    paused = !paused;
+    if (paused) held = performance.now() - started;
+    else started = performance.now() - held;
+    e.currentTarget.textContent = paused ? 'เล่นต่อ' : 'หยุดภาพ';
+  });
+  document.getElementById('restart').addEventListener('click', () => { started = performance.now(); held = 0; });
+
+  function drawFrame(name, cx, feet) {
+    const r = frames[name]?.frame;
+    if (!r) return;
+    ctx.drawImage(atlas, r.x,r.y,r.w,r.h, Math.round(cx-r.w/2), feet-r.h, r.w,r.h);
+  }
+  function drawDraft(cx, feet) {
+    ctx.drawImage(draft,draftBox.x,draftBox.y,draftBox.w,draftBox.h,
+      Math.round(cx-draftWidth/2),feet-124,draftWidth,124);
+  }
+  function draw(now) {
+    ctx.fillStyle = '#2b2440'; ctx.fillRect(0,0,1280,720);
+    // 1280x720 physical pixels are displayed at 640x360 logical pixels.
+    ctx.fillStyle = '#413b5d'; ctx.fillRect(638,0,4,720);
+    const feet = 604;
+    ctx.fillStyle = '#48c9a0'; ctx.fillRect(0,feet,1280,5);
+    ctx.fillStyle = '#ad98e5'; ctx.fillRect(0,feet-128,1280,1);
+    ctx.fillStyle = '#9887c0';
+    ctx.font = '22px ui-monospace, monospace';
+    ctx.fillText('OLD IDLE', 44, 64); ctx.fillText('NEW DRAFT', 685, 64);
+    if (atlas && draft && frames) {
+      const seq = sequences[selected];
+      const t = (paused ? held : now-started) % (800+seq.duration+700);
+      let name = null;
+      if (t >= 800 && t < 800+seq.duration) {
+        const k = Math.floor((t-800)/(1000/seq.fps)) % seq.names.length;
+        name = seq.names[k];
+      }
+      if (name) { drawFrame(name,320,feet); drawFrame(name,960,feet); }
+      else { drawFrame('idle_'+String(Math.floor(t/125)%6).padStart(3,'0'),320,feet); drawDraft(960,feet); }
+      ctx.fillStyle = '#f6c453'; ctx.font = '18px ui-monospace, monospace';
+      ctx.fillText(name || 'idle', 40, 665); ctx.fillText(name || 'idle draft', 680, 665);
+    }
+    detailCtx.drawImage(canvas,160,430,320,180,0,0,640,360);
+    detailCtx.drawImage(canvas,800,430,320,180,640,0,640,360);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+  Promise.all([loadImage(atlasUrl),loadImage(draftUrl),fetch(jsonUrl).then(r=>r.json())]).then(([a,d,j]) => {
+    atlas=a; draft=d; frames=j.frames; draftBox=opaqueBounds(d);
+    draftWidth=Math.round(draftBox.w*124/draftBox.h);
+    metrics.textContent=`Visible silhouette (physical pixels): old idle 68×124; draft scaled ${draftWidth}×124. Foot and crown guide lines match. Frame remains 96×128.`;
+  }).catch(err => { metrics.textContent='โหลดภาพไม่สำเร็จ: '+err.message; });
+</script>
+</body>
+</html>

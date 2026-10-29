@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th"><meta charset="utf-8"><title>Aclaire — combat revision keys</title>
+<style>body{margin:24px;background:#171427;color:#eee;font:16px system-ui}main{max-width:1100px;margin:auto}p{color:#c2bbd4;line-height:1.6}canvas{display:block;width:100%;image-rendering:pixelated;background:#2b2440}button{padding:10px;background:#413954;color:white;border:1px solid #aaa;cursor:pointer}img{width:100%;background:#2b2440}h1{font-size:24px}</style>
+<main><p><a style="color:#a8f0cf" href="2026-10-29_combat_production_review.html">เปิด production atlas ล่าสุดที่ใช้ในเกม</a></p><p><a style="color:#a8f0cf" href="2026-10-29_aclaire_dead_review.html">ดูท่าแพ้ใหม่ — เทียบขนาดหัวกับ Idle</a></p><h1>Aclaire — key pose ชุดปรับปรุง</h1><p>แถวบน: Idle ใหม่ / ชักดาบจากหลัง / Attack 1 / Attack 2 / Attack 3 / Cast<br>แถวล่าง: ตัวเทียบ — Idle / Run / Jump จากเกม และ Hurt ที่ปรับใหม่<br>ภาพใหม่ใช้สเกลเดียวกันทั้งชุด ไม่ยืดแต่ละท่าให้สูงเท่ากัน เส้นสีเขียวคือแนวฝ่าเท้า</p>
+
+<p>เทียบพร้อมกัน: Idle ค้างด้านซ้าย / Run ล่าสุดวน 4 เฟรมตรงกลาง / ชุดท่าด้านขวา — กดหยุดภาพเพื่อเทียบความสูง</p>
+<button id="toggle">หยุดภาพ</button> <button id="hurtMode">ดูทุกท่าสลับกัน</button><canvas id="motion" width="960" height="320" style="max-width:960px"></canvas>
+<canvas id="board" width="1280" height="540"></canvas><p>นี่เป็น key pose review ยังไม่ใช่ animation ครบเฟรม ชุดนี้ยังต้องเก็บขอบพิกเซลและแมปเข้าชุดสี V4 ก่อนผลิต atlas ส่วนเวลา Cast ในเกมยังอยู่ที่ 250 ms</p><p>Run — ปรับขาสั้นลงและเทียบขนาดหัว ลำตัว รองเท้า กับ Idle ใหม่ วาง Idle ด้านซ้ายเพื่อเทียบโดยตรง (แถวอ้างอิงด้านบนยังเป็น atlas เดิม)</p><img src="../../concept/2026-10-28_aclaire_run_proportions_v2_review.png" alt="Idle เทียบกับ Run สี่เฟรมที่ปรับความยาวขาและสัดส่วน"><p>Hurt — ใช้ภาพท่าที่ 2 เดิมก่อนปรับ expression (ภาพขวาสุดด้านล่าง) ซ้ำทั้ง 2 เฟรม ไม่กระพริบหาย</p><img src="../../concept/2026-10-28_aclaire_hurt_proportions_v2_review.png" alt="Idle เทียบกับ Hurt สองเฟรมล่าสุด"></main>
+<script>
+const root='../../../public/assets/sprites/player/';
+const load=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});
+Promise.all([load('../../concept/2026-10-28_aclaire_combat_revision_keys_v2.png'),load(root+'player.png'),load('../../concept/2026-10-28_aclaire_run_proportions_v2_review.png'),load('../../concept/2026-10-28_aclaire_hurt_proportions_v2_review.png'),fetch(root+'player.json').then(r=>r.json())]).then(([sheet,atlas,runSheet,hurtSheet,json])=>{
+ const b=document.querySelector('#board'),g=b.getContext('2d'),m=document.querySelector('#motion'),q=m.getContext('2d');g.imageSmoothingEnabled=q.imageSmoothingEnabled=false;
+ const keys=[['Idle',0,0,512,512,230,504],['Draw',512,0,512,512,760,504],['Attack 1',1024,0,512,512,1220,504],['Attack 2',0,475,524,549,250,997],['Attack 3',524,512,520,512,735,997],['Cast',1044,512,492,512,1255,997]];
+ const scale=124/474;
+ const tiles=keys.map((k,i)=>{const c=document.createElement('canvas');c.width=k[3];c.height=k[4];const z=c.getContext('2d');z.drawImage(sheet,k[1],k[2],k[3],k[4],0,0,k[3],k[4]);if(i===0)z.clearRect(390,475,122,37);if(i===1)z.clearRect(0,475,16,37);if(i===3)z.clearRect(0,0,390,37);return c});
+ function key(ctx,i,x,y,s=1){const k=keys[i],f=scale*s;ctx.drawImage(tiles[i],x-(k[5]-k[1])*f,y-(k[6]-k[2])*f,k[3]*f,k[4]*f)}
+ function hurt(ctx,i,x,y){const w=hurtSheet.width/3,f=124/741;ctx.drawImage(hurtSheet,w*2,0,w,790,x-430*f,y-761*f,w*f,790*f)}
+ function old(ctx,name,x,y){const f=json.frames[name].frame;ctx.drawImage(atlas,f.x,f.y,f.w,f.h,x-f.w/2,y-f.h,f.w,f.h)}
+ g.fillStyle='#2b2440';g.fillRect(0,0,b.width,b.height);g.font='18px system-ui';
+ keys.forEach((k,i)=>{const x=105+i*210;g.fillStyle='#48c9a0';g.fillRect(x-85,195,170,2);key(g,i,x,195);g.fillStyle='#fff';g.fillText(k[0],x-40,230)});
+ ['idle_000','run_000','jump_up_000','hurt_000'].forEach((n,i)=>{const x=230+i*270;g.fillStyle='#48c9a0';g.fillRect(x-85,455,170,2);if(n==='hurt_000')hurt(g,0,x,455);else old(g,n,x,455);g.fillStyle='#fff';g.fillText(n==='hurt_000'?'Hurt revised':n,x-60,490)});
+ let hurtOnly=true;document.querySelector('#hurtMode').onclick=e=>{hurtOnly=!hurtOnly;e.target.textContent=hurtOnly?'ดูทุกท่าสลับกัน':'ดู Hurt 2 เฟรม'};
+ let paused=false,t0=performance.now(),hold=0;document.querySelector('#toggle').onclick=e=>{paused=!paused;if(paused)hold=performance.now()-t0;else t0=performance.now()-hold;e.target.textContent=paused?'เล่นต่อ':'หยุดภาพ'};
+ function run(ctx,i,x,y){
+  const edges=[410,820,1200,1590,2048],centers=[640,1010,1390,1815],r=runSheet.width/2048,f=124/470;
+  const left=edges[i],w=edges[i+1]-left;
+  ctx.drawImage(runSheet,left*r,90*r,w*r,495*r,x+(left-centers[i])*f,y+(90-576)*f,w*f,495*f);
+ }
+ function frame(now){
+  q.fillStyle='#2b2440';q.fillRect(0,0,960,320);
+  const t=Math.max(0,paused?hold:now-t0),seq=[0,1,2,3,4,0,5,'jump','hurt'],i=hurtOnly?'hurt':seq[Math.floor(t/650)%seq.length],feet=255;
+  key(q,0,150,feet);run(q,Math.floor(t/125)%4,470,feet);
+  let name;
+  if(i==='jump'){old(q,'jump_up_000',790,feet);name='Jump (atlas)'}
+  else if(i==='hurt'){hurt(q,Math.floor(t/100)%2,790,feet);name='Hurt — 2 frames'}
+  else{key(q,i,790,feet);name=keys[i][0]}
+  q.fillStyle='#48c9a0';q.fillRect(30,feet,900,2);
+  q.strokeStyle='#b69cda';q.setLineDash([5,5]);q.beginPath();q.moveTo(30,feet-124);q.lineTo(930,feet-124);q.stroke();q.setLineDash([]);
+  q.fillStyle='#fff';q.font='18px system-ui';q.fillText('Idle — reference',75,40);q.fillText('Run — revised',400,40);q.fillText(name,730,40);
+  q.fillText('RUN '+String(Math.floor(t/125)%4+1).padStart(2,'0'),425,290);
+  requestAnimationFrame(frame);
+ }requestAnimationFrame(frame);
+}).catch(e=>document.body.append('โหลดภาพไม่สำเร็จ: '+e.message));
+</script></html>
