@@ -8,6 +8,7 @@ import { REGISTRY_VITALS } from './BootScene';
 import { REGISTRY_LEVEL } from './GameScene';
 import { isAdventure } from '../levels';
 import { sfx } from '../systems/Sfx';
+import { addSaveWarning } from '../ui/saveWarning';
 
 /** ด่านโหมดผจญภัยกลับไปที่แผนที่โลก ด่านทดสอบกลับไปหน้า Title */
 function exitScene(levelKey: string | undefined): string {
@@ -24,6 +25,7 @@ export class GameOverScene extends Phaser.Scene {
 
   create(): void {
     useUiCamera(this).setBackgroundColor(PALETTE.outline);
+    addSaveWarning(this);
     const cx = GAME_WIDTH / 2;
     this.add.text(cx, 130, 'GAME OVER', textStyle(28, PALETTE.fire)).setOrigin(0.5);
     this.add.text(cx, 190, 'ENTER  Continue', textStyle(12)).setOrigin(0.5);
@@ -51,6 +53,7 @@ export class StageClearScene extends Phaser.Scene {
 
   create(data: { coins?: number; level?: string; next?: string | null }): void {
     useUiCamera(this).setBackgroundColor(PALETTE.outline);
+    addSaveWarning(this);
     const cx = GAME_WIDTH / 2;
     const exit = exitScene(data.level);
     const adventure = exit === SceneKey.WorldMap;
