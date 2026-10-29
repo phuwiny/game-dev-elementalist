@@ -121,7 +121,7 @@
   "enemies_w1_thorn_beetle_death": {
     "atlas": "enemies_w1",
     "prefix": "thorn_beetle_death_",
-    "frames": 6,
+    "frames": 5,
     "frameRate": 12,
     "repeat": 0
   },
@@ -194,5 +194,75 @@
     "frames": 2,
     "frameRate": 8,
     "repeat": -1
+  },
+  "player_attack_1": {
+    "atlas": "player",
+    "prefix": "attack_1_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_attack_2": {
+    "atlas": "player",
+    "prefix": "attack_2_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_attack_3": {
+    "atlas": "player",
+    "prefix": "attack_3_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_double_jump": {
+    "atlas": "player",
+    "prefix": "double_jump_",
+    "frames": 4,
+    "frameRate": 14,
+    "repeat": 0
+  },
+  "player_cast": {
+    "atlas": "player",
+    "prefix": "cast_",
+    "frames": 4,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "player_dash": {
+    "atlas": "player",
+    "prefix": "dash_",
+    "frames": 3,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "player_glide": {
+    "atlas": "player",
+    "prefix": "glide_",
+    "frames": 4,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "player_ground_slam": {
+    "atlas": "player",
+    "prefix": "ground_slam_",
+    "frames": 5,
+    "frameRate": 14,
+    "repeat": 0
+  },
+  "player_hurt": {
+    "atlas": "player",
+    "prefix": "hurt_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "player_dead": {
+    "atlas": "player",
+    "prefix": "dead_",
+    "frames": 6,
+    "frameRate": 10,
+    "repeat": 0
   }
 }

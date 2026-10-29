@@ -1,0 +1,285 @@
+{
+  "double_jump": {
+    "source": "art/concept/2026-10-25_aclaire_double_jump_source_v2.png",
+    "scale": 0.20534652404920353,
+    "target_eye_x": 57,
+    "frames": [
+      {
+        "name": "double_jump_000",
+        "bounds": [
+          7,
+          28,
+          78,
+          128
+        ],
+        "eye": [
+          56.69565217391305,
+          63.43478260869565
+        ],
+        "colors": 210
+      },
+      {
+        "name": "double_jump_001",
+        "bounds": [
+          4,
+          12,
+          90,
+          128
+        ],
+        "eye": [
+          57.074074074074076,
+          49.333333333333336
+        ],
+        "colors": 213
+      },
+      {
+        "name": "double_jump_002",
+        "bounds": [
+          7,
+          14,
+          89,
+          128
+        ],
+        "eye": [
+          57.333333333333336,
+          46.86666666666667
+        ],
+        "colors": 211
+      },
+      {
+        "name": "double_jump_003",
+        "bounds": [
+          0,
+          21,
+          78,
+          128
+        ],
+        "eye": [
+          56.67857142857143,
+          53.42857142857143
+        ],
+        "colors": 211
+      }
+    ]
+  },
+  "cast": {
+    "source": "art/concept/2026-10-25_aclaire_cast_source_v3.png",
+    "scale": 0.24948875255623723,
+    "target_eye_x": 57,
+    "frames": [
+      {
+        "name": "cast_000",
+        "bounds": [
+          11,
+          6,
+          80,
+          128
+        ],
+        "eye": [
+          56.588235294117645,
+          46.23529411764706
+        ],
+        "colors": 216
+      },
+      {
+        "name": "cast_001",
+        "bounds": [
+          13,
+          6,
+          81,
+          128
+        ],
+        "eye": [
+          57.39473684210526,
+          46.05263157894737
+        ],
+        "colors": 216
+      },
+      {
+        "name": "cast_002",
+        "bounds": [
+          11,
+          6,
+          86,
+          128
+        ],
+        "eye": [
+          56.513513513513516,
+          45.7027027027027
+        ],
+        "colors": 214
+      },
+      {
+        "name": "cast_003",
+        "bounds": [
+          12,
+          6,
+          80,
+          128
+        ],
+        "eye": [
+          57.37837837837838,
+          45.78378378378378
+        ],
+        "colors": 215
+      }
+    ]
+  },
+  "dash": {
+    "source": "art/concept/2026-10-25_aclaire_dash_source_v3.png",
+    "scale": 0.17630057803468208,
+    "target_eye_x": 57,
+    "frames": [
+      {
+        "name": "dash_000",
+        "bounds": [
+          9,
+          6,
+          84,
+          128
+        ],
+        "eye": [
+          57.36363636363637,
+          50.45454545454545
+        ],
+        "colors": 199
+      },
+      {
+        "name": "dash_001",
+        "bounds": [
+          5,
+          31,
+          84,
+          128
+        ],
+        "eye": null,
+        "colors": 191
+      },
+      {
+        "name": "dash_002",
+        "bounds": [
+          10,
+          7,
+          83,
+          128
+        ],
+        "eye": [
+          57.5,
+          50.22727272727273
+        ],
+        "colors": 202
+      }
+    ]
+  },
+  "glide": {
+    "source": "art/concept/2026-10-25_aclaire_glide_source.png",
+    "scale": 0.2,
+    "target_eye_x": 57,
+    "frames": [
+      {
+        "name": "glide_000",
+        "bounds": [
+          2,
+          15,
+          94,
+          128
+        ],
+        "eye": [
+          57.30434782608695,
+          53.130434782608695
+        ],
+        "colors": 202
+      },
+      {
+        "name": "glide_001",
+        "bounds": [
+          3,
+          20,
+          91,
+          128
+        ],
+        "eye": [
+          56.85,
+          58.35
+        ],
+        "colors": 202
+      },
+      {
+        "name": "glide_002",
+        "bounds": [
+          1,
+          18,
+          93,
+          128
+        ],
+        "eye": [
+          57.25,
+          55.916666666666664
+        ],
+        "colors": 203
+      },
+      {
+        "name": "glide_003",
+        "bounds": [
+          4,
+          9,
+          88,
+          128
+        ],
+        "eye": [
+          56.625,
+          52.416666666666664
+        ],
+        "colors": 204
+      }
+    ]
+  },
+  "ground_slam": {
+    "source": "art/concept/2026-10-25_aclaire_ground_slam_key_source.png",
+    "scale": 0.10844333776579994,
+    "key": {
+      "bounds": [
+        0,
+        18,
+        84,
+        128
+      ],
+      "eye": [
+        57.193548387096776,
+        64.58064516129032
+      ],
+      "colors": 207
+    }
+  },
+  "hurt": {
+    "source": "art/concept/2026-10-25_aclaire_hurt_key_source.png",
+    "scale": 0.09291698400609291,
+    "key": {
+      "bounds": [
+        13,
+        6,
+        79,
+        128
+      ],
+      "eye": [
+        57.25,
+        43.375
+      ],
+      "colors": 203
+    }
+  },
+  "dead": {
+    "source": "art/concept/2026-10-25_aclaire_dead_key_source.png",
+    "scale": 0.09561128526645768,
+    "key": {
+      "bounds": [
+        8,
+        6,
+        87,
+        128
+      ],
+      "eye": null,
+      "colors": 196
+    }
+  }
+}

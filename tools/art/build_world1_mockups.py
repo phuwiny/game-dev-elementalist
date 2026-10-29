@@ -18,7 +18,7 @@ def tile(sheet:Image.Image,i:int)->Image.Image:
 def ground(screen:Image.Image,sheet:Image.Image,level:int=288)->None:
     for x in range(0,640,24):
         for y in range(level,360,24):
-            idx=0 if y==level else 1 if (x//24+y//24)%4 else 5
+            idx=0 if y==level else 2 if (x//24+y//24)%4 else 3
             screen.alpha_composite(tile(sheet,idx),(x,y))
 
 

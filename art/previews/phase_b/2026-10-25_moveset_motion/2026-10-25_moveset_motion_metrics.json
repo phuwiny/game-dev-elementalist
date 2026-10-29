@@ -1,0 +1,181 @@
+{
+  "ground_slam": {
+    "source": "art/concept/2026-10-25_aclaire_ground_slam_strip_source.png",
+    "scale": 0.20233567447595247,
+    "locked_key_index": 2,
+    "frames": [
+      {
+        "frame": "ground_slam_000",
+        "bounds": [
+          0,
+          29,
+          78,
+          128
+        ],
+        "eye": null,
+        "colors": 209
+      },
+      {
+        "frame": "ground_slam_001",
+        "bounds": [
+          0,
+          31,
+          81,
+          128
+        ],
+        "eye": null,
+        "colors": 201
+      },
+      {
+        "frame": "ground_slam_002",
+        "bounds": [
+          0,
+          18,
+          84,
+          128
+        ],
+        "eye": [
+          57.193548387096776,
+          64.58064516129032
+        ],
+        "colors": 207
+      },
+      {
+        "frame": "ground_slam_003",
+        "bounds": [
+          11,
+          36,
+          78,
+          128
+        ],
+        "eye": null,
+        "colors": 209
+      },
+      {
+        "frame": "ground_slam_004",
+        "bounds": [
+          20,
+          29,
+          78,
+          128
+        ],
+        "eye": [
+          57.23529411764706,
+          61.76470588235294
+        ],
+        "colors": 205
+      }
+    ]
+  },
+  "hurt": {
+    "source": "art/concept/2026-10-25_aclaire_hurt_strip_source.png",
+    "scale": 0.12398373983739837,
+    "locked_key_index": 1,
+    "frames": [
+      {
+        "frame": "hurt_000",
+        "bounds": [
+          18,
+          6,
+          84,
+          128
+        ],
+        "eye": [
+          57.421052631578945,
+          40.8421052631579
+        ],
+        "colors": 184
+      },
+      {
+        "frame": "hurt_001",
+        "bounds": [
+          13,
+          6,
+          79,
+          128
+        ],
+        "eye": [
+          57.25,
+          43.375
+        ],
+        "colors": 203
+      }
+    ]
+  },
+  "dead": {
+    "source": "art/concept/2026-10-25_aclaire_dead_strip_source_v2.png",
+    "scale": 0.2454728370221328,
+    "locked_key_index": 5,
+    "frames": [
+      {
+        "frame": "dead_000",
+        "bounds": [
+          8,
+          6,
+          87,
+          128
+        ],
+        "eye": [
+          57.8421052631579,
+          52.05263157894737
+        ],
+        "colors": 207
+      },
+      {
+        "frame": "dead_001",
+        "bounds": [
+          11,
+          13,
+          84,
+          128
+        ],
+        "eye": null,
+        "colors": 202
+      },
+      {
+        "frame": "dead_002",
+        "bounds": [
+          8,
+          32,
+          88,
+          128
+        ],
+        "eye": null,
+        "colors": 202
+      },
+      {
+        "frame": "dead_003",
+        "bounds": [
+          7,
+          22,
+          88,
+          128
+        ],
+        "eye": null,
+        "colors": 199
+      },
+      {
+        "frame": "dead_004",
+        "bounds": [
+          11,
+          18,
+          84,
+          128
+        ],
+        "eye": null,
+        "colors": 190
+      },
+      {
+        "frame": "dead_005",
+        "bounds": [
+          8,
+          6,
+          87,
+          128
+        ],
+        "eye": null,
+        "colors": 196
+      }
+    ]
+  }
+}
