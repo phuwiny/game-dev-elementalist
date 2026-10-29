@@ -266,3 +266,7 @@ Built-in imagegen only. All source PNGs are versioned in `art/concept/` with the
 - Cast: four frames in a 2×2 sheet; hand already forward on frame 1, slight push/hold/recovery, slightly open mouth and wide stance. Compact edit foreshortens the extended arm and modestly narrows stance without changing head/body size to fit the standard frame.
 - Run: remove only background and text from the approved five-pose comparison, retaining the four running poses and open-mouth expressions; transparent output.
 - All generated strips: same right-facing Aclaire, orange ponytail, pink armor, brown shorts, black boots, crisp pixel clusters, no captions or effects, genuine transparency. Hurt and Dead use their approved source sheets without another redraw.
+
+### Cast right-hand follow-up — 29 October 2026
+
+At Pinz's request, all four Cast frames now use the anatomical right (near-side) arm extending across the chest, with the other fist held close to the torso. The pose remains compact inside 96×128, with the hand forward from frame 1. Head/body scale and animation timing are unchanged. Source: `art/concept/2026-10-29_aclaire_cast_right_hand_source.png`; built-in imagegen prompt: switch casting to the near-side right arm, keep a natural compact forward palm, preserve the head/body/legs, four-frame layout and transparency. A second targeted pass corrected the last frame to use the same arm. Validator and both current atlas tests pass after rebuilding. Only the four Cast production frames and their packed pixels changed.
