@@ -193,11 +193,13 @@ def load_tileset():
     }
 
 
-# Tile roles in tiles_w1_ember_woods (see art/reports/phase_c.md and tools/art/build_world1_environment.py)
-T_TOP = (0, 0, 0, 1)          # grass cap (moss soil x3, old roots x1)
-T_EDGE = 2                    # soil with a dark left edge; mirrored for the right edge (no right-edge tile in the set)
-T_BOTTOM = (10, 10, 15)       # underside with a dark bottom strip
-T_FILL = (3, 3, 7)            # no plain fill tile exists: roots with a subtle left line, one with a cavity
+# Tile roles in tiles_w1_ember_woods (art/reports/2026-10-25_world1_integration_guide.md)
+T_TOP = (0, 0, 1)             # grass cap, two variants
+T_FILL = (2, 3)               # soil, two variants
+T_LEFT, T_RIGHT, T_CEILING = 4, 5, 6
+T_OUTER = {'tl': 7, 'tr': 8, 'bl': 9, 'br': 10}   # convex corners
+T_INNER = {'tl': 11, 'tr': 12, 'bl': 13, 'br': 14}  # concave corners (unused, see solid_tile)
+T_CAP = 15                    # single-tile platform cap
 T_ONEWAY = (16, 17, 18)       # left end, middle, right end
 T_HAZARD = (19, 19, 20, 21)
 # ground decoration: leaves 34-37, roots 38-41, rubble 46-49, mushrooms 50-53, ember flowers 54-57
@@ -219,6 +221,32 @@ CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'hea
            'A': 'arena_gate', 'B': 'boss'}
 
 
+def solid_tile(solid, r, c, rng):
+    """pick the terrain tile for a solid cell from its 8 neighbours (out of the map counts as solid)"""
+    u, d, l, rt = solid(r - 1, c), solid(r + 1, c), solid(r, c - 1), solid(r, c + 1)
+    if not u and not d:
+        return T_CAP
+    if not u:
+        if not l:
+            return T_OUTER['tl']
+        if not rt:
+            return T_OUTER['tr']
+        return rng.choice(T_TOP)
+    if not d:
+        if not l:
+            return T_OUTER['bl']
+        if not rt:
+            return T_OUTER['br']
+        return T_CEILING
+    if not l:
+        return T_LEFT
+    if not rt:
+        return T_RIGHT
+    # T_INNER (11-14) is not used: each draws a grass cap or edge lines across a tile that sits inside the soil,
+    # so a concave corner shows as a green block. Plain fill reads cleanly until the art intent is confirmed.
+    return rng.choice(T_FILL)
+
+
 def autotile(rows, rng):
     """terrain gids from the ASCII layout: '#' solid, '-' one-way, '^' hazard"""
     H_, W_ = len(rows), len(rows[0])
@@ -233,23 +261,14 @@ def autotile(rows, rng):
     for r in range(H_):
         for c in range(W_):
             ch = rows[r][c]
-            tid, flip = None, False
+            tid = None
             if ch == '#':
-                if not solid(r - 1, c):
-                    tid = rng.choice(T_TOP)
-                elif not solid(r, c - 1):
-                    tid = T_EDGE
-                elif not solid(r, c + 1):
-                    tid, flip = T_EDGE, True
-                elif not solid(r + 1, c):
-                    tid = rng.choice(T_BOTTOM)
-                else:
-                    tid = rng.choice(T_FILL)
+                tid = solid_tile(solid, r, c, rng)
             elif ch == '-':
                 tid = T_ONEWAY[0] if not oneway(r, c - 1) else T_ONEWAY[2] if not oneway(r, c + 1) else T_ONEWAY[1]
             elif ch == '^':
                 tid = rng.choice(T_HAZARD)
-            data.append(0 if tid is None else (1 + tid) | (FLIP_H if flip else 0))
+            data.append(0 if tid is None else 1 + tid)
     return data
 
 
