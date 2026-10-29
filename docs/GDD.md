@@ -250,7 +250,7 @@ Aclaire มี HP 5 ช่อง (หัวใจ) และเริ่มเ�
 
 **Save:** บันทึกด่านที่ปลดล็อก, Spirit Shard, settings และ key binding ลง localStorage เป็น JSON ทุกครั้งที่จบด่าน ครอบการอ่านเขียนด้วย try/catch ถ้าบันทึกไม่ได้ เกมยังเล่นได้ตามปกติแต่แสดงข้อความแจ้ง
 
-สถานะ Phase 3: บันทึกแล้วคือด่านที่ผ่าน (ปลดล็อกด่านถัดไป), ภูตที่ได้ (บันทึกทันทีที่เก็บ) และการปิดเสียง ข้อความแจ้งเมื่อบันทึกไม่ได้ทำแล้ว (`SaveStatus` รายงานจาก `SaveStore` แล้ว `addSaveWarning` แสดง "! Cannot save progress" กลางจอด้านบนที่ Title, World Map, HUD และหน้า Stage Clear/Game Over ตราบใดที่บันทึกไม่ได้) ส่วน Spirit Shard และ key binding ยังไม่ได้ทำ ลบเซฟได้ที่ World Map (กด Delete 2 ครั้ง)
+สถานะ Phase 3: บันทึกแล้วคือด่านที่ผ่าน (ปลดล็อกด่านถัดไป), ภูตที่ได้ (บันทึกทันทีที่เก็บ) และการปิดเสียง ข้อความแจ้งเมื่อบันทึกไม่ได้ทำแล้ว (`SaveStatus` รายงานจาก `SaveStore` แล้ว `addSaveWarning` แสดง "! Cannot save progress" กลางจอด้านบนที่ Title, World Map, HUD และหน้า Stage Clear/Game Over ตราบใดที่บันทึกไม่ได้) key binding ทำแล้ว (หน้า Settings จากเมนู Title หรือกด S ตอน Pause: แต่ละ action มีได้ 2 ปุ่ม ปุ่มซ้ำกับ action อื่นจะสลับกัน ESC, ENTER, M, Backspace, Delete ถูกสงวน บันทึกทันทีที่เปลี่ยน กับ `core/Bindings.ts`) ส่วน Spirit Shard ยังไม่ได้ทำ ลบเซฟได้ที่ World Map (กด Delete 2 ครั้ง)
 
 **ข้อจำกัดของ browser**
 

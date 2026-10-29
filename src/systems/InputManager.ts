@@ -1,39 +1,56 @@
 import Phaser from 'phaser';
-import { Action, allBoundKeys, type Bindings, mergeBindings } from '../core/Bindings';
+import { Action, allBoundKeys, type Bindings, loadBindings } from '../core/Bindings';
 import { SaveStore } from '../core/SaveStore';
 
-const SAVE_KEY = 'bindings';
+const codeOf = (name: string): number | undefined =>
+  Phaser.Input.Keyboard.KeyCodes[name as keyof typeof Phaser.Input.Keyboard.KeyCodes];
 
 /**
  * อ่าน input ตาม action แทนการอ้างปุ่มตรงๆ เพื่อรองรับ key rebinding (GDD หัวข้อ 7)
  * Gamepad จะเพิ่มใน Phase 5
  */
 export class InputManager {
+  private readonly keyboard: Phaser.Input.Keyboard.KeyboardPlugin;
   private readonly keys = new Map<Action, Phaser.Input.Keyboard.Key[]>();
+  private captured: number[] = [];
 
-  constructor(scene: Phaser.Scene, store = new SaveStore()) {
+  constructor(
+    scene: Phaser.Scene,
+    private readonly store = new SaveStore(),
+  ) {
     const keyboard = scene.input.keyboard;
     if (!keyboard) throw new Error('Keyboard input is not available');
+    this.keyboard = keyboard;
+    this.bind(loadBindings(store));
+  }
 
-    const bindings: Bindings = mergeBindings(store.load<unknown>(SAVE_KEY, null));
+  /** อ่านค่าที่ผู้เล่นตั้งไว้ใหม่ (หลังกลับจากหน้า Settings ระหว่างหยุดเกม) */
+  reload(): void {
+    for (const list of this.keys.values()) for (const key of list) this.keyboard.removeKey(key, false);
+    this.keyboard.removeCapture(this.captured);
+    this.keys.clear();
+    this.bind(loadBindings(this.store));
+  }
+
+  private bind(bindings: Bindings): void {
     for (const action of Object.values(Action)) {
       const list: Phaser.Input.Keyboard.Key[] = [];
       for (const name of bindings[action]) {
-        const code = Phaser.Input.Keyboard.KeyCodes[name as keyof typeof Phaser.Input.Keyboard.KeyCodes];
+        const code = codeOf(name);
         if (code === undefined) {
           console.warn(`[input] Unknown key "${name}" for action "${action}"`);
           continue;
         }
-        list.push(keyboard.addKey(code, true));
+        list.push(this.keyboard.addKey(code, true));
       }
       this.keys.set(action, list);
     }
 
     // กันไม่ให้ Space/ลูกศรเลื่อนหน้าเว็บ
-    const codes = allBoundKeys(bindings)
-      .map((n) => Phaser.Input.Keyboard.KeyCodes[n as keyof typeof Phaser.Input.Keyboard.KeyCodes])
+    this.captured = allBoundKeys(bindings)
+      .map(codeOf)
       .filter((c): c is number => c !== undefined);
-    keyboard.addCapture(codes);
+    this.keyboard.addCapture(this.captured);
   }
 
   isDown(action: Action): boolean {

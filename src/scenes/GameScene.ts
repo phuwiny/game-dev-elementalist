@@ -835,6 +835,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     return Phaser.Geom.Intersects.RectangleToRectangle(rect, new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height));
   }
 
+  /** อ่านปุ่มที่ผู้เล่นตั้งไว้ใหม่ (เรียกหลังปิดหน้า Settings ที่เปิดจากหน้า Pause) */
+  reloadControls(): void {
+    this.controls.reload();
+  }
+
   /** ตำแหน่งนี้มีพื้นแข็งหรือไม่ (terrain, วัตถุแข็ง, น้ำแข็ง, บล็อกหิน) */
   private isSolidAt(x: number, y: number): boolean {
     if (this.layer.getTileAtWorldXY(x, y, false)?.collides) return true;
