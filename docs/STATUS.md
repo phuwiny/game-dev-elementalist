@@ -1,10 +1,10 @@
 # STATUS — สถานะงานและบันทึกส่งต่อ
 
-อัปเดตล่าสุด 2026-10-25 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
+อัปเดตล่าสุด 2026-10-29 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
 
 ## สถานะตอนนี้
 
-ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และ merge เข้า `main` แล้ว รอภาพชุด World 1 จาก Codex (Phase C)
+ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และ merge เข้า `main` แล้ว ตอนนี้เชื่อมภาพชุด World 1 (Phase C, [PR #9](https://github.com/phuwiny/game-dev-elementalist/pull/9) ของ Codex) เข้าเกมแล้วใน branch `claude/aclaire-v4-status-al18pm` รอพินรีวิว mockup และสั่ง merge
 
 | PR | เนื้อหา | สถานะ |
 | --- | --- | --- |
@@ -15,6 +15,7 @@
 | #6 | รองรับ Aclaire V4: canvas 1280×720, ฉากขยาย 1.5 เท่า | merged |
 | #7 | (Codex) atlas `player` ชุดแรก: idle, run, jump_up, jump_peak, fall, land | merged |
 | #8 | placeholder รายท่า, แก้ `animations.json` ไม่ถูกใช้, hitbox 16×46 logical | merged |
+| #9 | (Codex) Phase C World 1: tileset, background 4 ชั้น, `enemies_w1`, `boss_bramble_king`, `animations.json` | draft รอพินรีวิว |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -27,15 +28,23 @@
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
 - **โลก 1 ใช้ไฟอย่างเดียว** ตาม GDD, `startSpirits` ใน `src/levels/index.ts`
+- **ด่าน W1 ใช้ `tiles_w1_ember_woods`:** `GameScene` วาด terrain ตาม gid ในไฟล์ Tiled (`buildArtTerrain` ใน `src/systems/TerrainArt.ts`, margin 1 spacing 2 อ่านจากแผนที่) ชนเฉพาะ tile ที่มี `collides` ชั้น `decor` (ไม่บังคับ) วาดหลัง terrain ไม่ชน ด่าน ASCII (lab, graybox) และกรณีไม่มี texture ยังใช้ graybox จาก grid
+- **บทบาทของ tile ID** (ตัวสร้างด่านอยู่ที่ `tools/levels/w1.py` และอ่าน property จาก `.tsx` โดยตรง): 0–15 terrain ทึบ, 16–18 one-way (ซ้าย/กลาง/ขวา), 19–21 hazard, 22–33 ผนัง (ยังไม่ได้ใช้ในด่าน), 34–57 ตกแต่ง (ตอนนี้วางเฉพาะของบนพื้น: ใบไม้, ราก, หิน, เห็ด, ดอกไม้ไฟ) ภาพใน ID 0–15 แบ่งเป็นผิวบน (0,1,4,5,8,9,12,13), ขอบซ้าย (2,3,6,7), ใต้ (10,11,14,15) **ไม่มี tile เนื้อดินล้วนและขอบขวา** จึงใช้ 3/7 เป็นเนื้อดิน และ tile 2 พลิกแนวนอน (flag ของ Tiled) เป็นขอบขวา
+- **One-way:** `Tile.OneWay` (property `oneWay`) สร้าง zone ชนเฉพาะด้านบนผ่าน `addOneWayPlatform` พื้นผิวอยู่ต่ำกว่าขอบบน tile 5 px (`ONE_WAY_DECK_OFFSET`) ตามภาพสะพานไม้ แท่นลอยทั้ง 3 จุดของ W1 (`platform()` ใน `w1.py`) เป็น one-way แล้ว ศัตรูพื้นชนแท่นได้แต่ `isSolidAt` ยังไม่นับแท่น (ไม่มีศัตรูเดินบนแท่นใน W1)
+- **Background:** `ParallaxBackground` วาด `bg_w1_far/mid/near` เต็มจอ (scrollFactor 0 ย่อ 1/`WORLD_SCALE` ให้ 1 pixel ภาพ = 1 pixel logical) เลื่อนด้วย parallax 0.1/0.3/0.6 และวนซ้ำ ทั้ง 3 ชั้นอยู่หลังฉากเล่น (ชั้น near ไม่ได้บังหน้า) สนามบอสสลับชั้น far เป็น `bg_w1_boss_far` ตอนประตูสนามปิด และกลับเมื่อผู้เล่นตาย
+- **โล่เถาวัลย์** ย้ายไปกึ่งกลาง x = 42 จากขอบซ้ายบอส (`BossBalance.brambleKing.shieldOffsetX`) เพื่อคลุมจุดอ่อน x 20–64 ตามสัญญา เดิมอยู่ที่ x = 6 ซึ่งอยู่ข้างจุดอ่อน
 
 ## งานถัดไป
 
 ฝั่ง Codex
 1. ท่าที่เหลือของ Aclaire: double_jump, cast, dash, glide, ground_slam, attack_1–3 (96×64 logical), hurt, dead
-2. Phase C World 1 Pack: `tiles_w1_ember_woods`, background 3 ชั้น + boss, `enemies_w1`, `boss_bramble_king`, mockup
+2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
+   - `thorn_beetle_flipped_000–003` วาดชิดบนของ frame (alpha y 0–22 จาก 32) ด้วงจึงลอยเหนือพื้น ~10 px ต้องชิดล่างแบบ frame `walk` (y 10–32)
+   - `tiles_w1_ember_woods` ID 0–15 ไม่มี tile เนื้อดินล้วน ขอบขวา และมุม (0=4=8=12, 1=13, 5=9, 2=6, 10=14 เป็นภาพเดียวกัน) ขอ: fill 2 แบบ, ขอบขวา, มุมนอกของผิวบน ถ้าเพิ่มต้องอยู่ใน ID 0–15 เพื่อให้ `collides` ยังครอบ หรือแจ้ง ID ใหม่
+   - ผนัง 22–33 และเถาวัลย์ 42–45 ยังไม่มีที่วางในด่าน รอ Claude ตัดสินว่าจะวางตรงไหน
 
 ฝั่ง Claude
-1. เมื่อ `tiles_w1_ember_woods` มาถึง: เปลี่ยนด่าน W1 จาก tileset `graybox` ไปใช้ tileset จริง (ตอนนี้ `GameScene` วาด tile จาก grid ของ `ParsedLevel` ไม่ได้ใช้ gid ของ Tiled ต้องเพิ่มการวาดตาม gid และ layer decoration) และเพิ่ม parallax background
+1. หลัง PR #9 merge: merge `main` เข้า branch นี้แล้วเปิด PR (ตอนนี้ branch รวม `art/phase-c` ไว้แล้วเพื่อทดสอบ) ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
 2. ตรวจภาพที่ Codex ส่งในเกมทุกรอบ: เท้าตรงพื้น, hitbox, ไม่ jitter, กล้องในสนามบอส (บอสสูง 192 px มงกุฎชิดขอบบนจอ)
 3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD)
 4. งานค้างจาก GDD: Spirit Shard, key rebinding, ข้อความแจ้งเมื่อเซฟไม่ได้, เพลง

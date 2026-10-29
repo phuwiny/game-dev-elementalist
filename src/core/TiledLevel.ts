@@ -1,6 +1,7 @@
 import {
   type EnemyKind,
   type GridPoint,
+  type LevelArt,
   LevelParseError,
   type LevelObject,
   type ObjectKind,
@@ -13,7 +14,9 @@ import {
  *
  * ข้อกำหนดของไฟล์ Tiled
  * - tile ขนาด 16×16, orientation orthogonal, ไม่ใช่ infinite map
- * - tile layer ชื่อ "terrain": tile ที่มี property `collides: true` = พื้นแข็ง, `hazard: true` = หนาม
+ * - tile layer ชื่อ "terrain": tile ที่มี property `collides: true` = พื้นแข็ง, `hazard: true` = หนาม,
+ *   `oneWay: true` = แท่นยืนจากด้านบน
+ * - tile layer ชื่อ "decor" (ไม่บังคับ): ภาพตกแต่งและผนัง ไม่ชน ไม่มีผลต่อ gameplay
  * - object layer ชื่อ "objects": ใช้ class (หรือ type ใน Tiled รุ่นเก่า) เป็นชนิดวัตถุ
  *   ตำแหน่งวัตถุอ่านจากมุมล่างซ้ายของสี่เหลี่ยม (หรือจุด) แล้วปัดเป็นช่อง
  *
@@ -39,6 +42,8 @@ interface TiledTileset {
   name?: string;
   tiles?: TiledTile[];
   tilecount?: number;
+  margin?: number;
+  spacing?: number;
 }
 
 interface TiledObject {
@@ -91,6 +96,17 @@ const ENEMY_CLASSES: readonly EnemyKind[] = ['moss_slime', 'leaf_wisp', 'thorn_b
 
 /** ล้างค่า gid flip flags ของ Tiled (3 บิตบน) */
 const GID_MASK = 0x1fffffff;
+const GID_FLIP_H = 0x80000000;
+
+/** tile id ใน tileset (ไม่รวม firstgid และ flip flag) หรือ -1 ถ้าเป็นช่องว่าง */
+export function gidToTileId(gid: number, firstgid: number): number {
+  const g = gid & GID_MASK;
+  return g === 0 ? -1 : g - firstgid;
+}
+
+export function isFlippedH(gid: number): boolean {
+  return (gid & GID_FLIP_H) !== 0;
+}
 
 export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
   if (map.infinite) throw new LevelParseError('Infinite Tiled maps are not supported');
@@ -112,6 +128,7 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     }
     tiles.push(out);
   }
+  const decor = map.layers.find((l) => l.name === 'decor' && l.type === 'tilelayer');
 
   const level: ParsedLevel = {
     width: map.width,
@@ -125,6 +142,7 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     enemies: [],
     objects: [],
     boss: null,
+    art: collectArt(map, terrain.data, decor?.data),
   };
   let hasPlayer = false;
   let hasGoal = false;
@@ -190,9 +208,30 @@ function collectTileKinds(tilesets: readonly TiledTileset[]): Map<number, Tile> 
       const gid = ts.firstgid + t.id;
       if (propList(t.properties, 'hazard') === true) kinds.set(gid, Tile.Spike);
       else if (propList(t.properties, 'collides') === true) kinds.set(gid, Tile.Solid);
+      else if (propList(t.properties, 'oneWay') === true) kinds.set(gid, Tile.OneWay);
     }
   }
   return kinds;
+}
+
+/** ข้อมูลสำหรับวาดด่านด้วย tileset จริง (ใช้ tileset แรกของแผนที่) */
+function collectArt(map: TiledMap, terrain: readonly number[], decor: readonly number[] | undefined): LevelArt | undefined {
+  const ts = map.tilesets[0];
+  if (!ts?.name) return undefined;
+  const grid = (data: readonly number[] | undefined): number[][] =>
+    Array.from({ length: map.height }, (_, r) =>
+      Array.from({ length: map.width }, (_, c) => data?.[r * map.width + c] ?? 0),
+    );
+  const collidingIds = (ts.tiles ?? []).filter((t) => propList(t.properties, 'collides') === true).map((t) => t.id);
+  return {
+    tileset: ts.name,
+    firstgid: ts.firstgid,
+    margin: ts.margin ?? 0,
+    spacing: ts.spacing ?? 0,
+    terrain: grid(terrain),
+    decor: grid(decor),
+    collidingIds,
+  };
 }
 
 /** มุมล่างซ้ายของวัตถุเป็นช่อง (สี่เหลี่ยมใน Tiled มี y ที่ขอบบน) */

@@ -4,7 +4,10 @@ usage: python3 w1.py <out_dir>   (writes w1_1.json, w1_2.json, w1_3.json and pri
 """
 import json
 import os
+import random
 import sys
+from pathlib import Path
+from xml.etree import ElementTree as ET
 
 H, G = 23, 20  # rows, ground row (G..H-1 are ground)
 SIZES = {'v': (1, 1), 'b': (1, 1), 'i': (1, 1), '~': (1, 1), 't': (1, 2), 'w': (1, 1), 'm': (3, 3),
@@ -36,7 +39,8 @@ class Level:
         self.fill(c0, c1, G - height, G - 1)
 
     def platform(self, c0, c1, row):
-        self.fill(c0, c1, row, row)
+        """floating one-way platform (stand on it from above, jump up through it)"""
+        self.fill(c0, c1, row, row, '-')
 
     def gate(self, c, ch='D', floor=G):
         self.fill(c, c + 1, 0, floor - 4)
@@ -167,33 +171,105 @@ def w1_3():
     return L
 
 
-TILESET = {
-    'firstgid': 1, 'name': 'graybox', 'tilewidth': 16, 'tileheight': 16, 'tilecount': 3, 'columns': 3,
-    'image': 'graybox_tiles.png', 'imagewidth': 48, 'imageheight': 16, 'margin': 0, 'spacing': 0,
-    'tiles': [
-        {'id': 0, 'properties': [{'name': 'collides', 'type': 'bool', 'value': True}]},
-        {'id': 1, 'properties': [{'name': 'collides', 'type': 'bool', 'value': True}]},
-        {'id': 2, 'properties': [{'name': 'hazard', 'type': 'bool', 'value': True}]},
-    ],
-}
+TSX = Path(__file__).resolve().parents[2] / 'public/assets/tilesets/tiles_w1_ember_woods.tsx'
+FLIP_H = 0x80000000
+
+
+def load_tileset():
+    """Embed the tileset from the TSX (single source of truth for margin, spacing and tile properties)."""
+    root = ET.parse(TSX).getroot()
+    image = root.find('image')
+    tiles = []
+    for tile in root.findall('tile'):
+        props = [{'name': p.get('name'), 'type': p.get('type'), 'value': p.get('value') == 'true'}
+                 for p in tile.find('properties')]
+        tiles.append({'id': int(tile.get('id')), 'properties': props})
+    return {
+        'firstgid': 1, 'name': root.get('name'), 'tilewidth': 16, 'tileheight': 16,
+        'tilecount': int(root.get('tilecount')), 'columns': int(root.get('columns')),
+        'image': '../tilesets/' + image.get('source'), 'imagewidth': int(image.get('width')),
+        'imageheight': int(image.get('height')), 'margin': int(root.get('margin')),
+        'spacing': int(root.get('spacing')), 'tiles': tiles,
+    }
+
+
+# Tile roles in tiles_w1_ember_woods (see art/reports/phase_c.md and tools/art/build_world1_environment.py)
+T_TOP = (0, 0, 0, 1)          # grass cap (moss soil x3, old roots x1)
+T_EDGE = 2                    # soil with a dark left edge; mirrored for the right edge (no right-edge tile in the set)
+T_BOTTOM = (10, 10, 15)       # underside with a dark bottom strip
+T_FILL = (3, 3, 7)            # no plain fill tile exists: roots with a subtle left line, one with a cavity
+T_ONEWAY = (16, 17, 18)       # left end, middle, right end
+T_HAZARD = (19, 19, 20, 21)
+# ground decoration: leaves 34-37, roots 38-41, rubble 46-49, mushrooms 50-53, ember flowers 54-57
+DECOR_GROUND = list(range(34, 42)) + list(range(46, 58))
+DECOR_CHANCE = 0.3
 CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'heart', 's': 'moss_slime',
            'f': 'leaf_wisp', 'r': 'thorn_beetle', 'v': 'vine', 'b': 'crate', 'i': 'ice', '~': 'water',
            't': 'torch', 'w': 'seed', 'm': 'windmill', 'X': 'cracked_wall', '_': 'plate', 'D': 'gate',
            'A': 'arena_gate', 'B': 'boss'}
 
 
+def autotile(rows, rng):
+    """terrain gids from the ASCII layout: '#' solid, '-' one-way, '^' hazard"""
+    H_, W_ = len(rows), len(rows[0])
+
+    def solid(r, c):
+        return r < 0 or r >= H_ or c < 0 or c >= W_ or rows[r][c] == '#'
+
+    def oneway(r, c):
+        return 0 <= r < H_ and 0 <= c < W_ and rows[r][c] == '-'
+
+    data = []
+    for r in range(H_):
+        for c in range(W_):
+            ch = rows[r][c]
+            tid, flip = None, False
+            if ch == '#':
+                if not solid(r - 1, c):
+                    tid = rng.choice(T_TOP)
+                elif not solid(r, c - 1):
+                    tid = T_EDGE
+                elif not solid(r, c + 1):
+                    tid, flip = T_EDGE, True
+                elif not solid(r + 1, c):
+                    tid = rng.choice(T_BOTTOM)
+                else:
+                    tid = rng.choice(T_FILL)
+            elif ch == '-':
+                tid = T_ONEWAY[0] if not oneway(r, c - 1) else T_ONEWAY[2] if not oneway(r, c + 1) else T_ONEWAY[1]
+            elif ch == '^':
+                tid = rng.choice(T_HAZARD)
+            data.append(0 if tid is None else (1 + tid) | (FLIP_H if flip else 0))
+    return data
+
+
+def decorate(rows, rng):
+    """sparse ground decoration on grass caps, away from objects, enemies and spawns"""
+    H_, W_ = len(rows), len(rows[0])
+    data = [0] * (H_ * W_)
+    for r in range(1, H_):
+        last = -9
+        for c in range(W_):
+            if rows[r][c] != '#' or rows[r - 1][c] != '.':
+                continue
+            near = rows[r - 1][max(0, c - 2):c + 3]
+            if set(near) != {'.'} or c - last < 2:
+                continue
+            if rng.random() < DECOR_CHANCE:
+                data[(r - 1) * W_ + c] = 1 + rng.choice(DECOR_GROUND)
+                last = c
+    return data
+
+
 def to_tiled(rows, name):
     W = len(rows[0])
-    data, objects = [], []
+    objects = []
+    rng = random.Random('terrain:' + name)
+    data = autotile(rows, rng)
+    decor = decorate(rows, random.Random('decor:' + name))
     for r, line in enumerate(rows):
         for c, ch in enumerate(line):
-            if ch == '#':
-                data.append(1 if r > 0 and rows[r - 1][c] == '#' else 2)
-            elif ch == '^':
-                data.append(3)
-            else:
-                data.append(0)
-            if ch in '.#^':
+            if ch in '.#^-':
                 continue
             if ch in '1234':
                 cls, w, h, props = 'spirit', 1, 1, [{'name': 'slot', 'type': 'int', 'value': int(ch) - 1}]
@@ -211,10 +287,12 @@ def to_tiled(rows, name):
     return {
         'type': 'map', 'version': '1.10', 'tiledversion': '1.10.2', 'orientation': 'orthogonal',
         'renderorder': 'right-down', 'width': W, 'height': H, 'tilewidth': 16, 'tileheight': 16,
-        'infinite': False, 'nextlayerid': 3, 'nextobjectid': len(objects) + 1,
+        'infinite': False, 'nextlayerid': 4, 'nextobjectid': len(objects) + 1,
         'properties': [{'name': 'name', 'type': 'string', 'value': name}],
-        'tilesets': [TILESET],
+        'tilesets': [load_tileset()],
         'layers': [
+            {'id': 3, 'name': 'decor', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
+             'opacity': 1, 'visible': True, 'data': decor},
             {'id': 1, 'name': 'terrain', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
              'opacity': 1, 'visible': True, 'data': data},
             {'id': 2, 'name': 'objects', 'type': 'objectgroup', 'draworder': 'topdown', 'x': 0, 'y': 0,

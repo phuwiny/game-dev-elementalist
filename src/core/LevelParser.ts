@@ -27,6 +27,8 @@ export enum Tile {
   Empty = 0,
   Solid = 1,
   Spike = 2,
+  /** แท่นยืนได้จากด้านบนเท่านั้น (กระโดดทะลุจากด้านล่างได้) */
+  OneWay = 3,
 }
 
 export interface GridPoint {
@@ -60,11 +62,26 @@ export interface LevelObject extends GridPoint {
   slot?: number;
 }
 
+/** ข้อมูลภาพของด่าน Tiled ที่ใช้ tileset จริง (ด่าน ASCII ไม่มี ใช้ graybox) */
+export interface LevelArt {
+  /** ชื่อ tileset ใน Tiled = key ของ texture */
+  tileset: string;
+  firstgid: number;
+  margin: number;
+  spacing: number;
+  /** gid ของชั้น terrain และ decor [row][col] (0 = ว่าง, รวม flip flag ของ Tiled) */
+  terrain: number[][];
+  decor: number[][];
+  /** tile id (ไม่รวม firstgid) ที่ชนแบบทึบ */
+  collidingIds: number[];
+}
+
 export interface ParsedLevel {
   width: number;
   height: number;
   /** tiles[row][col] */
   tiles: Tile[][];
+  art?: LevelArt;
   player: GridPoint;
   goal: GridPoint;
   checkpoints: GridPoint[];

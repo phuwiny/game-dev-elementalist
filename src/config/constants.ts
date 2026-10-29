@@ -17,6 +17,8 @@ export const WORLD_SCALE = 1.5;
 /** zoom ของกล้องในด่านเทียบกับ canvas (3 เมื่อ canvas 1280×720) */
 export const WORLD_ZOOM = WORLD_SCALE * RENDER_SCALE;
 export const TILE_SIZE = 16;
+/** พื้นผิวของ tile one-way อยู่ต่ำกว่าขอบบนของ tile กี่ pixel (ตามภาพสะพานไม้ใน tileset) */
+export const ONE_WAY_DECK_OFFSET = 5;
 
 export const SceneKey = {
   Boot: 'BootScene',

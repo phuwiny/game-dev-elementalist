@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseTiledMap, type TiledMap } from '../src/core/TiledLevel';
+import { gidToTileId, isFlippedH, parseTiledMap, type TiledMap } from '../src/core/TiledLevel';
 
 type TiledObjects = NonNullable<TiledMap['layers'][number]['objects']>;
 import { lintLevel, SINGLE_JUMP_RULES } from '../src/core/LevelLint';
-import { parseLevel, LevelParseError } from '../src/core/LevelParser';
+import { parseLevel, LevelParseError, Tile } from '../src/core/LevelParser';
 import { ADVENTURE_LEVELS } from '../src/levels';
 
 const load = (file: string) => JSON.parse(readFileSync(new URL(`../public/${file}`, import.meta.url), 'utf8')) as TiledMap;
@@ -68,6 +68,67 @@ describe('parseTiledMap', () => {
   it('rejects unknown classes and maps without player or goal', () => {
     expect(() => parseTiledMap(tiny([{ id: 1, class: 'dragon', x: 0, y: 0, width: 16, height: 16 }]))).toThrow(/Unknown/);
     expect(() => parseTiledMap(tiny([{ id: 1, class: 'goal', x: 0, y: 0, width: 16, height: 16 }]))).toThrow(LevelParseError);
+  });
+});
+
+describe('Ember Woods tileset', () => {
+  const ts = {
+    firstgid: 1,
+    name: 'tiles_w1_ember_woods',
+    margin: 1,
+    spacing: 2,
+    tiles: [
+      { id: 0, properties: [{ name: 'collides', type: 'bool', value: true }] },
+      { id: 16, properties: [{ name: 'oneWay', type: 'bool', value: true }] },
+      { id: 19, properties: [{ name: 'hazard', type: 'bool', value: true }] },
+    ],
+  };
+  const FLIP_H = 0x80000000;
+  const base = (terrain: number[], decor?: number[]): TiledMap => ({
+    width: 4,
+    height: 1,
+    tilewidth: 16,
+    tileheight: 16,
+    tilesets: [ts],
+    layers: [
+      { name: 'decor', type: 'tilelayer', data: decor ?? [0, 0, 0, 0] },
+      { name: 'terrain', type: 'tilelayer', data: terrain },
+      {
+        name: 'objects',
+        type: 'objectgroup',
+        objects: [
+          { id: 1, class: 'player', x: 0, y: 0, width: 16, height: 16 },
+          { id: 2, class: 'goal', x: 48, y: 0, width: 16, height: 16 },
+        ],
+      },
+    ],
+  });
+
+  it('maps tile ids to solid, one-way, hazard and decoration-only cells', () => {
+    // gid = firstgid + id; id 40 (decoration) has no properties
+    const level = parseTiledMap(base([1, 17, 20, 41]));
+    expect(level.tiles[0]).toEqual([Tile.Solid, Tile.OneWay, Tile.Spike, Tile.Empty]);
+  });
+
+  it('keeps flip flags out of the tile kind and exposes them for rendering', () => {
+    const flipped = FLIP_H + 1;
+    const level = parseTiledMap(base([flipped, 0, 0, 0]));
+    expect(level.tiles[0][0]).toBe(Tile.Solid);
+    expect(isFlippedH(level.art!.terrain[0][0])).toBe(true);
+    expect(gidToTileId(level.art!.terrain[0][0], 1)).toBe(0);
+    expect(gidToTileId(0, 1)).toBe(-1);
+  });
+
+  it('exposes tileset layout, solid ids and the decor layer', () => {
+    const level = parseTiledMap(base([1, 0, 0, 0], [0, 35, 0, 0]));
+    expect(level.art).toMatchObject({ tileset: 'tiles_w1_ember_woods', firstgid: 1, margin: 1, spacing: 2, collidingIds: [0] });
+    expect(level.art!.decor[0]).toEqual([0, 35, 0, 0]);
+  });
+
+  it('has no art data for maps without a named tileset', () => {
+    const map = base([1, 0, 0, 0]);
+    map.tilesets = [{ firstgid: 1, tiles: ts.tiles }];
+    expect(parseTiledMap(map).art).toBeUndefined();
   });
 });
 
