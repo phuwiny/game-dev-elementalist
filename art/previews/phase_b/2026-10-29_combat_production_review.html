@@ -1,0 +1,18 @@
+<!doctype html><html lang="th"><meta charset="utf-8"><title>Aclaire production atlas review</title>
+<style>body{background:#171427;color:#eee;font:16px system-ui;margin:24px}main{max-width:1100px;margin:auto}canvas{width:100%;image-rendering:pixelated}button,select{padding:10px;margin:5px}a{color:#a8f0cf}p{line-height:1.6}</style>
+<main><h1>Aclaire — production atlas</h1><p>ภาพจาก atlas ที่เกมใช้จริง · 640×360 logical · density 2 · เส้นเขียวคือพื้น<br>ซ้าย Idle อ้างอิง · กลางท่าที่เลือก · ขวาสลับชุดท่าเพื่อตรวจรอยต่อ</p>
+<select id="action" aria-label="เลือกท่า"></select><button id="pause">หยุดภาพ</button><canvas id="view" width="640" height="360"></canvas>
+<p><a href="/">เปิดเกมทดสอบ</a> · A/D เดิน · Space กระโดด · J ดาบ · K ธาตุ<br>Hurt ใช้ภาพเฟรม 2 เดิมซ้ำทั้งสองเฟรมตามที่อนุมัติ Cast ยื่นมือออกตั้งแต่เฟรมแรก</p></main>
+<script>
+const base='../../../public/assets/';
+const image=new Image();image.src=base+'sprites/player/player.png';
+Promise.all([new Promise((r,j)=>{image.onload=r;image.onerror=j}),fetch(base+'sprites/player/player.json').then(r=>r.json()),fetch(base+'animations.json').then(r=>r.json())]).then(([,atlas,all])=>{
+const names=Object.keys(all).filter(k=>all[k].atlas==='player').map(k=>k.slice(7));
+const select=document.querySelector('select');for(const n of names){const o=document.createElement('option');o.textContent=o.value=n;select.append(o)}select.value='run';
+const ctx=document.querySelector('canvas').getContext('2d');ctx.imageSmoothingEnabled=false;
+let pause=false,held=0,start=performance.now();document.querySelector('#pause').onclick=e=>{pause=!pause;if(pause)held=performance.now()-start;else start=performance.now()-held;e.target.textContent=pause?'เล่นต่อ':'หยุดภาพ'};
+function sprite(action,time,x){const a=all['player_'+action],i=Math.floor(time*a.frameRate/1000)%a.frames,f=atlas.frames[a.prefix+String(i).padStart(3,'0')].frame;ctx.drawImage(image,f.x,f.y,f.w,f.h,x-f.w/4,250-f.h/2,f.w/2,f.h/2)}
+function loop(now){const t=Math.max(0,pause?held:now-start),seq=['idle','run','idle','attack_1','attack_2','attack_3','cast','hurt','dead','jump_up','fall','land'],part=Math.floor(t/900)%seq.length;
+ctx.fillStyle='#2b2440';ctx.fillRect(0,0,640,360);sprite('idle',t,110);sprite(select.value,t,320);sprite(seq[part],t%900,530);ctx.fillStyle='#48c9a0';ctx.fillRect(20,250,600,1);ctx.fillStyle='white';ctx.font='14px system-ui';ctx.fillText('Idle',95,120);ctx.fillText(select.value,290,120);ctx.fillText(seq[part],500,120);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+}).catch(e=>document.body.append('โหลดไม่สำเร็จ: '+e));
+</script></html>

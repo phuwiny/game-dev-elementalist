@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th"><meta charset="utf-8"><title>Aclaire — Dead proportions review</title>
+<style>body{background:#171427;color:#eee;font:16px system-ui;margin:24px}main{max-width:1000px;margin:auto}canvas,img{width:100%;image-rendering:pixelated;background:#2b2440}button{padding:10px;margin:8px;color:white;background:#413954;border:1px solid #aaa}p{line-height:1.6}a{color:#a8f0cf}</style>
+<main><h1>ท่าแพ้ — ปรับหัวให้ใกล้เคียง Idle</h1><p>ซ้าย: Idle ล่าสุด · กลาง: ท่าแพ้เดิม · ขวา: ท่าแพ้ใหม่<br>ใช้สเกลเดียวกันทุกเฟรม คงขนาดตัวขณะทรุดลง เส้นเขียวคือพื้น</p>
+<button id="pause">หยุดภาพ</button><button id="next">เฟรมถัดไป</button><canvas id="review" width="960" height="330"></canvas>
+<p>ภาพร่างสำหรับตรวจสัดส่วน ยังไม่ได้แทน atlas ในเกม</p><img src="../../concept/2026-10-29_aclaire_dead_proportions_v3_review.png" alt="ท่าแพ้ใหม่หกเฟรม หัวเล็กลง">
+<p><a href="2026-10-28_aclaire_combat_revision_review.html">กลับไปชุดท่า Combat</a></p></main>
+<script>
+const load=url=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=url});
+Promise.all(['2026-10-28_aclaire_combat_revision_keys_v2.png','2026-10-25_aclaire_dead_strip_source_v2.png','2026-10-29_aclaire_dead_proportions_v3_review.png'].map(n=>load('../../concept/'+n))).then(([idle,old,newSheet])=>{
+ const ctx=document.querySelector('canvas').getContext('2d');ctx.imageSmoothingEnabled=false;
+ const scale=124/474,ground=250;let paused=false,index=0,last=performance.now();
+ document.querySelector('#pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'เล่นต่อ':'หยุดภาพ';last=performance.now()};
+ document.querySelector('#next').onclick=()=>{paused=true;index=(index+1)%6;document.querySelector('#pause').textContent='เล่นต่อ'};
+ function pose(sheet,i,x,feet){const row=Math.floor(i/3),col=i%3;ctx.drawImage(sheet,col*512,row*512,512,512,x-270*scale,ground-feet*scale,512*scale,512*scale)}
+ function render(now){if(!paused&&now-last>(index===5?1100:180)){index=(index+1)%6;last=now}ctx.fillStyle='#2b2440';ctx.fillRect(0,0,960,330);
+ ctx.drawImage(idle,0,0,390,512,160-230*scale,ground-504*scale,390*scale,512*scale);
+ pose(old,index,480,index<3?527:478);pose(newSheet,index,800,index<3?500:414);
+ ctx.fillStyle='#48c9a0';ctx.fillRect(30,ground,900,2);ctx.fillStyle='#fff';ctx.font='18px system-ui';ctx.fillText('Idle',135,45);ctx.fillText('Dead — original',410,45);ctx.fillText('Dead — revised',730,45);ctx.fillText('Frame '+(index+1)+' / 6',430,300);requestAnimationFrame(render)}requestAnimationFrame(render);
+}).catch(e=>document.body.append('โหลดภาพไม่สำเร็จ: '+e));
+</script></html>

@@ -244,3 +244,37 @@ Pinz approved the seven [key poses and initial four motion studies](2026-10-25_a
 3. **Assumptions:** Review GIFs loop for inspection even for one-shot game actions. Every frame uses a bottom anchor, binary alpha, and colors from the exact approved V4 palette. The blue-eye x anchor is 57 physical pixels when an eye is visible. The final dead pose has closed eyes and uses the approved centered key; its prior frames transition into a compact kneel within the 48×64 logical allocation.
 4. **Spec differences:** None in the current handoff or manifest. The standing attack/movement artwork, game source, maps, audio, tests, docs, and config were not edited.
 5. **Next decision:** Pinz reviews the seven action GIFs at game scale before this follow-up is merged.
+
+## Approved combat revision production — 29 October 2026
+
+Pinz approved all reviewed movesets and authorized production. This follow-up replaces 35 frames (Idle 6, Run 4, Attack 1–3 13, Cast 4, Hurt 2, Dead 6) in the existing 59-frame atlas. The other 24 frames remain byte-identical.
+
+1. **Files:** Revised `art/frames/player/` and `public/assets/sprites/player/player.png`; added versioned concept sources, strip/APNG previews and metrics under `art/previews/phase_b/2026-10-29_combat_production/`, interactive `2026-10-29_combat_production_review.html`, `tools/art/build_player_combat_revision.py`, and `tools/art/test_player_combat_revision.py`. Existing atlas JSON and animations.json remain byte-identical because names, dimensions, packing positions, counts and timing did not change.
+2. **Validation:** `python tools/validate_assets.py` PASS (0 errors); `python tools/art/test_player_combat_revision.py` PASS (2 tests covering all 59 frames, palette/binary alpha, packing roundtrip, baseline, dimensions, attack reach, idle eye-anchor stability and identical Hurt frames). Browser loaded the actual atlas in the 640×360 logical comparison page and game. In-game screenshots inspected title Idle, grounded Idle and airborne pose after jump input; movement and sword input exercised. No console warnings/errors were captured. This was an art smoke test, not an exhaustive gameplay or combo-timing test. Cast/Dead are additionally available in the atlas review selector; not all states were triggered through gameplay.
+3. **Assumptions:** Built-in imagegen supplies complete strips from approved keys; nearest-neighbor scaling, binary alpha cleanup and V4 palette mapping are deterministic. One scale per action avoids individual frame stretching. Closed-eye Idle uses the preceding frame's horizontal anchor. Hurt uses the original v2 rightmost pose twice, without invisible frames, per the final user correction. Cast has a foreshortened forward arm to fit 96×128 while keeping the body/head size; hand is forward from frame 1. The lower legs in Run and Hurt and smaller Dead head follow the approved revisions.
+4. **Spec/runtime notes:** No src/tests/docs/config/reference changes. Existing 250 ms Cast gameplay lock is outside art scope. Art cannot shorten it; Claude can review if still desired. Existing historical `test_player_atlas.py` targets the old 18-frame movement packet and original hashes; use the new 59-frame contract check for this revision. No new palette colors, animation keys or frame dimensions are required.
+5. **Next decision:** Review the production atlas in the game before merge. No new world/phase started.
+
+### Image-generation prompt record
+
+Built-in imagegen only. All source PNGs are versioned in `art/concept/` with the `2026-10-29_aclaire_` prefix; approved 28 October key and proportions sheets remain intact.
+
+- Idle: six frames in a 3×2 sheet, calm whole-body breathing with planted feet; frame 4 closes both eyes, no extra black eyebrows; preserve the approved top-left Idle proportions, clothing, hair and dark vivid palette.
+- Attack 1: four frames in a 2×2 sheet; draw from behind the shoulder, bring the short sword forward, horizontal impact, downward follow-through. A targeted second pass removes the red pommel below the second pose's fist.
+- Attack 2: four frames in a 2×2 sheet; low forward sword, rising diagonal, approved raised impact, forward recovery. Same body/head size, short blade.
+- Attack 3: five frames in a 3×2 sheet with empty sixth cell; forward blade, windup, downward strike, follow-through, recovery. Keep finisher body/head size stable and blade short.
+- Cast: four frames in a 2×2 sheet; hand already forward on frame 1, slight push/hold/recovery, slightly open mouth and wide stance. Compact edit foreshortens the extended arm and modestly narrows stance without changing head/body size to fit the standard frame.
+- Run: remove only background and text from the approved five-pose comparison, retaining the four running poses and open-mouth expressions; transparent output.
+- All generated strips: same right-facing Aclaire, orange ponytail, pink armor, brown shorts, black boots, crisp pixel clusters, no captions or effects, genuine transparency. Hurt and Dead use their approved source sheets without another redraw.
+
+### Cast right-hand follow-up — 29 October 2026
+
+At Pinz's request, all four Cast frames now use the anatomical right (near-side) arm extending across the chest, with the other fist held close to the torso. The pose remains compact inside 96×128, with the hand forward from frame 1. Head/body scale and animation timing are unchanged. Source: `art/concept/2026-10-29_aclaire_cast_right_hand_source.png`; built-in imagegen prompt: switch casting to the near-side right arm, keep a natural compact forward palm, preserve the head/body/legs, four-frame layout and transparency. A second targeted pass corrected the last frame to use the same arm. Validator and both current atlas tests pass after rebuilding. Only the four Cast production frames and their packed pixels changed.
+
+### Cast cancellation — 29 October 2026
+
+Pinz cancelled the right-hand revision. Production Cast is restored to the original compact source (2026-10-29_aclaire_cast_compact_source.png), exactly as shipped in c82edd6. The right-hand source remains an unused study. Validator and current atlas checks pass.
+
+### Final artwork selection and closeout — 30 October 2026
+
+Pinz rejected the pixel-cleanup experiment and chose the original approved combat artwork. All 59 production frames, the player atlas and animations.json are byte-identical to c82edd6; the experiment never entered production or PR #13. Rejected study files and helpers are preserved in a local untracked archive. Asset validator: PASS (0 errors). Current combat atlas tests: PASS (2 tests). No spec conflict or further art decision remains for this revision. See [closeout report](2026-10-30_aclaire_art_closeout.md).
