@@ -16,7 +16,8 @@ import {
  * - tile ขนาด 16×16, orientation orthogonal, ไม่ใช่ infinite map
  * - tile layer ชื่อ "terrain": tile ที่มี property `collides: true` = พื้นแข็ง, `hazard: true` = หนาม,
  *   `oneWay: true` = แท่นยืนจากด้านบน
- * - tile layer ชื่อ "decor" (ไม่บังคับ): ภาพตกแต่งและผนัง ไม่ชน ไม่มีผลต่อ gameplay
+ * - tile layer ชื่อขึ้นต้นด้วย "decor" (ไม่บังคับ มีได้หลายชั้น): ภาพตกแต่งและผนัง ไม่ชน ไม่มีผลต่อ gameplay
+ *   ชั้นที่อยู่ท้ายในไฟล์วาดทับชั้นก่อนหน้า
  * - object layer ชื่อ "objects": ใช้ class (หรือ type ใน Tiled รุ่นเก่า) เป็นชนิดวัตถุ
  *   ตำแหน่งวัตถุอ่านจากมุมล่างซ้ายของสี่เหลี่ยม (หรือจุด) แล้วปัดเป็นช่อง
  *
@@ -128,7 +129,7 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     }
     tiles.push(out);
   }
-  const decor = map.layers.find((l) => l.name === 'decor' && l.type === 'tilelayer');
+  const decor = map.layers.filter((l) => l.name.startsWith('decor') && l.type === 'tilelayer');
 
   const level: ParsedLevel = {
     width: map.width,
@@ -142,7 +143,7 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     enemies: [],
     objects: [],
     boss: null,
-    art: collectArt(map, terrain.data, decor?.data),
+    art: collectArt(map, terrain.data, decor.map((l) => l.data)),
   };
   let hasPlayer = false;
   let hasGoal = false;
@@ -215,7 +216,7 @@ function collectTileKinds(tilesets: readonly TiledTileset[]): Map<number, Tile> 
 }
 
 /** ข้อมูลสำหรับวาดด่านด้วย tileset จริง (ใช้ tileset แรกของแผนที่) */
-function collectArt(map: TiledMap, terrain: readonly number[], decor: readonly number[] | undefined): LevelArt | undefined {
+function collectArt(map: TiledMap, terrain: readonly number[], decor: readonly (readonly number[] | undefined)[]): LevelArt | undefined {
   const ts = map.tilesets[0];
   if (!ts?.name) return undefined;
   const grid = (data: readonly number[] | undefined): number[][] =>
@@ -229,7 +230,7 @@ function collectArt(map: TiledMap, terrain: readonly number[], decor: readonly n
     margin: ts.margin ?? 0,
     spacing: ts.spacing ?? 0,
     terrain: grid(terrain),
-    decor: grid(decor),
+    decor: decor.map(grid),
     collidingIds,
   };
 }

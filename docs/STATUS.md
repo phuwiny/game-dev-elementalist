@@ -28,9 +28,9 @@
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
 - **โลก 1 ใช้ไฟอย่างเดียว** ตาม GDD, `startSpirits` ใน `src/levels/index.ts`
-- **ด่าน W1 ใช้ `tiles_w1_ember_woods`:** `GameScene` วาด terrain ตาม gid ในไฟล์ Tiled (`buildArtTerrain` ใน `src/systems/TerrainArt.ts`, margin 1 spacing 2 อ่านจากแผนที่) ชนเฉพาะ tile ที่มี `collides` ชั้น `decor` (ไม่บังคับ) วาดหลัง terrain ไม่ชน ด่าน ASCII (lab, graybox) และกรณีไม่มี texture ยังใช้ graybox จาก grid
-- **บทบาทของ tile ID** (ตัวสร้างด่านอยู่ที่ `tools/levels/w1.py` และอ่าน property จาก `.tsx` โดยตรง): 0–15 terrain ทึบ, 16–18 one-way (ซ้าย/กลาง/ขวา), 19–21 hazard, 22–33 ผนัง (ยังไม่ได้ใช้ในด่าน), 34–57 ตกแต่ง (ตอนนี้วางเฉพาะของบนพื้น: ใบไม้, ราก, หิน, เห็ด, ดอกไม้ไฟ) ภาพใน ID 0–15 แบ่งเป็นผิวบน (0,1,4,5,8,9,12,13), ขอบซ้าย (2,3,6,7), ใต้ (10,11,14,15) **ไม่มี tile เนื้อดินล้วนและขอบขวา** จึงใช้ 3/7 เป็นเนื้อดิน และ tile 2 พลิกแนวนอน (flag ของ Tiled) เป็นขอบขวา
-- **One-way:** `Tile.OneWay` (property `oneWay`) สร้าง zone ชนเฉพาะด้านบนผ่าน `addOneWayPlatform` พื้นผิวอยู่ต่ำกว่าขอบบน tile 5 px (`ONE_WAY_DECK_OFFSET`) ตามภาพสะพานไม้ แท่นลอยทั้ง 3 จุดของ W1 (`platform()` ใน `w1.py`) เป็น one-way แล้ว ศัตรูพื้นชนแท่นได้แต่ `isSolidAt` ยังไม่นับแท่น (ไม่มีศัตรูเดินบนแท่นใน W1)
+- **ด่าน W1 ใช้ `tiles_w1_ember_woods`:** `GameScene` วาด terrain ตาม gid ในไฟล์ Tiled (`buildArtTerrain` ใน `src/systems/TerrainArt.ts`, margin 1 spacing 2 อ่านจากแผนที่) ชนเฉพาะ tile ที่มี `collides` ชั้นที่ชื่อขึ้นต้นด้วย `decor` (ไม่บังคับ มีได้หลายชั้น เรียงตามไฟล์) วาดหลัง terrain ไม่ชน ด่าน W1 มี `decor` (ผนังซากปรัก) กับ `decor_over` (ตกแต่งบนพื้นและเถาวัลย์ห้อยจากยอดผนัง) ตำแหน่งซากปรักอยู่ใน `RUINS` ของ `w1.py` (ด่านบอสมีผนังเป็นฉากหลังทั้งสนาม) ด่าน ASCII (lab, graybox) และกรณีไม่มี texture ยังใช้ graybox จาก grid
+- **บทบาทของ tile ID** (ตัวสร้างด่านอยู่ที่ `tools/levels/w1.py` และอ่าน property จาก `.tsx` โดยตรง): 0–15 terrain ทึบ, 16–18 one-way (ซ้าย/กลาง/ขวา), 19–21 hazard, 22–33 ผนังซากปรัก, 34–57 ตกแต่ง (ใบไม้, ราก, เถาวัลย์ผนัง 42–45, หิน, เห็ด, ดอกไม้ไฟ) ภาพใน ID 0–15 แบ่งเป็นผิวบน (0,1,4,5,8,9,12,13), ขอบซ้าย (2,3,6,7), ใต้ (10,11,14,15) **ไม่มี tile เนื้อดินล้วนและขอบขวา** จึงใช้ 3/7 เป็นเนื้อดิน และ tile 2 พลิกแนวนอน (flag ของ Tiled) เป็นขอบขวา
+- **One-way:** `Tile.OneWay` (property `oneWay`) สร้าง zone ชนเฉพาะด้านบนผ่าน `addOneWayPlatform` พื้นผิวอยู่ต่ำกว่าขอบบน tile 5 px (`ONE_WAY_DECK_OFFSET`) ตามภาพสะพานไม้ แท่นลอยทั้ง 3 จุดของ W1 (`platform()` ใน `w1.py`) เป็น one-way แล้ว ศัตรูพื้นชนแท่นได้แต่ `isSolidAt` ยังไม่นับแท่น (ไม่มีศัตรูเดินบนแท่นใน W1) ตรวจด้วย `tests/e2e/oneway.py`
 - **Background:** `ParallaxBackground` วาด `bg_w1_far/mid/near` เต็มจอ (scrollFactor 0 ย่อ 1/`WORLD_SCALE` ให้ 1 pixel ภาพ = 1 pixel logical) เลื่อนด้วย parallax 0.1/0.3/0.6 และวนซ้ำ ทั้ง 3 ชั้นอยู่หลังฉากเล่น (ชั้น near ไม่ได้บังหน้า) สนามบอสสลับชั้น far เป็น `bg_w1_boss_far` ตอนประตูสนามปิด และกลับเมื่อผู้เล่นตาย
 - **โล่เถาวัลย์** ย้ายไปกึ่งกลาง x = 42 จากขอบซ้ายบอส (`BossBalance.brambleKing.shieldOffsetX`) เพื่อคลุมจุดอ่อน x 20–64 ตามสัญญา เดิมอยู่ที่ x = 6 ซึ่งอยู่ข้างจุดอ่อน
 
@@ -41,7 +41,6 @@
 2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
    - `thorn_beetle_flipped_000–003` วาดชิดบนของ frame (alpha y 0–22 จาก 32) ด้วงจึงลอยเหนือพื้น ~10 px ต้องชิดล่างแบบ frame `walk` (y 10–32)
    - `tiles_w1_ember_woods` ID 0–15 ไม่มี tile เนื้อดินล้วน ขอบขวา และมุม (0=4=8=12, 1=13, 5=9, 2=6, 10=14 เป็นภาพเดียวกัน) ขอ: fill 2 แบบ, ขอบขวา, มุมนอกของผิวบน ถ้าเพิ่มต้องอยู่ใน ID 0–15 เพื่อให้ `collides` ยังครอบ หรือแจ้ง ID ใหม่
-   - ผนัง 22–33 และเถาวัลย์ 42–45 ยังไม่มีที่วางในด่าน รอ Claude ตัดสินว่าจะวางตรงไหน
 
 ฝั่ง Claude
 1. หลัง PR #9 merge: merge `main` เข้า branch นี้แล้วเปิด PR (ตอนนี้ branch รวม `art/phase-c` ไว้แล้วเพื่อทดสอบ) ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
@@ -60,6 +59,7 @@ python3 tests/e2e/w1_bot.py w1_3 clean --boss   # ด่าน 1-3 + สู้�
 python3 tests/e2e/lab_test.py                   # Elements Lab 38 checks
 python3 tests/e2e/flow.py                       # เมนู, World Map, เซฟ, Game Over
 python3 tests/e2e/boss_reset.py                 # สนามบอส: ประตูปิด, ตายแล้วรีเซ็ต, phase 1→3
+python3 tests/e2e/oneway.py                     # แท่น one-way: ทะลุจากล่าง ลงยืนจากบน
 ```
 
 - สคริปต์ใช้ `?lowres` (วาด 640×360) เพราะ software GL ที่ 1280×720 ได้ ~44 fps จน bot กดปุ่มไม่ทัน ตั้ง `GAME_URL` และ `SHOT_DIR` ได้ทาง env

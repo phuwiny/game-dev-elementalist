@@ -203,6 +203,16 @@ T_HAZARD = (19, 19, 20, 21)
 # ground decoration: leaves 34-37, roots 38-41, rubble 46-49, mushrooms 50-53, ember flowers 54-57
 DECOR_GROUND = list(range(34, 42)) + list(range(46, 58))
 DECOR_CHANCE = 0.3
+# background ruins: ruined masonry 22-33 behind the play lane, wall vines 42-45 hanging from the broken top
+WALL_TILES = tuple(range(22, 34))
+VINE_TILES = tuple(range(42, 46))
+VINE_CHANCE = 0.4
+# (first col, last col, max height in tiles) per level; cells holding an object or enemy are left empty
+RUINS = {
+    'Ember Trail': [(60, 70, 5), (148, 158, 4)],
+    'Burning Canopy': [(60, 68, 5), (150, 160, 4)],
+    'Bramble Hollow': [(60, 66, 4), (176, 198, 6)],
+}
 CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'heart', 's': 'moss_slime',
            'f': 'leaf_wisp', 'r': 'thorn_beetle', 'v': 'vine', 'b': 'crate', 'i': 'ice', '~': 'water',
            't': 'torch', 'w': 'seed', 'm': 'windmill', 'X': 'cracked_wall', '_': 'plate', 'D': 'gate',
@@ -261,12 +271,34 @@ def decorate(rows, rng):
     return data
 
 
+def ruins(rows, name, rng):
+    """(wall gids, vine gids): masonry rising from the ground with an uneven top, vines hanging from it"""
+    H_, W_ = len(rows), len(rows[0])
+    walls, vines = [0] * (H_ * W_), [0] * (H_ * W_)
+    for c0, c1, h in RUINS.get(name, []):
+        for c in range(c0, c1 + 1):
+            if rows[G][c] != '#':
+                continue  # no wall standing over a pit
+            height = max(2, h - rng.choice((0, 0, 1, 2)))
+            top = G - height
+            for r in range(top, G):
+                if rows[r][c] == '.':
+                    walls[r * W_ + c] = 1 + rng.choice(WALL_TILES)
+            if walls[top * W_ + c] and rng.random() < VINE_CHANCE:
+                for r in (top, top + 1):
+                    if walls[r * W_ + c]:
+                        vines[r * W_ + c] = 1 + rng.choice(VINE_TILES)
+    return walls, vines
+
+
 def to_tiled(rows, name):
     W = len(rows[0])
     objects = []
     rng = random.Random('terrain:' + name)
     data = autotile(rows, rng)
-    decor = decorate(rows, random.Random('decor:' + name))
+    ground = decorate(rows, random.Random('decor:' + name))
+    walls, vines = ruins(rows, name, random.Random('ruins:' + name))
+    over = [v or g for v, g in zip(vines, ground)]
     for r, line in enumerate(rows):
         for c, ch in enumerate(line):
             if ch in '.#^-':
@@ -287,12 +319,14 @@ def to_tiled(rows, name):
     return {
         'type': 'map', 'version': '1.10', 'tiledversion': '1.10.2', 'orientation': 'orthogonal',
         'renderorder': 'right-down', 'width': W, 'height': H, 'tilewidth': 16, 'tileheight': 16,
-        'infinite': False, 'nextlayerid': 4, 'nextobjectid': len(objects) + 1,
+        'infinite': False, 'nextlayerid': 5, 'nextobjectid': len(objects) + 1,
         'properties': [{'name': 'name', 'type': 'string', 'value': name}],
         'tilesets': [load_tileset()],
         'layers': [
             {'id': 3, 'name': 'decor', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
-             'opacity': 1, 'visible': True, 'data': decor},
+             'opacity': 1, 'visible': True, 'data': walls},
+            {'id': 4, 'name': 'decor_over', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
+             'opacity': 1, 'visible': True, 'data': over},
             {'id': 1, 'name': 'terrain', 'type': 'tilelayer', 'width': W, 'height': H, 'x': 0, 'y': 0,
              'opacity': 1, 'visible': True, 'data': data},
             {'id': 2, 'name': 'objects', 'type': 'objectgroup', 'draworder': 'topdown', 'x': 0, 'y': 0,

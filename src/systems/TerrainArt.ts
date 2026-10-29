@@ -3,8 +3,8 @@ import { TILE_SIZE } from '../config/constants';
 import type { LevelArt } from '../core/LevelParser';
 import { gidToTileId, isFlippedH } from '../core/TiledLevel';
 
-/** depth ของชั้นตกแต่ง (หลัง terrain และหลังตัวละครทุกตัว) */
-const DECOR_DEPTH = -1;
+/** depth ของชั้นตกแต่งชั้นแรก (หลัง terrain และหลังตัวละครทุกตัว) ชั้นถัดไปสูงขึ้นทีละ 0.1 แต่ยังต่ำกว่า terrain */
+const DECOR_DEPTH = -1.5;
 
 function createLayer(scene: Phaser.Scene, art: LevelArt, grid: readonly (readonly number[])[]): Phaser.Tilemaps.TilemapLayer {
   const data = grid.map((row) => row.map((gid) => gidToTileId(gid, art.firstgid)));
@@ -29,9 +29,9 @@ function createLayer(scene: Phaser.Scene, art: LevelArt, grid: readonly (readonl
  * terrain ชนเฉพาะ tile ที่มี property `collides` ส่วน one-way และ hazard แยกไปสร้าง hitbox เอง
  */
 export function buildArtTerrain(scene: Phaser.Scene, art: LevelArt): Phaser.Tilemaps.TilemapLayer {
-  if (art.decor.some((row) => row.some((gid) => gid !== 0))) {
-    createLayer(scene, art, art.decor).setDepth(DECOR_DEPTH);
-  }
+  art.decor.forEach((grid, i) => {
+    if (grid.some((row) => row.some((gid) => gid !== 0))) createLayer(scene, art, grid).setDepth(DECOR_DEPTH + i * 0.1);
+  });
   const terrain = createLayer(scene, art, art.terrain);
   terrain.setCollision(art.collidingIds);
   return terrain;

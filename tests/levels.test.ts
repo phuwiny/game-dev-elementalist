@@ -84,7 +84,7 @@ describe('Ember Woods tileset', () => {
     ],
   };
   const FLIP_H = 0x80000000;
-  const base = (terrain: number[], decor?: number[]): TiledMap => ({
+  const base = (terrain: number[], decor?: number[], over?: number[]): TiledMap => ({
     width: 4,
     height: 1,
     tilewidth: 16,
@@ -92,6 +92,7 @@ describe('Ember Woods tileset', () => {
     tilesets: [ts],
     layers: [
       { name: 'decor', type: 'tilelayer', data: decor ?? [0, 0, 0, 0] },
+      { name: 'decor_over', type: 'tilelayer', data: over ?? [0, 0, 0, 0] },
       { name: 'terrain', type: 'tilelayer', data: terrain },
       {
         name: 'objects',
@@ -119,10 +120,10 @@ describe('Ember Woods tileset', () => {
     expect(gidToTileId(0, 1)).toBe(-1);
   });
 
-  it('exposes tileset layout, solid ids and the decor layer', () => {
-    const level = parseTiledMap(base([1, 0, 0, 0], [0, 35, 0, 0]));
+  it('exposes tileset layout, solid ids and every decor layer in file order', () => {
+    const level = parseTiledMap(base([1, 0, 0, 0], [0, 35, 0, 0], [0, 0, 43, 0]));
     expect(level.art).toMatchObject({ tileset: 'tiles_w1_ember_woods', firstgid: 1, margin: 1, spacing: 2, collidingIds: [0] });
-    expect(level.art!.decor[0]).toEqual([0, 35, 0, 0]);
+    expect(level.art!.decor.map((g) => g[0])).toEqual([[0, 35, 0, 0], [0, 0, 43, 0]]);
   });
 
   it('has no art data for maps without a named tileset', () => {

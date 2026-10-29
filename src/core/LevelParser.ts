@@ -69,9 +69,10 @@ export interface LevelArt {
   firstgid: number;
   margin: number;
   spacing: number;
-  /** gid ของชั้น terrain และ decor [row][col] (0 = ว่าง, รวม flip flag ของ Tiled) */
+  /** gid ของชั้น terrain [row][col] (0 = ว่าง, รวม flip flag ของ Tiled) */
   terrain: number[][];
-  decor: number[][];
+  /** ชั้นตกแต่งที่ชื่อขึ้นต้นด้วย "decor" เรียงจากล่างขึ้นบน (ชั้นหลังวาดทับชั้นก่อน) แต่ละชั้นเป็น gid [row][col] */
+  decor: number[][][];
   /** tile id (ไม่รวม firstgid) ที่ชนแบบทึบ */
   collidingIds: number[];
 }
