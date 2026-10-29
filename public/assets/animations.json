@@ -40,5 +40,159 @@
     "frames": 2,
     "frameRate": 14,
     "repeat": 0
+  },
+  "enemies_w1_moss_slime_idle": {
+    "atlas": "enemies_w1",
+    "prefix": "moss_slime_idle_",
+    "frames": 4,
+    "frameRate": 6,
+    "repeat": -1
+  },
+  "enemies_w1_moss_slime_move": {
+    "atlas": "enemies_w1",
+    "prefix": "moss_slime_move_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "enemies_w1_moss_slime_hurt": {
+    "atlas": "enemies_w1",
+    "prefix": "moss_slime_hurt_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "enemies_w1_moss_slime_death": {
+    "atlas": "enemies_w1",
+    "prefix": "moss_slime_death_",
+    "frames": 5,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "enemies_w1_leaf_wisp_fly": {
+    "atlas": "enemies_w1",
+    "prefix": "leaf_wisp_fly_",
+    "frames": 6,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "enemies_w1_leaf_wisp_dive": {
+    "atlas": "enemies_w1",
+    "prefix": "leaf_wisp_dive_",
+    "frames": 3,
+    "frameRate": 12,
+    "repeat": -1
+  },
+  "enemies_w1_leaf_wisp_hurt": {
+    "atlas": "enemies_w1",
+    "prefix": "leaf_wisp_hurt_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "enemies_w1_leaf_wisp_death": {
+    "atlas": "enemies_w1",
+    "prefix": "leaf_wisp_death_",
+    "frames": 5,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "enemies_w1_thorn_beetle_walk": {
+    "atlas": "enemies_w1",
+    "prefix": "thorn_beetle_walk_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "enemies_w1_thorn_beetle_flipped": {
+    "atlas": "enemies_w1",
+    "prefix": "thorn_beetle_flipped_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "enemies_w1_thorn_beetle_hurt": {
+    "atlas": "enemies_w1",
+    "prefix": "thorn_beetle_hurt_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "enemies_w1_thorn_beetle_death": {
+    "atlas": "enemies_w1",
+    "prefix": "thorn_beetle_death_",
+    "frames": 6,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "boss_bramble_king_idle": {
+    "atlas": "boss_bramble_king",
+    "prefix": "idle_",
+    "frames": 6,
+    "frameRate": 6,
+    "repeat": -1
+  },
+  "boss_bramble_king_vine_attack": {
+    "atlas": "boss_bramble_king",
+    "prefix": "vine_attack_",
+    "frames": 8,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "boss_bramble_king_roar": {
+    "atlas": "boss_bramble_king",
+    "prefix": "roar_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": 0
+  },
+  "boss_bramble_king_weak_exposed": {
+    "atlas": "boss_bramble_king",
+    "prefix": "weak_exposed_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "boss_bramble_king_hurt": {
+    "atlas": "boss_bramble_king",
+    "prefix": "hurt_",
+    "frames": 2,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "boss_bramble_king_death": {
+    "atlas": "boss_bramble_king",
+    "prefix": "death_",
+    "frames": 10,
+    "frameRate": 10,
+    "repeat": 0
+  },
+  "boss_bramble_king_vine_whip": {
+    "atlas": "boss_bramble_king",
+    "prefix": "vine_whip_",
+    "frames": 6,
+    "frameRate": 12,
+    "repeat": -1
+  },
+  "boss_bramble_king_vine_shield_idle": {
+    "atlas": "boss_bramble_king",
+    "prefix": "vine_shield_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "boss_bramble_king_vine_shield_burn": {
+    "atlas": "boss_bramble_king",
+    "prefix": "vine_shield_burn_",
+    "frames": 6,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "boss_bramble_king_thorn_seed": {
+    "atlas": "boss_bramble_king",
+    "prefix": "thorn_seed_",
+    "frames": 2,
+    "frameRate": 8,
+    "repeat": -1
   }
 }
