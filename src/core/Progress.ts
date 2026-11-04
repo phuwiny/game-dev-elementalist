@@ -9,18 +9,24 @@ export interface ProgressData {
   spirits: ElementType[];
   /** Spirit Shard ที่เก็บแล้วต่อด่าน (slot 0–2) */
   shards: Record<string, number[]>;
+  /** 1UP Feather ที่เก็บแล้วต่อด่าน (ลำดับ feather ในไฟล์ด่าน เริ่ม 0) */
+  feathers: Record<string, number[]>;
 }
+
+/** จำนวน feather ต่อด่านที่ยอมรับตอนอ่านเซฟ (กันข้อมูลเสีย) */
+const MAX_FEATHERS_PER_LEVEL = 8;
 
 const ELEMENTS = new Set<string>(Object.values(ElementType));
 
 /**
- * ความคืบหน้าของผู้เล่น (GDD หัวข้อ 8): ด่านที่ผ่านแล้ว, ภูตที่ได้แล้ว และ Spirit Shard ที่เก็บแล้วต่อด่าน
+ * ความคืบหน้าของผู้เล่น (GDD หัวข้อ 8): ด่านที่ผ่านแล้ว, ภูตที่ได้แล้ว, Spirit Shard และ 1UP Feather ที่เก็บแล้วต่อด่าน
  * ด่านในโหมดผจญภัยปลดล็อกตามลำดับ ด่านแรกเปิดเสมอ
  */
 export class Progress {
   private readonly cleared = new Set<string>();
   private readonly spirits = new Set<ElementType>();
   private readonly shards = new Map<string, Set<number>>();
+  private readonly feathers = new Map<string, Set<number>>();
 
   constructor(
     private readonly order: readonly string[],
@@ -35,6 +41,12 @@ export class Progress {
         for (const [level, slots] of Object.entries(d.shards)) {
           if (!order.includes(level) || !Array.isArray(slots)) continue;
           for (const s of slots) if (Number.isInteger(s) && s >= 0 && s < SHARDS_PER_LEVEL) this.shardSet(level).add(s);
+        }
+      }
+      if (d.feathers && typeof d.feathers === 'object' && !Array.isArray(d.feathers)) {
+        for (const [level, ids] of Object.entries(d.feathers)) {
+          if (!order.includes(level) || !Array.isArray(ids)) continue;
+          for (const i of ids) if (Number.isInteger(i) && i >= 0 && i < MAX_FEATHERS_PER_LEVEL) this.featherSet(level).add(i);
         }
       }
     }
@@ -66,6 +78,33 @@ export class Progress {
       this.shards.set(level, set);
     }
     return set;
+  }
+
+  private featherSet(level: string): Set<number> {
+    let set = this.feathers.get(level);
+    if (!set) {
+      set = new Set<number>();
+      this.feathers.set(level, set);
+    }
+    return set;
+  }
+
+  /** ลำดับของ 1UP Feather ที่เก็บแล้วในด่านนี้ */
+  collectedFeathers(level: string): number[] {
+    return [...(this.feathers.get(level) ?? [])].sort((a, b) => a - b);
+  }
+
+  /**
+   * บันทึก feather ทันทีที่เก็บ (ต่างจาก shard ที่บันทึกตอนผ่านด่าน: feather ให้ชีวิตทันที
+   * ถ้ารอผ่านด่านจะเก็บแล้วออกจากด่านเพื่อเก็บซ้ำได้) คืน false ถ้าเคยเก็บแล้วหรือไม่ใช่ด่านผจญภัย
+   */
+  addFeather(level: string, index: number): boolean {
+    if (!this.order.includes(level) || !Number.isInteger(index) || index < 0 || index >= MAX_FEATHERS_PER_LEVEL) return false;
+    const set = this.featherSet(level);
+    if (set.has(index)) return false;
+    set.add(index);
+    this.save();
+    return true;
   }
 
   /** slot ของ Spirit Shard ที่เก็บแล้วในด่านนี้ */
@@ -116,13 +155,16 @@ export class Progress {
     this.cleared.clear();
     this.spirits.clear();
     this.shards.clear();
+    this.feathers.clear();
     this.save();
   }
 
   toJSON(): ProgressData {
     const shards: Record<string, number[]> = {};
     for (const [level, set] of this.shards) if (set.size > 0) shards[level] = [...set].sort((a, b) => a - b);
-    return { cleared: [...this.cleared], spirits: [...this.spirits], shards };
+    const feathers: Record<string, number[]> = {};
+    for (const [level, set] of this.feathers) if (set.size > 0) feathers[level] = [...set].sort((a, b) => a - b);
+    return { cleared: [...this.cleared], spirits: [...this.spirits], shards, feathers };
   }
 
   /** คืนค่า false ถ้าบันทึกไม่ได้ (เช่น browser บล็อก localStorage) */

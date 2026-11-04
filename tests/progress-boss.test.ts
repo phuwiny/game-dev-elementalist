@@ -37,10 +37,32 @@ describe('Progress', () => {
     const mem = new MemoryStorage();
     mem.setItem('elemental-spirit:progress', JSON.stringify({ cleared: [1, 'w1_1'], spirits: ['lava', 'fire'] }));
     const p = new Progress(order, new SaveStore(() => mem));
-    expect(p.toJSON()).toEqual({ cleared: ['w1_1'], spirits: ['fire'], shards: {} });
+    expect(p.toJSON()).toEqual({ cleared: ['w1_1'], spirits: ['fire'], shards: {}, feathers: {} });
     p.reset();
     expect(p.isUnlocked('w1_2')).toBe(false);
     expect(p.nextLevel()).toBe('w1_1');
+  });
+
+  describe('1UP Feathers', () => {
+    const make = (mem: MemoryStorage) => new Progress(order, new SaveStore(() => mem));
+
+    it('saves a feather the moment it is taken, once per level and index, and survives a reload', () => {
+      const mem = new MemoryStorage();
+      const p = make(mem);
+      expect(p.collectedFeathers('w1_2')).toEqual([]);
+      expect(p.addFeather('w1_2', 0)).toBe(true);
+      expect(p.addFeather('w1_2', 0)).toBe(false);
+      expect(p.addFeather('lab', 0)).toBe(false); // test levels are not saved
+      expect(make(mem).collectedFeathers('w1_2')).toEqual([0]);
+      p.reset();
+      expect(make(mem).collectedFeathers('w1_2')).toEqual([]);
+    });
+
+    it('ignores corrupt feather data', () => {
+      const mem = new MemoryStorage();
+      mem.setItem('elemental-spirit:progress', JSON.stringify({ feathers: { w1_2: [0, -1, 1.5, 'x', 99], lab: [0], w1_1: 'bad' } }));
+      expect(make(mem).toJSON().feathers).toEqual({ w1_2: [0] });
+    });
   });
 
   describe('Spirit Shards', () => {

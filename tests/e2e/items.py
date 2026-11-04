@@ -4,6 +4,7 @@
 2. orb: walking into it with low energy refills +50 (ItemBalance.orbEnergy); with full energy it stays for later
 3. feather: climb the three one-way ledges above the 1-2 checkpoint with real jumps and take it: lives +1, "1UP" text;
    at the life cap (9) it stays; from the ground below the ledges the feather is outside the camera view
+4. the feather is saved the moment it is taken: replaying 1-2 (also after a page reload) shows a ghost that gives no life
 
 usage: python3 items.py
 """
@@ -42,7 +43,7 @@ with sync_playwright() as pw:
     def items(prefix):
         return page.evaluate(f"""() => {GS}.children.list
           .filter(o => o.active && o.anims && o.anims.currentAnim && o.anims.currentAnim.key === 'items_{prefix}')
-          .map(o => ({{ x: o.x, y: o.y, tex: o.texture.key, frame: o.frame.name }}))""")
+          .map(o => ({{ x: o.x, y: o.y, tex: o.texture.key, frame: o.frame.name, alpha: o.alpha }}))""")
 
     def teleport(col, y):
         page.evaluate(f"() => {{ const g = {GS}; g.player.setPosition({col * T + T / 2}, {y - 1}); g.player.body.setVelocity(0, 0); }}")
@@ -135,6 +136,14 @@ with sync_playwright() as pw:
     wait(800)
     view = page.evaluate(f"() => {{ const v = {GS}.cameras.main.worldView; return [v.top, v.bottom]; }}")
     check(not (view[0] <= 7 * T + 8 <= view[1]), f'feather hidden from the ground (camera rows {view[0] / T:.0f}-{view[1] / T:.0f})')
+    # life cap first, while the feather is still untaken in this save
+    page.evaluate(f"() => {{ const v = {GS}.vitals; for (let i = 0; i < 9; i++) v.addLife(); }}")
+    page.evaluate(f"() => {{ const g = {GS}; g.player.body.setAllowGravity(false); g.player.setPosition(128 * {T} + 8, 8 * {T}); g.player.body.setVelocity(0, 0); }}")
+    wait(400)
+    check(len(items('oneup_feather_float')) == 1 and state()['lives'] == 9 and page.evaluate(f"() => {GS}.progress.collectedFeathers('w1_2')") == [],
+          'life cap (9): the feather stays and is not saved')
+    page.evaluate(f"() => {{ const g = {GS}; g.vitals.resetForContinue(); g.player.body.setAllowGravity(true); }}")
+    start('w1_2')
     lives0 = state()['lives']
     got = False
     for _ in range(3):
@@ -146,11 +155,21 @@ with sync_playwright() as pw:
     check(got and s['lives'] == lives0 + 1 and len(items('oneup_feather_float')) == 0, f'feather reached with real jumps: lives {lives0} -> {s["lives"]}')
     page.screenshot(path=os.path.join(os.environ.get('SHOT_DIR', '/tmp'), 'feather_ledge.png'))
 
-    start('w1_2')
-    page.evaluate(f"() => {{ const v = {GS}.vitals; for (let i = 0; i < 9; i++) v.addLife(); }}")
-    page.evaluate(f"() => {{ const g = {GS}; g.player.body.setAllowGravity(false); g.player.setPosition(128 * {T} + 8, 8 * {T}); g.player.body.setVelocity(0, 0); }}")
-    wait(400)
-    check(len(items('oneup_feather_float')) == 1 and state()['lives'] == 9, 'life cap (9): the feather stays')
+    # ---- 4. taken once per save: ghost on replay, after a reload too; nothing more to take ----
+    saved = page.evaluate(f"() => {GS}.progress.collectedFeathers('w1_2')")
+    stored = page.evaluate("() => JSON.parse(localStorage.getItem('elemental-spirit:progress') || '{}').feathers")
+    check(saved == [0] and stored == {'w1_2': [0]}, f'feather saved the moment it was taken {saved} {stored}')
+    for label, reload in (('replay', False), ('after reload', True)):
+        if reload:
+            page.reload()
+            page.wait_for_function("() => window.__game && window.__game.scene.isActive('TitleScene')")
+        start('w1_2')
+        f = items('oneup_feather_float')
+        lives = state()['lives']
+        page.evaluate(f"() => {{ const g = {GS}; g.player.body.setAllowGravity(false); g.player.setPosition(128 * {T} + 8, 8 * {T}); g.player.body.setVelocity(0, 0); }}")
+        wait(400)
+        check(len(f) == 1 and f[0]['alpha'] == 0.3 and state()['lives'] == lives and len(items('oneup_feather_float')) == 1,
+              f'{label}: feather shown as a ghost and gives no life ({f}, lives {lives} -> {state()["lives"]})')
 
     check(not errors, f'no page errors {errors[:2]}')
     br.close()

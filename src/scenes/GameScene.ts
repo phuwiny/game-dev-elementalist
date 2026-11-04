@@ -641,16 +641,25 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       sfx.play('spirit');
     });
 
-    // 1UP Feather: +1 ชีวิต ถ้าชีวิตเต็มแล้วไม่เก็บ
+    // 1UP Feather: +1 ชีวิต เก็บได้ครั้งเดียวต่อเซฟ (บันทึกทันทีที่เก็บ) ชิ้นที่เก็บแล้วแสดงเป็นเงาจางแบบ Spirit Shard
+    // ถ้าชีวิตเต็มแล้วไม่เก็บ
+    const savedFeathers = adventure ? this.progress.collectedFeathers(this.def.key) : [];
     const feathers = this.physics.add.staticGroup();
-    for (const p of this.level.feathers) {
+    this.level.feathers.forEach((p, i) => {
       const f = this.add.sprite(this.centerOf(p).x, this.centerOf(p).y, 'items', 'oneup_feather_float_000').setDepth(3);
       f.play(animKey('items', 'oneup_feather_float'));
+      if (savedFeathers.includes(i)) {
+        f.setAlpha(0.3);
+        return;
+      }
+      f.setData('index', i);
       feathers.add(f);
-    }
+    });
     this.physics.add.overlap(this.player, feathers, (_p, obj) => {
       if (this.vitals.lives >= VitalsBalance.maxLives) return;
-      (obj as Phaser.GameObjects.Sprite).destroy();
+      const sprite = obj as Phaser.GameObjects.Sprite;
+      if (adventure) this.progress.addFeather(this.def.key, sprite.getData('index') as number);
+      sprite.destroy();
       for (let i = 0; i < ItemBalance.featherLives; i += 1) this.vitals.addLife();
       sfx.play('one_up');
       this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, '1UP', PALETTE.wind);
