@@ -41,6 +41,21 @@ class PlayerContractTests(unittest.TestCase):
     def check(self):
         return validator.validate(self.root, self.master, self.v4)
 
+    def test_spirit_portraits_accept_only_contract_names(self):
+        self.write_atlas()
+        directory = self.root / 'sprites/spirits'
+        directory.mkdir()
+        Image.new('RGBA', (32, 32), (*next(iter(self.master)), 255)).save(directory / 'spirits.png')
+        for name in ('burnil_icon', 'wata_icon', 'valvaliz_icon', 'eathy_icon', 'unknown_icon'):
+            (directory / 'spirits.json').write_text(json.dumps({'frames': {
+                name: {'frame': {'x': 0, 'y': 0, 'w': 32, 'h': 32}, 'rotated': False, 'trimmed': False}
+            }}))
+            errors = self.check()
+            if name == 'unknown_icon':
+                self.assertTrue(any('invalid frame name' in e for e in errors))
+            else:
+                self.assertEqual([], errors)
+
     def test_valid_player_atlas(self):
         self.write_atlas()
         self.assertEqual([], self.check())
