@@ -60,6 +60,8 @@ export interface HudState {
   selected: ElementType | null;
   boss: { name: string; hp: number; max: number } | null;
   muted: boolean;
+  /** Spirit Shard ของด่านนี้: ที่มีแล้ว (เก็บไว้ก่อนหน้าและในรอบนี้) / ทั้งหมด */
+  shards: { have: number; total: number };
 }
 
 /** วัตถุที่กระสุนธาตุชนแล้วมีปฏิกิริยา (วัตถุ puzzle และโล่เถาวัลย์ของบอส) */
@@ -104,6 +106,10 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private respawnPoint = { x: 0, y: 0 };
   private activeCheckpoint: Phaser.GameObjects.Sprite | null = null;
   private stageCoins = 0;
+  /** slot ของ Spirit Shard ที่เก็บในรอบนี้ (บันทึกลงเซฟตอนผ่านด่านเท่านั้น) */
+  private stageShards = new Set<number>();
+  /** slot ที่เก็บไว้แล้วจากรอบก่อนๆ */
+  private savedShards: number[] = [];
   private finished = false;
   private puzzleDirty = true;
   private def!: LevelDef;
@@ -128,6 +134,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   create(data: { level?: string }): void {
     this.finished = false;
     this.stageCoins = 0;
+    this.stageShards = new Set<number>();
+    this.savedShards = [];
     this.activeCheckpoint = null;
     this.puzzleObjects = [];
     this.objectGrid = new Map();
@@ -248,6 +256,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       selected: this.elements.selected,
       boss: this.boss && (this.boss.isActive || this.boss.isDefeated) ? { name: this.boss.name, hp: this.boss.hp, max: this.boss.maxHp } : null,
       muted: sfx.muted,
+      shards: { have: new Set([...this.savedShards, ...this.stageShards]).size, total: this.level.shards.length },
     };
   }
 
@@ -572,6 +581,29 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       const extra = this.vitals.addCoins(1);
       sfx.play(extra > 0 ? 'one_up' : 'coin');
       if (extra > 0) this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, '1UP', PALETTE.wind);
+    });
+
+    // Spirit Shard: ชิ้นที่เก็บไว้แล้วจากรอบก่อนแสดงเป็นเงาจาง เก็บซ้ำไม่ได้
+    const adventure = isAdventure(this.def.key);
+    this.savedShards = adventure ? this.progress.collectedShards(this.def.key) : [];
+    const shards = this.physics.add.staticGroup();
+    for (const s of this.level.shards) {
+      const c = this.centerOf(s);
+      const sprite = this.add.sprite(c.x, c.y, 'items', 'spirit_shard_000').setDepth(3);
+      sprite.play(animKey('items', 'spirit_shard_shine'));
+      if (this.savedShards.includes(s.slot)) {
+        sprite.setAlpha(0.3);
+        continue;
+      }
+      sprite.setData('slot', s.slot);
+      shards.add(sprite);
+    }
+    this.physics.add.overlap(this.player, shards, (_p, obj) => {
+      const sprite = obj as Phaser.GameObjects.Sprite;
+      this.stageShards.add(sprite.getData('slot') as number);
+      sprite.destroy();
+      sfx.play('shard');
+      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, 'SPIRIT SHARD', PALETTE.pink3);
     });
 
     const hearts = this.physics.add.staticGroup();
@@ -959,11 +991,16 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.player.body.setAcceleration(0, 0);
     sfx.play('clear');
     const adventure = isAdventure(this.def.key);
-    if (adventure) this.progress.markCleared(this.def.key);
+    let newShards = 0;
+    if (adventure) {
+      this.progress.markCleared(this.def.key);
+      newShards = this.progress.addShards(this.def.key, this.stageShards);
+    }
+    const shards = { have: adventure ? this.progress.collectedShards(this.def.key).length : this.stageShards.size, total: this.level.shards.length, added: newShards };
     const next = adventure ? nextAdventureLevel(this.def.key) : null;
     this.time.delayedCall(600, () => {
       this.scene.stop(SceneKey.UI);
-      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next });
+      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next, shards });
     });
   }
 

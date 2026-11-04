@@ -37,10 +37,50 @@ describe('Progress', () => {
     const mem = new MemoryStorage();
     mem.setItem('elemental-spirit:progress', JSON.stringify({ cleared: [1, 'w1_1'], spirits: ['lava', 'fire'] }));
     const p = new Progress(order, new SaveStore(() => mem));
-    expect(p.toJSON()).toEqual({ cleared: ['w1_1'], spirits: ['fire'] });
+    expect(p.toJSON()).toEqual({ cleared: ['w1_1'], spirits: ['fire'], shards: {} });
     p.reset();
     expect(p.isUnlocked('w1_2')).toBe(false);
     expect(p.nextLevel()).toBe('w1_1');
+  });
+
+  describe('Spirit Shards', () => {
+    const store = () => {
+      const mem = new MemoryStorage();
+      return { mem, make: () => new Progress(order, new SaveStore(() => mem)) };
+    };
+
+    it('adds new shards, counts only first-time ones and survives a reload', () => {
+      const { make } = store();
+      const p = make();
+      expect(p.totalShards).toBe(0);
+      expect(p.addShards('w1_1', [2, 0])).toBe(2);
+      expect(p.addShards('w1_1', [0, 1])).toBe(1); // 0 was already saved
+      expect(p.collectedShards('w1_1')).toEqual([0, 1, 2]);
+      expect(p.totalShards).toBe(3);
+      expect(p.maxShards).toBe(order.length * 3);
+      const again = make();
+      expect(again.collectedShards('w1_1')).toEqual([0, 1, 2]);
+      expect(again.collectedShards('w1_2')).toEqual([]);
+    });
+
+    it('ignores unknown levels and out-of-range slots, saving nothing for them', () => {
+      const { mem, make } = store();
+      const p = make();
+      expect(p.addShards('nope', [0])).toBe(0);
+      expect(p.addShards('w1_1', [3, -1, 1.5])).toBe(0);
+      expect(mem.getItem('elemental-spirit:progress')).toBeNull();
+    });
+
+    it('drops corrupt shard data on load and clears it on reset', () => {
+      const { mem, make } = store();
+      mem.setItem('elemental-spirit:progress', JSON.stringify({ shards: { w1_1: [0, 9, 'x', 0], nope: [1], w1_2: 'bad' } }));
+      const p = make();
+      expect(p.collectedShards('w1_1')).toEqual([0]);
+      expect(p.totalShards).toBe(1);
+      p.reset();
+      expect(p.totalShards).toBe(0);
+      expect(p.toJSON().shards).toEqual({});
+    });
   });
 
   it('works without storage', () => {

@@ -35,6 +35,8 @@ export class UIScene extends Phaser.Scene {
   private bossFill!: Phaser.GameObjects.Image;
   private bossName!: Phaser.GameObjects.Text;
   private shownBossHp = -1;
+  private shardIcon!: Phaser.GameObjects.Image;
+  private shardsText!: Phaser.GameObjects.Text;
   private settingsOpen = false;
   private lastKey = '';
 
@@ -63,6 +65,10 @@ export class UIScene extends Phaser.Scene {
     this.livesText = this.add.text(GAME_WIDTH - 84, 12, '', textStyle(12)).setOrigin(0, 0);
     this.add.image(GAME_WIDTH - 102, 34, 'ui', 'coin_icon').setOrigin(0, 0);
     this.coinsText = this.add.text(GAME_WIDTH - 84, 31, '', textStyle(12)).setOrigin(0, 0);
+
+    this.shardIcon = this.add.image(GAME_WIDTH - 104, 52, 'items', 'spirit_shard_000').setOrigin(0, 0).setVisible(false);
+    setAtlasFrame(this.shardIcon, 'items', 'spirit_shard_000');
+    this.shardsText = this.add.text(GAME_WIDTH - 84, 53, '', textStyle(12, PALETTE.pink3)).setOrigin(0, 0).setVisible(false);
 
     this.shownBossHp = -1;
     this.bossFill = this.add.image(BOSS_BAR_X + 2, BOSS_BAR_Y + 2, 'ui', 'boss_bar_fill').setOrigin(0, 0);
@@ -125,7 +131,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   private render(s: HudState): void {
-    const key = `${s.hp}/${s.maxHp}/${s.lives}/${s.coins}/${s.unlocked.join(',')}/${s.selected}`;
+    const key = `${s.hp}/${s.maxHp}/${s.lives}/${s.coins}/${s.unlocked.join(',')}/${s.selected}/${s.shards.have}/${s.shards.total}`;
     if (key !== this.lastKey) {
       this.lastKey = key;
       this.hearts.forEach((h, i) => {
@@ -134,6 +140,8 @@ export class UIScene extends Phaser.Scene {
       });
       this.livesText.setText(`×${s.lives}`);
       this.coinsText.setText(String(s.coins).padStart(2, '0'));
+      this.shardIcon.setVisible(s.shards.total > 0);
+      this.shardsText.setVisible(s.shards.total > 0).setText(`${s.shards.have}/${s.shards.total}`);
       ELEMENT_ORDER.forEach((el, i) => {
         setAtlasFrame(this.slots[i], 'ui', `element_icon_${el}_${s.unlocked.includes(el) ? 'normal' : 'locked'}`);
       });

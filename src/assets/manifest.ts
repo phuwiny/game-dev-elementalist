@@ -208,6 +208,7 @@ export const ATLASES: AtlasDef[] = [
     anims: [
       { name: 'coin_spin', frames: 6, frameRate: 10, repeat: -1, width: 12, height: 12 },
       { name: 'heart_fruit_bob', frames: 4, frameRate: 6, repeat: -1 },
+      { name: 'spirit_shard_shine', frames: 6, frameRate: 10, repeat: -1 },
       { name: 'checkpoint_shrine_unlit', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 48 },
       { name: 'checkpoint_shrine_lighting', frames: 6, frameRate: 12, repeat: 0, width: 32, height: 48 },
       { name: 'checkpoint_shrine_lit', frames: 4, frameRate: 8, repeat: -1, width: 32, height: 48 },

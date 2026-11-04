@@ -7,6 +7,7 @@ import { useUiCamera } from '../ui/screen';
 import { ADVENTURE_LEVELS } from '../levels';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import type { Progress } from '../core/Progress';
+import { SHARDS_PER_LEVEL } from '../core/LevelParser';
 import type { Vitals } from '../core/Vitals';
 import { sfx } from '../systems/Sfx';
 import { addSaveWarning } from '../ui/saveWarning';
@@ -34,6 +35,7 @@ export class WorldMapScene extends Phaser.Scene {
     addSaveWarning(this);
 
     this.add.text(cx, 40, 'WORLD 1 · EMBER WOODS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
+    this.add.text(cx, 62, `Spirit Shards ${progress.totalShards}/${progress.maxShards}`, textStyle(10, PALETTE.pink3)).setOrigin(0.5);
 
     // เส้นทางเชื่อมระหว่างด่าน
     const path = this.add.graphics();
@@ -50,6 +52,10 @@ export class WorldMapScene extends Phaser.Scene {
       labels.push(
         this.add.text(nodeX(i, n), NODE_Y + 28, l.name, textStyle(10, state === 'locked' ? PALETTE.neutral3 : PALETTE.highlight)).setOrigin(0.5, 0),
       );
+      const got = progress.collectedShards(l.key).length;
+      this.add
+        .text(nodeX(i, n), NODE_Y + 44, `Shards ${got}/${SHARDS_PER_LEVEL}`, textStyle(10, got === SHARDS_PER_LEVEL ? PALETTE.pink3 : PALETTE.neutral3))
+        .setOrigin(0.5, 0);
       if (l.boss) this.add.text(nodeX(i, n), NODE_Y - 34, 'BOSS', textStyle(10, PALETTE.fire)).setOrigin(0.5);
     });
 

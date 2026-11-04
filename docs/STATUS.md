@@ -1,10 +1,10 @@
 # STATUS — สถานะงานและบันทึกส่งต่อ
 
-อัปเดตล่าสุด 2026-10-29 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
+อัปเดตล่าสุด 2026-11-04 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
 
 ## สถานะตอนนี้
 
-ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และ merge เข้า `main` แล้ว ตอนนี้เชื่อมภาพชุด World 1 (Phase C, [PR #9](https://github.com/phuwiny/game-dev-elementalist/pull/9) ของ Codex) เข้าเกมแล้วใน branch `claude/aclaire-v4-status-al18pm` รอพินรีวิว mockup และสั่ง merge
+ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และเชื่อมภาพ World 1 กับท่าครบชุดของ Aclaire แล้ว ภาพของ Codex ที่ส่งมาตอนนี้ครบทั้งโลก 1 และ moveset ของ Aclaire งานฝั่ง Claude ที่เหลือคือเพลง (ข้อ D) กับ playtest
 
 | PR | เนื้อหา | สถานะ |
 | --- | --- | --- |
@@ -15,7 +15,13 @@
 | #6 | รองรับ Aclaire V4: canvas 1280×720, ฉากขยาย 1.5 เท่า | merged |
 | #7 | (Codex) atlas `player` ชุดแรก: idle, run, jump_up, jump_peak, fall, land | merged |
 | #8 | placeholder รายท่า, แก้ `animations.json` ไม่ถูกใช้, hitbox 16×46 logical | merged |
-| #9 | (Codex) Phase C World 1: tileset, background 4 ชั้น, `enemies_w1`, `boss_bramble_king`, `animations.json` | draft รอพินรีวิว |
+| #9 | (Codex) Phase C World 1: tileset, background 4 ชั้น, `enemies_w1`, `boss_bramble_king`, `animations.json` | merged |
+| #10 | docs handoff, สคริปต์ e2e, ตัวสร้างด่าน W1 | merged |
+| #13 | (Codex) moveset ครบของ Aclaire (attack_1–3, double_jump, cast, dash, glide, ground_slam, hurt, dead) | merged |
+| #14 | เชื่อมภาพ World 1: tileset จริง, one-way, parallax, ซากปรัก, โล่ครอบจุดอ่อนบอส | merged |
+| #15 | ข้อความแจ้งเมื่อบันทึกไม่ได้ + e2e ท่า Aclaire | merged |
+| #16 | key rebinding + หน้า Settings | merged |
+| #17 | Spirit Shard ด่านละ 3 ชิ้น | เปิดอยู่ รอพิน merge |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -27,6 +33,7 @@
 - **ฉากและศัตรู:** Codex ยังวาดขนาดเดิม (tile 16, ศัตรู 32, palette 35 สี) ผู้ใช้อนุมัติภาพทดสอบสไตล์ World 1 แล้ว
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
+- **Spirit Shard:** ตำแหน่งสร้างใน `tools/levels/w1.py` (`L.shard(col,row,slot)`, `L.crate_nest`) ด่านละ 3 ชิ้น: 1-1 หอแท่นลอย 3 ชั้นข้างจุดเริ่ม / ลอยเหนือแท่นกลางด่าน / รังลังหลังหลุม, 1-2 ลอยเหนือแท่นข้างพีระมิด / รังลัง / แท่นสูงที่มี Leaf Wisp เฝ้า, 1-3 ลอยเหนือหนามช่องแรก / รังลัง / แท่นข้างพีระมิดที่มี Leaf Wisp ชิ้นที่ลอยสูงต้องกระโดดซ้ำจากแท่น (เก็บจากพื้นไม่ถึง) ภาพ `spirit_shard_shine` ยังเป็น placeholder จนกว่า atlas `items` จะมา
 - **โลก 1 ใช้ไฟอย่างเดียว** ตาม GDD, `startSpirits` ใน `src/levels/index.ts`
 - **ด่าน W1 ใช้ `tiles_w1_ember_woods`:** `GameScene` วาด terrain ตาม gid ในไฟล์ Tiled (`buildArtTerrain` ใน `src/systems/TerrainArt.ts`, margin 1 spacing 2 อ่านจากแผนที่) ชนเฉพาะ tile ที่มี `collides` ชั้นที่ชื่อขึ้นต้นด้วย `decor` (ไม่บังคับ มีได้หลายชั้น เรียงตามไฟล์) วาดหลัง terrain ไม่ชน ด่าน W1 มี `decor` (ผนังซากปรัก) กับ `decor_over` (ตกแต่งบนพื้นและเถาวัลย์ห้อยจากยอดผนัง) ตำแหน่งซากปรักอยู่ใน `RUINS` ของ `w1.py` (ด่านบอสมีผนังเป็นฉากหลังทั้งสนาม) ด่าน ASCII (lab, graybox) และกรณีไม่มี texture ยังใช้ graybox จาก grid
 - **บทบาทของ tile ID** (ตามคู่มือ `art/reports/2026-10-25_world1_integration_guide.md` ตัวสร้างด่านอยู่ที่ `tools/levels/w1.py` และอ่าน property จาก `.tsx` โดยตรง): 0–1 ผิวบน, 2–3 เนื้อดิน, 4/5 ขอบซ้าย/ขวา, 6 เพดาน, 7–10 มุมนอก (บนซ้าย, บนขวา, ล่างซ้าย, ล่างขวา), 11–14 มุมใน, 15 ฝาครอบแท่นเดี่ยว, 16–18 one-way, 19–21 hazard, 22–33 ผนังซากปรัก, 34–57 ตกแต่ง (ใบไม้, ราก, เถาวัลย์ผนัง 42–45, หิน, เห็ด, ดอกไม้ไฟ) **มุมใน 11–14 ยังไม่ใช้:** แต่ละใบวาดฝาหญ้าหรือเส้นขอบพาดทั้งด้านของ tile ที่อยู่กลางเนื้อดิน วางที่มุมเว้าแล้วดูเป็นก้อนหญ้าลอยในดิน จึงใช้เนื้อดินแทน รอ Codex ยืนยันว่าตั้งใจให้ใช้ตรงไหน
@@ -37,15 +44,15 @@
 ## งานถัดไป
 
 ฝั่ง Codex
-1. ท่าที่เหลือของ Aclaire: double_jump, cast, dash, glide, ground_slam, attack_1–3 (96×64 logical), hurt, dead
+1. (ท่าของ Aclaire ครบแล้ว ตรวจในเกมแล้ว: `tests/e2e/player_anims.py`)
 2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
    - tile มุมใน 11–14 ของ `tiles_w1_ember_woods`: ถ้าตั้งใจให้ใช้ที่มุมเว้า (tile อยู่กลางเนื้อดินแต่เฉียงหนึ่งด้านว่าง) ภาพปัจจุบันไม่เข้า เพราะมีฝาหญ้าหรือเส้นขอบพาดทั้งด้านที่ติดดิน ขอให้บอกว่าตั้งใจใช้ตรงไหน หรือวาดใหม่ให้มีขอบเฉพาะมุมเว้า
 
 ฝั่ง Claude
-1. หลัง PR #9 merge: merge `main` เข้า branch นี้แล้วเปิด PR (ตอนนี้ branch รวม `art/phase-c` ไว้แล้วเพื่อทดสอบ) ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
+1. ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
 2. ตรวจภาพที่ Codex ส่งในเกมทุกรอบ: เท้าตรงพื้น, hitbox, ไม่ jitter, กล้องในสนามบอส (บอสสูง 192 px มงกุฎชิดขอบบนจอ)
 3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD)
-4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), C Spirit Shard (ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน, ยังไม่ทำ gallery/ด่านพิเศษ), D เพลง (chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริง แหล่งเพลงจริงรอพิน)
+4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), ~~C Spirit Shard~~ (เสร็จ: ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน ยังไม่ทำ gallery/ด่านพิเศษที่ shard ปลดล็อก), D เพลง (chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริง แหล่งเพลงจริงรอพิน)
 
 ## การทดสอบ
 
@@ -59,6 +66,7 @@ python3 tests/e2e/lab_test.py                   # Elements Lab 38 checks
 python3 tests/e2e/flow.py                       # เมนู, World Map, เซฟ, Game Over
 python3 tests/e2e/boss_reset.py                 # สนามบอส: ประตูปิด, ตายแล้วรีเซ็ต, phase 1→3
 python3 tests/e2e/oneway.py                     # แท่น one-way: ทะลุจากล่าง ลงยืนจากบน
+python3 tests/e2e/shards.py                     # Spirit Shard: เก็บครบ 9 ชิ้นด้วย input จริง (hop/เผาลัง), บันทึกเมื่อผ่านด่านเท่านั้น, HUD/Stage Clear/เงาชิ้นที่เก็บแล้ว
 python3 tests/e2e/settings.py                   # key rebinding: Title/Pause → Settings, สลับปุ่มซ้ำ, ปุ่มสงวน, ใช้ปุ่มใหม่ในเกม, รีเซ็ต
 python3 tests/e2e/save_warning.py               # เซฟไม่ได้: localStorage ถูกบล็อก หรือ setItem throw แล้วขึ้นข้อความเตือน
 python3 tests/e2e/player_anims.py               # Aclaire: 59 frame ชิดพื้น/กึ่งกลาง และกดปุ่มจริงแล้วเล่นท่าถูก (run, combo, jump, double jump, cast, dash, slam, hurt, dead)

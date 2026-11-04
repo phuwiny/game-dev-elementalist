@@ -41,7 +41,7 @@ with sync_playwright() as pw:
     # dev level from title
     page.keyboard.press('Escape'); wait(page, 'TitleScene')
     print('menu before', page.evaluate("() => window.__game.scene.getScene('TitleScene').children.list.filter(o => o.type==='Text').map(t=>t.text).filter(t=>t.startsWith('>'))"))
-    page.keyboard.press('ArrowDown'); page.wait_for_timeout(200)
+    page.keyboard.press('ArrowDown'); page.wait_for_timeout(150); page.keyboard.press('ArrowDown'); page.wait_for_timeout(200)   # Adventure, Settings, then the first dev level
     print('menu after', page.evaluate("() => window.__game.scene.getScene('TitleScene').children.list.filter(o => o.type==='Text').map(t=>t.text).filter(t=>t.startsWith('>'))"))
     page.keyboard.press('Enter'); wait(page, 'GameScene')
     print('10 dev level', page.evaluate(f"() => {GS}.def.key"))
