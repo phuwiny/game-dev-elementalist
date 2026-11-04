@@ -10,6 +10,11 @@ import { music } from '../systems/Music';
 import { controlsHint, loadBindings } from '../core/Bindings';
 import { SaveStore } from '../core/SaveStore';
 import { addSaveWarning } from '../ui/saveWarning';
+import { BUTTON_HEIGHT, MenuButton, addCursor } from '../ui/widgets';
+
+/** กึ่งกลางของปุ่มแรกและความกว้างปุ่มเมนู (ชื่อด่านทดสอบยาวสุด ~22 ตัวอักษร) */
+const MENU_Y = 190;
+const MENU_WIDTH = 200;
 
 interface MenuItem {
   label: string;
@@ -21,6 +26,9 @@ interface MenuItem {
  * จึงปลดล็อกเสียงที่การกดปุ่มครั้งแรก
  */
 export class TitleScene extends Phaser.Scene {
+  /** ชื่อรายการที่เลือกอยู่ (สคริปต์ e2e อ่านค่านี้) */
+  selectedLabel = '';
+
   constructor() {
     super(SceneKey.Title);
   }
@@ -43,14 +51,16 @@ export class TitleScene extends Phaser.Scene {
     ];
 
     let selected = 0;
-    const items = menu.map((_m, i) => this.add.text(cx, 196 + i * 18, '', textStyle(12)).setOrigin(0.5));
-    const refresh = () =>
-      items.forEach((t, i) =>
-        t.setText(`${i === selected ? '>' : ' '} ${menu[i].label}`).setColor(i === selected ? PALETTE.highlight : PALETTE.neutral3),
-      );
+    const buttons = menu.map((m, i) => new MenuButton(this, cx, MENU_Y + i * (BUTTON_HEIGHT + 2), MENU_WIDTH, m.label));
+    const cursor = addCursor(this);
+    const refresh = () => {
+      buttons.forEach((b, i) => b.setState(i === selected ? 'hover' : 'normal'));
+      cursor.setPosition(buttons[selected].left - 4, buttons[selected].y);
+      this.selectedLabel = menu[selected].label;
+    };
     refresh();
 
-    const muteText = this.add.text(cx, 270, '', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
+    const muteText = this.add.text(cx, MENU_Y + (menu.length - 1) * (BUTTON_HEIGHT + 2) + BUTTON_HEIGHT / 2 + 8, '', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
     const refreshMute = () => muteText.setText(`M  Sound: ${sfx.muted ? 'OFF' : 'ON'}`);
     refreshMute();
 
@@ -66,6 +76,7 @@ export class TitleScene extends Phaser.Scene {
       started = true;
       sfx.unlock();
       sfx.play('menu');
+      buttons[selected].setState('pressed');
       menu[selected].run();
     };
     // ปุ่มแรกที่กดคือจังหวะที่ browser อนุญาตให้เปิดเสียง

@@ -81,6 +81,12 @@ export function backgroundForTileset(tileset: string): WorldBackground | null {
   return tileset === 'tiles_w1_ember_woods' ? WORLD1_BACKGROUND : null;
 }
 
+/**
+ * bitmap font ของ HUD (BMFont XML, ART_HANDOFF.md หัวข้อ 7) มีเฉพาะ A–Z, 0–9 และ `× : / - + !`
+ * ถ้าโหลดไม่ได้ src/ui/hudText.ts ใช้ font ของระบบแทน
+ */
+export const HUD_FONT = { key: 'font_hud', png: 'assets/ui/font_hud.png', xml: 'assets/ui/font_hud.xml' } as const;
+
 /** texture ที่เก็บ placeholder ของ frame ที่ไฟล์จริงยังไม่มี (atlas ส่งมาไม่ครบทุกท่า) */
 export const fillTextureKey = (atlasKey: string): string => `${atlasKey}__fill`;
 
@@ -271,6 +277,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'earth_block_appear', frames: 4, frameRate: 16, repeat: 0 },
       { name: 'earth_block_idle', frames: 1, frameRate: 1, repeat: 0 },
       { name: 'earth_block_crumble', frames: 4, frameRate: 14, repeat: 0 },
+      { name: 'checkpoint_spark', frames: 5, frameRate: 12, repeat: 0, width: 16, height: 16 },
       ...ELEMENT_KEYS.map((el) => ({
         name: `element_switch_aura_${el}`,
         frames: 5,
@@ -309,6 +316,12 @@ export const ATLASES: AtlasDef[] = [
       { name: 'world_map_node_locked' },
       { name: 'world_map_node_open' },
       { name: 'world_map_node_cleared' },
+      // กล่องเมนูแบบ 9-slice ขอบ 16 px (ART_HANDOFF.md หัวข้อ 7)
+      { name: 'panel_9slice', width: 48, height: 48 },
+      { name: 'button_normal', width: 96, height: 24 },
+      { name: 'button_hover', width: 96, height: 24 },
+      { name: 'button_pressed', width: 96, height: 24 },
+      { name: 'cursor_arrow', width: 8, height: 8 },
     ],
   },
 ];
