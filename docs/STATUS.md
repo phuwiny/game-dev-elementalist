@@ -1,10 +1,10 @@
 # STATUS — สถานะงานและบันทึกส่งต่อ
 
-อัปเดตล่าสุด 2026-10-29 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
+อัปเดตล่าสุด 2026-11-04 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
 
 ## สถานะตอนนี้
 
-ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และ merge เข้า `main` แล้ว ตอนนี้เชื่อมภาพชุด World 1 (Phase C, [PR #9](https://github.com/phuwiny/game-dev-elementalist/pull/9) ของ Codex) เข้าเกมแล้วใน branch `claude/aclaire-v4-status-al18pm` รอพินรีวิว mockup และสั่ง merge
+ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และเชื่อมภาพ World 1 กับท่าครบชุดของ Aclaire แล้ว ภาพของ Codex ที่ส่งมาตอนนี้ครบทั้งโลก 1 และ moveset ของ Aclaire งานฝั่ง Claude ที่เหลือคือเพลง (ข้อ D) กับ playtest
 
 | PR | เนื้อหา | สถานะ |
 | --- | --- | --- |
@@ -15,7 +15,13 @@
 | #6 | รองรับ Aclaire V4: canvas 1280×720, ฉากขยาย 1.5 เท่า | merged |
 | #7 | (Codex) atlas `player` ชุดแรก: idle, run, jump_up, jump_peak, fall, land | merged |
 | #8 | placeholder รายท่า, แก้ `animations.json` ไม่ถูกใช้, hitbox 16×46 logical | merged |
-| #9 | (Codex) Phase C World 1: tileset, background 4 ชั้น, `enemies_w1`, `boss_bramble_king`, `animations.json` | draft รอพินรีวิว |
+| #9 | (Codex) Phase C World 1: tileset, background 4 ชั้น, `enemies_w1`, `boss_bramble_king`, `animations.json` | merged |
+| #10 | docs handoff, สคริปต์ e2e, ตัวสร้างด่าน W1 | merged |
+| #13 | (Codex) moveset ครบของ Aclaire (attack_1–3, double_jump, cast, dash, glide, ground_slam, hurt, dead) | merged |
+| #14 | เชื่อมภาพ World 1: tileset จริง, one-way, parallax, ซากปรัก, โล่ครอบจุดอ่อนบอส | merged |
+| #15 | ข้อความแจ้งเมื่อบันทึกไม่ได้ + e2e ท่า Aclaire | merged |
+| #16 | key rebinding + หน้า Settings | merged |
+| #17 | Spirit Shard ด่านละ 3 ชิ้น | เปิดอยู่ รอพิน merge |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -38,12 +44,12 @@
 ## งานถัดไป
 
 ฝั่ง Codex
-1. ท่าที่เหลือของ Aclaire: double_jump, cast, dash, glide, ground_slam, attack_1–3 (96×64 logical), hurt, dead
+1. (ท่าของ Aclaire ครบแล้ว ตรวจในเกมแล้ว: `tests/e2e/player_anims.py`)
 2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
    - tile มุมใน 11–14 ของ `tiles_w1_ember_woods`: ถ้าตั้งใจให้ใช้ที่มุมเว้า (tile อยู่กลางเนื้อดินแต่เฉียงหนึ่งด้านว่าง) ภาพปัจจุบันไม่เข้า เพราะมีฝาหญ้าหรือเส้นขอบพาดทั้งด้านที่ติดดิน ขอให้บอกว่าตั้งใจใช้ตรงไหน หรือวาดใหม่ให้มีขอบเฉพาะมุมเว้า
 
 ฝั่ง Claude
-1. หลัง PR #9 merge: merge `main` เข้า branch นี้แล้วเปิด PR (ตอนนี้ branch รวม `art/phase-c` ไว้แล้วเพื่อทดสอบ) ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
+1. ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
 2. ตรวจภาพที่ Codex ส่งในเกมทุกรอบ: เท้าตรงพื้น, hitbox, ไม่ jitter, กล้องในสนามบอส (บอสสูง 192 px มงกุฎชิดขอบบนจอ)
 3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD)
 4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), ~~C Spirit Shard~~ (เสร็จ: ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน ยังไม่ทำ gallery/ด่านพิเศษที่ shard ปลดล็อก), D เพลง (chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริง แหล่งเพลงจริงรอพิน)
