@@ -209,6 +209,13 @@ describe('parseLevel', () => {
     expect(level.hearts).toEqual([{ col: 2, row: 2 }]);
   });
 
+  it('parses Spirit Orbs (o) and 1UP Feathers (u) as empty cells', () => {
+    const level = parseLevel(['Po.uG', '#####']);
+    expect(level.orbs).toEqual([{ col: 1, row: 0 }]);
+    expect(level.feathers).toEqual([{ col: 3, row: 0 }]);
+    expect(level.tiles[0]).toEqual([Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty, Tile.Empty]);
+  });
+
   it('rejects ragged rows, unknown symbols and missing P/G', () => {
     expect(() => parseLevel(['P.G', '##'])).toThrow(LevelParseError);
     expect(() => parseLevel(['PxG'])).toThrow(/Unknown symbol/);

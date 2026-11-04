@@ -113,6 +113,9 @@ def w1_1():
     L.platform(5, 7, 17); L.platform(8, 10, 14); L.platform(11, 13, 11); L.shard(12, 10, 0)
     L.platform(48, 49, 12); L.shard(48, 11, 1)
     L.crate_nest(146, 2)                        # the pit at 142-144 comes first
+    # Spirit Orbs: after the heart nest (torch + gate ahead), before the last crate nest (ice wall behind).
+    # Keep orbs out of the RUINS columns: a cell holding an object changes the wall RNG sequence
+    L.put(72, G - 2, 'o'); L.put(140, G - 2, 'o')
     return L
 
 
@@ -155,6 +158,12 @@ def w1_2():
     L.platform(28, 30, 14); L.shard(29, 9, 0)    # float 4 tiles above the ledge: jump again from it
     L.crate_nest(44, 1)
     L.platform(135, 137, 12); L.shard(136, 11, 2); L.put(133, 10, 'f')
+    # Spirit Orbs: before the two torches, before the vine column
+    L.put(74, G - 2, 'o'); L.put(142, G - 2, 'o')
+    # 1UP Feather (the only one in World 1): one-way ledges climbing above the checkpoint into the rows
+    # the camera does not show from the ground (it sees rows 8-22 there); the feather sits on the top ledge
+    L.platform(118, 120, 17); L.platform(121, 123, 14); L.platform(124, 126, 11); L.platform(127, 129, 8)
+    L.put(128, 7, 'u')
     return L
 
 
@@ -193,6 +202,8 @@ def w1_3():
     L.platform(29, 31, 15); L.shard(30, 10, 0)
     L.crate_nest(52, 1)
     L.platform(128, 129, 14); L.shard(129, 9, 2)
+    # Spirit Orbs: after the first checkpoint (ice wall + torch ahead), just before the boss arena
+    L.put(68, G - 2, 'o'); L.put(165, G - 2, 'o')
     return L
 
 
@@ -240,7 +251,8 @@ RUINS = {
     'Burning Canopy': [(60, 68, 5), (150, 160, 4)],
     'Bramble Hollow': [(60, 66, 4), (176, 198, 6)],
 }
-CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'heart', 's': 'moss_slime',
+CLASSES = {'P': 'player', 'G': 'goal', 'K': 'checkpoint', 'c': 'coin', 'h': 'heart', 'o': 'orb', 'u': 'feather',
+           's': 'moss_slime',
            'f': 'leaf_wisp', 'r': 'thorn_beetle', 'v': 'vine', 'b': 'crate', 'i': 'ice', '~': 'water',
            't': 'torch', 'w': 'seed', 'm': 'windmill', 'X': 'cracked_wall', '_': 'plate', 'D': 'gate',
            'A': 'arena_gate', 'B': 'boss'}

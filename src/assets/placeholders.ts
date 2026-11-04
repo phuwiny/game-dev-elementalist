@@ -483,6 +483,19 @@ function paintItems(p: PixelPen, f: FrameInfo): void {
     p.rect(cx - w / 2, 0, w, 1, C.wood2);
     return;
   }
+  if (f.anim === 'spirit_orb_pulse') {
+    const r = 4 + (f.index % 2);
+    p.disc(8, 8, r + 1, C.outline);
+    p.disc(8, 8, r, C.magic);
+    p.rect(6, 5, 2, 2, C.highlight);
+    return;
+  }
+  if (f.anim === 'oneup_feather_float') {
+    const bob = f.index === 1 || f.index === 2 ? 1 : 0;
+    p.line(4, 13 - bob, 11, 2 - bob, 3, C.highlight);
+    p.line(5, 13 - bob, 11, 3 - bob, 1, C.wind);
+    return;
+  }
   if (f.anim === 'spirit_shard_shine') {
     // ผลึกรูปข้าวหลามตัด กะพริบสว่างไล่ไปตาม frame
     const bob = f.index % 2;

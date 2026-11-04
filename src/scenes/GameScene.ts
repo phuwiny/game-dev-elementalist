@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ONE_WAY_DECK_OFFSET, SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
-import { BossBalance, ElementBalance } from '../config/balance';
+import { BossBalance, ElementBalance, ItemBalance, VitalsBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { parseLevel, Tile, type GridPoint, type LevelObject, type ParsedLevel } from '../core/LevelParser';
@@ -624,6 +624,36 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       (obj as Phaser.GameObjects.Sprite).destroy();
       sfx.play('heart');
       this.vitals.heal(1);
+    });
+
+    // Spirit Orb: ฟื้น Energy ตอนเกจเต็มอยู่แล้วไม่เก็บ (เก็บไว้ใช้ทีหลังเหมือน Heart Fruit)
+    const orbs = this.physics.add.staticGroup();
+    for (const p of this.level.orbs) {
+      const o = this.add.sprite(this.centerOf(p).x, this.centerOf(p).y, 'items', 'spirit_orb_pulse_000').setDepth(3);
+      o.play(animKey('items', 'spirit_orb_pulse'));
+      orbs.add(o);
+    }
+    this.physics.add.overlap(this.player, orbs, (_p, obj) => {
+      const energy = this.elements.energy;
+      if (energy.value >= energy.max) return;
+      (obj as Phaser.GameObjects.Sprite).destroy();
+      energy.add(ItemBalance.orbEnergy);
+      sfx.play('spirit');
+    });
+
+    // 1UP Feather: +1 ชีวิต ถ้าชีวิตเต็มแล้วไม่เก็บ
+    const feathers = this.physics.add.staticGroup();
+    for (const p of this.level.feathers) {
+      const f = this.add.sprite(this.centerOf(p).x, this.centerOf(p).y, 'items', 'oneup_feather_float_000').setDepth(3);
+      f.play(animKey('items', 'oneup_feather_float'));
+      feathers.add(f);
+    }
+    this.physics.add.overlap(this.player, feathers, (_p, obj) => {
+      if (this.vitals.lives >= VitalsBalance.maxLives) return;
+      (obj as Phaser.GameObjects.Sprite).destroy();
+      for (let i = 0; i < ItemBalance.featherLives; i += 1) this.vitals.addLife();
+      sfx.play('one_up');
+      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, '1UP', PALETTE.wind);
     });
   }
 
