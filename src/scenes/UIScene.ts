@@ -9,6 +9,7 @@ import { isAdventure } from '../levels';
 import { setAtlasFrame } from '../assets/frames';
 import { sfx } from '../systems/Sfx';
 import { addSaveWarning } from '../ui/saveWarning';
+import { music } from '../systems/Music';
 
 const BOSS_FILL_WIDTH = 236;
 const BOSS_BAR_X = (GAME_WIDTH - 240) / 2;
@@ -120,7 +121,10 @@ export class UIScene extends Phaser.Scene {
     // สลับแท็บแล้วหยุดเกมไว้ ไม่ให้ตัวละครตายตอนผู้เล่นไม่อยู่
     const onHidden = () => this.setPaused(true);
     this.game.events.on(Phaser.Core.Events.HIDDEN, onHidden);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.off(Phaser.Core.Events.HIDDEN, onHidden));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.game.events.off(Phaser.Core.Events.HIDDEN, onHidden);
+      music.setDucked(false);
+    });
   }
 
   override update(): void {
@@ -180,6 +184,7 @@ export class UIScene extends Phaser.Scene {
     if (paused) this.scene.pause(SceneKey.Game);
     else this.scene.resume(SceneKey.Game);
     this.pauseLayer.setVisible(paused);
+    music.setDucked(paused);
     if (paused) this.refreshPauseHint();
   }
 }

@@ -115,9 +115,27 @@ class SfxPlayer {
   private readonly store = new SaveStore();
   private _muted = this.store.load<boolean>(MUTE_KEY, false) === true;
   private readonly lastPlayed = new Map<SfxName, number>();
+  private readonly listeners = new Set<() => void>();
 
   get muted(): boolean {
     return this._muted;
+  }
+
+  /** AudioContext ที่ใช้ร่วมกับเพลง (null จนกว่าผู้เล่นจะกดปุ่มครั้งแรก) */
+  get context(): AudioContext | null {
+    return this.ctx;
+  }
+
+  /** แจ้งเมื่อ AudioContext พร้อมหรือสถานะปิดเสียงเปลี่ยน คืนฟังก์ชันยกเลิก */
+  subscribe(cb: () => void): () => void {
+    this.listeners.add(cb);
+    return () => {
+      this.listeners.delete(cb);
+    };
+  }
+
+  private notify(): void {
+    for (const cb of [...this.listeners]) cb();
   }
 
   /** เรียกจาก input ของผู้เล่น (คลิก/กดปุ่ม) ก่อนเล่นเสียงครั้งแรก */
@@ -132,11 +150,13 @@ class SfxPlayer {
     } catch {
       this.ctx = null;
     }
+    this.notify();
   }
 
   toggleMute(): boolean {
     this._muted = !this._muted;
     this.store.save(MUTE_KEY, this._muted);
+    this.notify();
     return this._muted;
   }
 

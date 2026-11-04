@@ -52,7 +52,7 @@
 1. ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
 2. ตรวจภาพที่ Codex ส่งในเกมทุกรอบ: เท้าตรงพื้น, hitbox, ไม่ jitter, กล้องในสนามบอส (บอสสูง 192 px มงกุฎชิดขอบบนจอ)
 3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD)
-4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), ~~C Spirit Shard~~ (เสร็จ: ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน ยังไม่ทำ gallery/ด่านพิเศษที่ shard ปลดล็อก), D เพลง (chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริง แหล่งเพลงจริงรอพิน)
+4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), ~~C Spirit Shard~~ (เสร็จ: ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน ยังไม่ทำ gallery/ด่านพิเศษที่ shard ปลดล็อก), ~~D เพลง~~ (เสร็จ: chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริงจาก `public/assets/audio/music/` แหล่งเพลงจริงรอพิน)
 
 ## การทดสอบ
 
@@ -66,6 +66,7 @@ python3 tests/e2e/lab_test.py                   # Elements Lab 38 checks
 python3 tests/e2e/flow.py                       # เมนู, World Map, เซฟ, Game Over
 python3 tests/e2e/boss_reset.py                 # สนามบอส: ประตูปิด, ตายแล้วรีเซ็ต, phase 1→3
 python3 tests/e2e/oneway.py                     # แท่น one-way: ทะลุจากล่าง ลงยืนจากบน
+python3 tests/e2e/music.py                      # เพลง: เริ่มหลังกดปุ่มแรก, เปลี่ยนตาม scene/บอส, pause เบาลง, M ปิด, jingle, ไฟล์จริงแทน score
 python3 tests/e2e/shards.py                     # Spirit Shard: เก็บครบ 9 ชิ้นด้วย input จริง (hop/เผาลัง), บันทึกเมื่อผ่านด่านเท่านั้น, HUD/Stage Clear/เงาชิ้นที่เก็บแล้ว
 python3 tests/e2e/settings.py                   # key rebinding: Title/Pause → Settings, สลับปุ่มซ้ำ, ปุ่มสงวน, ใช้ปุ่มใหม่ในเกม, รีเซ็ต
 python3 tests/e2e/save_warning.py               # เซฟไม่ได้: localStorage ถูกบล็อก หรือ setItem throw แล้วขึ้นข้อความเตือน
@@ -75,6 +76,7 @@ python3 tests/e2e/player_anims.py               # Aclaire: 59 frame ชิดพ
 - สคริปต์ใช้ `?lowres` (วาด 640×360) เพราะ software GL ที่ 1280×720 ได้ ~44 fps จน bot กดปุ่มไม่ทัน ตั้ง `GAME_URL` และ `SHOT_DIR` ได้ทาง env
 - ข้อควรระวังเวลาเขียนสคริปต์: `page.evaluate` ห้าม return object ของ Phaser (เช่นผลของ `scene.start`) ให้ครอบด้วย `{ ...; }` ไม่งั้นค้าง, กดปุ่มให้ค้าง ≥ 60 ms เพราะเกมอ่าน input ทีละ frame, ทดสอบอันตรายด้วยการวิ่งกระโดดจริงเสมอ
 - Bot สู้บอสไม่หลบเมล็ดหนาม ผลตายบ้างในสนามบอสไม่ได้แปลว่าเกมผิด
+- `page.evaluate("() => obj.method()")` ที่ method คืน `this` (เช่น `player.setPosition`) ทำให้ Playwright พยายาม serialize object ของ Phaser และผลลัพธ์เพี้ยนแบบสุ่ม ให้ใช้ `() => { obj.method(); }` เสมอ
 - ตัวช่วยใน URL: `?unlock` ภูตครบ 4 ตน, `?debug` เห็น hitbox, `?lowres`
 
 ## วิธีทำงานกับ GitHub
