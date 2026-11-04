@@ -6,6 +6,7 @@
  *   .  ว่าง           #  พื้นแข็ง        ^  หนาม (ตายทันที)
  *   P  จุดเริ่ม        G  ธงเส้นชัย       K  checkpoint
  *   c  เหรียญ         h  Heart Fruit
+ *   o  Spirit Orb     u  1UP Feather
  *
  * ศัตรู (Phase 3)
  *   s  Moss Slime     f  Leaf Wisp (ลอยกลางอากาศ)     r  Thorn Beetle
@@ -96,6 +97,10 @@ export interface ParsedLevel {
   checkpoints: GridPoint[];
   coins: GridPoint[];
   hearts: GridPoint[];
+  /** Spirit Orb: ฟื้น Spirit Energy (GDD หัวข้อ 4) */
+  orbs: GridPoint[];
+  /** 1UP Feather: +1 ชีวิต */
+  feathers: GridPoint[];
   shards: ShardSpawn[];
   enemies: EnemySpawn[];
   objects: LevelObject[];
@@ -150,6 +155,8 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
   const checkpoints: GridPoint[] = [];
   const coins: GridPoint[] = [];
   const hearts: GridPoint[] = [];
+  const orbs: GridPoint[] = [];
+  const feathers: GridPoint[] = [];
   const enemies: EnemySpawn[] = [];
   const objects: LevelObject[] = [];
   let player: GridPoint | null = null;
@@ -200,6 +207,12 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
           case 'h':
             hearts.push(point);
             break;
+          case 'o':
+            orbs.push(point);
+            break;
+          case 'u':
+            feathers.push(point);
+            break;
           case 'B':
             if (boss) throw new LevelParseError('Level has more than one boss (B)');
             boss = point;
@@ -225,6 +238,8 @@ export function parseLevel(lines: readonly string[]): ParsedLevel {
     checkpoints,
     coins,
     hearts,
+    orbs,
+    feathers,
     shards: [],
     enemies,
     objects,

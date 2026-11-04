@@ -33,6 +33,24 @@ describe('World 1 Tiled maps', () => {
     }
   });
 
+  it('each World 1 level has two Spirit Orbs and the world has one 1UP Feather, hidden high in 1-2', () => {
+    let feathers = 0;
+    for (const def of ADVENTURE_LEVELS) {
+      const level = parseTiledMap(load(def.map!));
+      expect(level.orbs.length, def.key).toBe(2);
+      feathers += level.feathers.length;
+      for (const p of [...level.orbs, ...level.feathers]) {
+        expect(level.tiles[p.row][p.col], `${def.key} item at ${p.col},${p.row}`).toBe(Tile.Empty);
+        const below = Array.from({ length: 3 }, (_, i) => level.tiles[p.row + 1 + i]?.[p.col]);
+        expect(below.some((t) => t === Tile.Solid || t === Tile.OneWay), `${def.key} item at ${p.col},${p.row} floats`).toBe(true);
+      }
+    }
+    expect(feathers).toBe(1);
+    const w12 = parseTiledMap(load('assets/maps/w1_2.json'));
+    // above the rows the camera shows from the ground (15 rows, bottom clamped to the map: rows 8-22)
+    expect(w12.feathers[0].row).toBeLessThanOrEqual(7);
+  });
+
   it('1-1 gives Burnil and 1-3 ends with the boss arena', () => {
     const w11 = parseTiledMap(load('assets/maps/w1_1.json'));
     expect(w11.objects.filter((o) => o.kind === 'spirit').map((o) => o.slot)).toEqual([0]);
@@ -70,8 +88,12 @@ describe('parseTiledMap', () => {
         { id: 2, type: 'goal', x: 48, y: 16, width: 16, height: 16 },
         { id: 3, class: 'torch', x: 16, y: 0, width: 16, height: 32 },
         { id: 4, class: 'leaf_wisp', x: 32, y: 0, width: 16, height: 16 },
+        { id: 5, class: 'orb', x: 16, y: 0, width: 16, height: 16 },
+        { id: 6, class: 'feather', x: 48, y: 0, width: 16, height: 16 },
       ]),
     );
+    expect(level.orbs).toEqual([{ col: 1, row: 0 }]);
+    expect(level.feathers).toEqual([{ col: 3, row: 0 }]);
     expect(level.tiles[1][2]).toBe(2);
     expect(level.tiles[2][0]).toBe(1);
     expect(level.player).toEqual({ col: 0, row: 1 });

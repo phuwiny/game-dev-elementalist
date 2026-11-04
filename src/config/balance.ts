@@ -57,6 +57,14 @@ export const VitalsBalance = {
   coinsPerExtraLife: 100,
 } as const;
 
+/** ไอเท็มในด่าน (GDD หัวข้อ 4) */
+export const ItemBalance = {
+  /** Spirit Orb ฟื้น Spirit Energy เท่านี้ (เกจเต็ม 100) */
+  orbEnergy: 50,
+  /** 1UP Feather เพิ่มชีวิตเท่านี้ (ไม่เกิน VitalsBalance.maxLives) */
+  featherLives: 1,
+} as const;
+
 export const EnergyBalance = {
   max: 100,
   regenPerSecond: 5,
