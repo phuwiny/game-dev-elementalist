@@ -21,6 +21,7 @@ import type { ElementWorld } from '../elements/ElementPowers';
 import { InputManager } from '../systems/InputManager';
 import { ElementSystem } from '../systems/ElementSystem';
 import { sfx } from '../systems/Sfx';
+import { music } from '../systems/Music';
 import {
   ArenaGate,
   Burnable,
@@ -151,6 +152,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const def = findLevel(data?.level ?? (this.registry.get(REGISTRY_LEVEL) as string | undefined));
     this.def = def;
     this.registry.set(REGISTRY_LEVEL, def.key);
+    music.play('world1');
 
     this.vitals = this.registry.get(REGISTRY_VITALS) as Vitals;
     this.progress = this.registry.get(REGISTRY_PROGRESS) as Progress;
@@ -666,6 +668,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         boss.start(() => this.onBossDefeated());
         this.frameBossFight(true);
         this.background?.setBossArena(true);
+        music.play('boss');
       }
     }
     boss.update(delta);
@@ -682,6 +685,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
   private onBossDefeated(): void {
     this.frameBossFight(false);
+    music.play('world1');
     this.arenaGate?.setClosed(false);
     this.time.delayedCall(1200, () => {
       this.goalFlag?.setVisible(true);
@@ -962,6 +966,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         this.boss.reset();
         this.frameBossFight(false);
         this.background?.setBossArena(false);
+        music.play('world1');
         this.arenaGate?.setClosed(false);
       }
       this.companion.snap();

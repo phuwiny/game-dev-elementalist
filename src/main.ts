@@ -10,6 +10,7 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { GameOverScene, StageClearScene } from './scenes/EndScenes';
 import { SettingsScene } from './scenes/SettingsScene';
+import { music } from './systems/Music';
 
 const game = new Phaser.Game({
   type: Phaser.WEBGL,
@@ -35,4 +36,5 @@ const game = new Phaser.Game({
 });
 
 // เปิดให้ทดสอบผ่าน console / automated test ได้
-(window as unknown as { __game: Phaser.Game }).__game = game;
+(window as unknown as { __game: Phaser.Game; __music: typeof music }).__game = game;
+(window as unknown as { __music: typeof music }).__music = music;

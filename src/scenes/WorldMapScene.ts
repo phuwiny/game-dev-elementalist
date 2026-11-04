@@ -10,6 +10,7 @@ import type { Progress } from '../core/Progress';
 import { SHARDS_PER_LEVEL } from '../core/LevelParser';
 import type { Vitals } from '../core/Vitals';
 import { sfx } from '../systems/Sfx';
+import { music } from '../systems/Music';
 import { addSaveWarning } from '../ui/saveWarning';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
@@ -33,6 +34,7 @@ export class WorldMapScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const n = ADVENTURE_LEVELS.length;
     addSaveWarning(this);
+    music.play('world_map');
 
     this.add.text(cx, 40, 'WORLD 1 · EMBER WOODS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
     this.add.text(cx, 62, `Spirit Shards ${progress.totalShards}/${progress.maxShards}`, textStyle(10, PALETTE.pink3)).setOrigin(0.5);

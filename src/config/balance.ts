@@ -127,6 +127,16 @@ export const ElementBalance = {
   },
 } as const;
 
+/** เพลง (src/systems/Music.ts) */
+export const AudioBalance = {
+  /** ความดังของเพลงเทียบกับ SFX (SFX ใช้ gain 0.12–0.25 ต่อเสียง) */
+  musicVolume: 0.5,
+  /** ตอนหยุดเกม: ลดความดังเพลงเหลือเท่านี้ */
+  duckFactor: 0.3,
+  /** เวลา (วินาที) ที่เพลงเก่าค่อยๆ เบาลงและเพลงใหม่ค่อยๆ ดังขึ้น */
+  fadeSeconds: 0.6,
+} as const;
+
 export const BossBalance = {
   brambleKing: {
     hpPerPhase: 4,
