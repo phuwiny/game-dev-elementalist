@@ -4,7 +4,7 @@
 
 ## สถานะตอนนี้
 
-ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) และเชื่อมภาพ World 1 กับท่าครบชุดของ Aclaire แล้ว ภาพของ Codex ที่ส่งมาตอนนี้ครบทั้งโลก 1 และ moveset ของ Aclaire งานฝั่ง Claude ที่เหลือคือเพลง (ข้อ D) กับ playtest
+ฝั่งเกมจบ Phase 3 Vertical Slice (โลก 1 Ember Woods) เชื่อมภาพ World 1, ท่าครบชุดของ Aclaire และ core assets ของ Codex (spirits, objects, items, fx, ui, font_hud) แล้ว Valvaliz/Eathy ใช้ภาพ density 2 งานฝั่ง Claude ที่เหลือคือ Spirit Orb กับ 1UP Feather (ไอเท็มใหม่ ภาพมาแล้ว) และ playtest
 
 | PR | เนื้อหา | สถานะ |
 | --- | --- | --- |
@@ -21,7 +21,11 @@
 | #14 | เชื่อมภาพ World 1: tileset จริง, one-way, parallax, ซากปรัก, โล่ครอบจุดอ่อนบอส | merged |
 | #15 | ข้อความแจ้งเมื่อบันทึกไม่ได้ + e2e ท่า Aclaire | merged |
 | #16 | key rebinding + หน้า Settings | merged |
-| #17 | Spirit Shard ด่านละ 3 ชิ้น | เปิดอยู่ รอพิน merge |
+| #17 | Spirit Shard ด่านละ 3 ชิ้น | merged |
+| #18 | เพลง chiptune ชั่วคราว + ตัวโหลดไฟล์เพลงจริง | merged |
+| #19 | (Codex) core assets ครบชุด: spirits, objects, items, fx, ui, font_hud + Valvaliz/Eathy expression v2 | merged |
+| #20 | Valvaliz/Eathy density 2 (64×64) ใน atlas `spirits_hd` แสดง 32×32 เท่าเดิม | merged |
+| (ถัดไป) | เชื่อม core assets ที่ยังไม่ได้ใช้: `checkpoint_spark`, `font_hud` บน HUD, `panel_9slice` / `button_*` / `cursor_arrow` ในเมนู, แก้ icon shard บน HUD | PR นี้ |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -32,6 +36,8 @@
 - **Aclaire V4:** atlas `player` วาดที่ `density: 2` (frame 96×128, run 128×128, attack 192×128) ในด่านแสดงที่ scale 1/3 = สูง ~41 px ในพิกัดด่าน (~62 px บนจอ logical) hitbox 11×31 px ในด่าน (~16×46 logical เท้าถึงหน้าผาก) กระโดดสูงสุด ~64 px
 - **ฉากและศัตรู:** Codex ยังวาดขนาดเดิม (tile 16, ศัตรู 32, palette 35 สี) ผู้ใช้อนุมัติภาพทดสอบสไตล์ World 1 แล้ว
 - **ภูต density 2:** Valvaliz/Eathy ใช้ภาพ expression v2 (64×64) ใน atlas `spirits_hd` (`public/assets/sprites/spirits/hd/` คัดลอกจาก `art/previews/phase_b/2026-11-04_spirit_expressions_v2/` แบบ byte-identical ตามที่ผู้ใช้อนุมัติ) ส่วน Burnil/Wata ยังอยู่ใน `spirits` 32×32 ทุกจุดที่แสดงภูต (companion, ภูตในด่าน, icon ตอน "joined!") สร้างผ่าน `src/assets/spirits.ts` ซึ่งเลือก atlas ด้วย `spiritAtlasKey` และตั้ง scale ตาม density ให้ขนาดในเกม 32×32 เท่ากันทุกตน ในด่านภาพ density 2 แสดงที่ 1.5 pixel canvas ต่อ texel (ไม่เป็นจำนวนเต็ม) และใน `?lowres` เหลือ 0.75
+- **UI ของ Codex:** `src/ui/widgets.ts` มี `addPanel` (9-slice ขอบ 16), `MenuButton` (button_* ยืดแบบ 9-slice ขอบ 4 ตามความกว้างข้อความ: hover = รายการที่เลือก, pressed = ตอนกดยืนยัน) และ `addCursor` ใช้ที่ Title (ปุ่ม + ลูกศร), Settings (กล่อง + ลูกศร), Pause (กล่อง), Stage Clear / Game Over (กล่อง + ปุ่ม ENTER/ESC) e2e อ่านรายการที่เลือกใน Title จาก `TitleScene.selectedLabel` (เดิมดูจากข้อความที่ขึ้นต้นด้วย `>`)
+- **font_hud:** ใช้กับตัวเลขและชื่อบอสบน HUD (`src/ui/hudText.ts`, scale 2 = ช่องสูง 16 logical px, tint ตามสี, เงา 1 px) font มีแค่ตัวพิมพ์ใหญ่ `addHudText` แปลงให้เอง ถ้าโหลดไม่ได้ใช้ font ระบบ ข้อความลอยในด่าน ("CHECKPOINT", "1UP" ฯลฯ) และเมนูยังใช้ font ระบบ: font_hud ไม่มีตัวพิมพ์เล็ก และมีแค่เงา 1 px ทำให้อ่านยากบนผนังซากปรัก
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
 - **Spirit Shard:** ตำแหน่งสร้างใน `tools/levels/w1.py` (`L.shard(col,row,slot)`, `L.crate_nest`) ด่านละ 3 ชิ้น: 1-1 หอแท่นลอย 3 ชั้นข้างจุดเริ่ม / ลอยเหนือแท่นกลางด่าน / รังลังหลังหลุม, 1-2 ลอยเหนือแท่นข้างพีระมิด / รังลัง / แท่นสูงที่มี Leaf Wisp เฝ้า, 1-3 ลอยเหนือหนามช่องแรก / รังลัง / แท่นข้างพีระมิดที่มี Leaf Wisp ชิ้นที่ลอยสูงต้องกระโดดซ้ำจากแท่น (เก็บจากพื้นไม่ถึง) ภาพ `spirit_shard_shine` ยังเป็น placeholder จนกว่า atlas `items` จะมา
@@ -71,6 +77,7 @@ python3 tests/e2e/music.py                      # เพลง: เริ่ม�
 python3 tests/e2e/shards.py                     # Spirit Shard: เก็บครบ 9 ชิ้นด้วย input จริง (hop/เผาลัง), บันทึกเมื่อผ่านด่านเท่านั้น, HUD/Stage Clear/เงาชิ้นที่เก็บแล้ว
 python3 tests/e2e/settings.py                   # key rebinding: Title/Pause → Settings, สลับปุ่มซ้ำ, ปุ่มสงวน, ใช้ปุ่มใหม่ในเกม, รีเซ็ต
 python3 tests/e2e/save_warning.py               # เซฟไม่ได้: localStorage ถูกบล็อก หรือ setItem throw แล้วขึ้นข้อความเตือน
+python3 tests/e2e/core_ui.py                    # UI ของ Codex: ปุ่ม/cursor ใน Title, panel ใน Settings/Pause/Stage Clear/Game Over, font_hud บน HUD, icon shard, checkpoint_spark
 python3 tests/e2e/spirits.py                    # ภูต: 4 ตน 32×32 ทุกจุด (pickup, icon, companion) สลับธาตุ/cast ด้วยปุ่มจริงแล้วขนาดและตำแหน่งไม่กระโดด + ภาพสีหน้าใน SHOT_DIR
 python3 tests/e2e/player_anims.py               # Aclaire: 59 frame ชิดพื้น/กึ่งกลาง และกดปุ่มจริงแล้วเล่นท่าถูก (run, combo, jump, double jump, cast, dash, slam, hurt, dead)
 ```

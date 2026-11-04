@@ -443,7 +443,7 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | coin_icon | 12×12 | — |
 | boss_bar_frame / boss_bar_fill | 240×12 / 236×8 | — (เกมตัด fill จากซ้ายตาม HP บอส) |
 | panel_9slice | 48×48 | ใช้ทำกล่องเมนู ขอบ 16 px |
-| button | 96×24 | normal, hover, pressed |
+| button | 96×24 | normal, hover, pressed (เกมยืดความกว้างแบบ 9-slice ขอบ 4 px ตามข้อความ ความสูงคงที่ 24) |
 | cursor_arrow | 8×8 | — |
 | world_map_node | 16×16 | locked, open, cleared (frame `world_map_node_locked` ฯลฯ เกมขยาย 2 เท่าบนแผนที่โลก) |
 

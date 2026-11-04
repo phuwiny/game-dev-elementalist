@@ -551,6 +551,13 @@ function paintFx(p: PixelPen, f: FrameInfo): void {
     }
     return;
   }
+  if (f.anim === 'checkpoint_spark') {
+    const r = 1 + Math.round(t * 6);
+    p.rect(8 - r, 7, r * 2 + 1, 1, C.gold);
+    p.rect(7, 8 - r, 1, r * 2 + 1, C.gold);
+    p.rect(7, 7, 2, 2, C.highlight);
+    return;
+  }
   if (f.anim === 'hit_spark') {
     const r = 2 + f.index * 2;
     p.rect(8 - r, 7, r * 2, 2, C.highlight);
@@ -727,6 +734,23 @@ function paintUi(p: PixelPen, f: FrameInfo): void {
       if (f.name.endsWith('cleared')) p.rect(5, 7, 6, 2, C.outline);
       return;
     }
+    case 'panel_9slice':
+      p.rect(0, 0, f.w, f.h, C.outline);
+      p.rect(1, 1, f.w - 2, f.h - 2, C.gold);
+      p.rect(2, 2, f.w - 4, f.h - 4, C.outline);
+      p.rect(4, 4, f.w - 8, f.h - 8, C.magic);
+      p.rect(5, 5, f.w - 10, f.h - 10, C.outline);
+      return;
+    case 'button_normal':
+    case 'button_hover':
+    case 'button_pressed':
+      p.rect(0, 0, f.w, f.h, C.outline);
+      p.rect(1, 1, f.w - 2, f.h - 2, C.gold);
+      p.rect(2, 2, f.w - 4, f.h - 4, f.name === 'button_hover' ? C.magic : f.name === 'button_pressed' ? C.neutral2 : C.outline);
+      return;
+    case 'cursor_arrow':
+      for (let i = 0; i < 4; i += 1) p.rect(1 + i, i, 1, 8 - i * 2, C.gold);
+      return;
     default:
       break;
   }

@@ -596,7 +596,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const shards = this.physics.add.staticGroup();
     for (const s of this.level.shards) {
       const c = this.centerOf(s);
-      const sprite = this.add.sprite(c.x, c.y, 'items', 'spirit_shard_000').setDepth(3);
+      const sprite = this.add.sprite(c.x, c.y, 'items', 'spirit_shard_shine_000').setDepth(3);
       sprite.play(animKey('items', 'spirit_shard_shine'));
       if (this.savedShards.includes(s.slot)) {
         sprite.setAlpha(0.3);
@@ -991,6 +991,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     shrine.play(animKey('items', 'checkpoint_shrine_lighting'));
     shrine.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => shrine.play(animKey('items', 'checkpoint_shrine_lit')));
     sfx.play('checkpoint');
+    // ประกายที่เปลวไฟบนยอดแท่น (ยอดเปลวอยู่สูงจากฐาน ~44 px)
+    this.spawnFx('checkpoint_spark', shrine.x, shrine.y - 40);
     this.floatText(shrine.x, shrine.y - 56, 'CHECKPOINT', PALETTE.gold);
   }
 
@@ -1047,6 +1049,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   }
 
   private floatText(x: number, y: number, text: string, color: string): void {
+    // ข้อความลอยในด่านยังใช้ font ระบบที่มีขอบหนา: font_hud มีแค่เงา 1 px อ่านยากบนผนังซากปรักและใบไม้
     const t = this.add
       .text(x, y, text, { fontFamily: 'monospace', fontSize: '7px', color, stroke: PALETTE.outline, strokeThickness: 2, resolution: 6 })
       .setOrigin(0.5)

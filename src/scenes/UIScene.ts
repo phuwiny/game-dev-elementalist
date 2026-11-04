@@ -3,6 +3,8 @@ import { GAME_HEIGHT, GAME_WIDTH, SceneKey } from '../config/constants';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { PALETTE, hex } from '../assets/palette';
 import { textStyle } from '../ui/text';
+import { addHudText, setHudText, type HudText } from '../ui/hudText';
+import { addPanel } from '../ui/widgets';
 import { useUiCamera } from '../ui/screen';
 import { REGISTRY_LEVEL, type GameScene, type HudState } from './GameScene';
 import { isAdventure } from '../levels';
@@ -16,6 +18,8 @@ const BOSS_BAR_X = (GAME_WIDTH - 240) / 2;
 const BOSS_BAR_Y = GAME_HEIGHT - 24;
 
 const ENERGY_FILL_WIDTH = 92;
+/** กล่อง Pause กว้างพอให้บรรทัดคำแนะนำ (~58 ตัวอักษร) อยู่ในขอบ */
+const PAUSE_PANEL_W = 400;
 const SLOT_X = (i: number) => 12 + i * 28;
 const SLOT_Y = 50;
 
@@ -28,16 +32,16 @@ export class UIScene extends Phaser.Scene {
   private energyFill!: Phaser.GameObjects.Image;
   private slots: Phaser.GameObjects.Image[] = [];
   private slotSelect!: Phaser.GameObjects.Image;
-  private livesText!: Phaser.GameObjects.Text;
-  private coinsText!: Phaser.GameObjects.Text;
+  private livesText!: HudText;
+  private coinsText!: HudText;
   private pauseLayer!: Phaser.GameObjects.Container;
   private pauseHint!: Phaser.GameObjects.Text;
   private bossLayer!: Phaser.GameObjects.Container;
   private bossFill!: Phaser.GameObjects.Image;
-  private bossName!: Phaser.GameObjects.Text;
+  private bossName!: HudText;
   private shownBossHp = -1;
   private shardIcon!: Phaser.GameObjects.Image;
-  private shardsText!: Phaser.GameObjects.Text;
+  private shardsText!: HudText;
   private settingsOpen = false;
   private lastKey = '';
 
@@ -63,17 +67,17 @@ export class UIScene extends Phaser.Scene {
     );
 
     this.add.image(GAME_WIDTH - 104, 12, 'ui', 'lives_icon').setOrigin(0, 0);
-    this.livesText = this.add.text(GAME_WIDTH - 84, 12, '', textStyle(12)).setOrigin(0, 0);
+    this.livesText = addHudText(this, GAME_WIDTH - 84, 12, '').setOrigin(0, 0);
     this.add.image(GAME_WIDTH - 102, 34, 'ui', 'coin_icon').setOrigin(0, 0);
-    this.coinsText = this.add.text(GAME_WIDTH - 84, 31, '', textStyle(12)).setOrigin(0, 0);
+    this.coinsText = addHudText(this, GAME_WIDTH - 84, 32, '').setOrigin(0, 0);
 
-    this.shardIcon = this.add.image(GAME_WIDTH - 104, 52, 'items', 'spirit_shard_000').setOrigin(0, 0).setVisible(false);
-    setAtlasFrame(this.shardIcon, 'items', 'spirit_shard_000');
-    this.shardsText = this.add.text(GAME_WIDTH - 84, 53, '', textStyle(12, PALETTE.pink3)).setOrigin(0, 0).setVisible(false);
+    this.shardIcon = this.add.image(GAME_WIDTH - 104, 52, 'items', 'spirit_shard_shine_000').setOrigin(0, 0).setVisible(false);
+    setAtlasFrame(this.shardIcon, 'items', 'spirit_shard_shine_000');
+    this.shardsText = addHudText(this, GAME_WIDTH - 84, 52, '', PALETTE.pink3).setOrigin(0, 0).setVisible(false);
 
     this.shownBossHp = -1;
     this.bossFill = this.add.image(BOSS_BAR_X + 2, BOSS_BAR_Y + 2, 'ui', 'boss_bar_fill').setOrigin(0, 0);
-    this.bossName = this.add.text(GAME_WIDTH / 2, BOSS_BAR_Y - 4, '', textStyle(10, PALETTE.highlight)).setOrigin(0.5, 1);
+    this.bossName = addHudText(this, GAME_WIDTH / 2, BOSS_BAR_Y - 2, '').setOrigin(0.5, 1);
     this.bossLayer = this.add
       .container(0, 0, [this.add.image(BOSS_BAR_X, BOSS_BAR_Y, 'ui', 'boss_bar_frame').setOrigin(0, 0), this.bossFill, this.bossName])
       .setVisible(false);
@@ -82,6 +86,7 @@ export class UIScene extends Phaser.Scene {
     this.pauseLayer = this.add
       .container(0, 0, [
         this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, hex(PALETTE.outline), 0.6).setOrigin(0, 0),
+        addPanel(this, GAME_WIDTH / 2 - PAUSE_PANEL_W / 2, GAME_HEIGHT / 2 - 40, PAUSE_PANEL_W, 80),
         this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'PAUSED', textStyle(24, PALETTE.gold)).setOrigin(0.5),
         this.pauseHint,
       ])
@@ -142,10 +147,10 @@ export class UIScene extends Phaser.Scene {
         h.setVisible(i < s.maxHp);
         setAtlasFrame(h, 'ui', i < s.hp ? 'heart_full' : 'heart_empty');
       });
-      this.livesText.setText(`×${s.lives}`);
-      this.coinsText.setText(String(s.coins).padStart(2, '0'));
+      setHudText(this.livesText, `×${s.lives}`);
+      setHudText(this.coinsText, String(s.coins).padStart(2, '0'));
       this.shardIcon.setVisible(s.shards.total > 0);
-      this.shardsText.setVisible(s.shards.total > 0).setText(`${s.shards.have}/${s.shards.total}`);
+      setHudText(this.shardsText.setVisible(s.shards.total > 0), `${s.shards.have}/${s.shards.total}`);
       ELEMENT_ORDER.forEach((el, i) => {
         setAtlasFrame(this.slots[i], 'ui', `element_icon_${el}_${s.unlocked.includes(el) ? 'normal' : 'locked'}`);
       });
@@ -165,7 +170,7 @@ export class UIScene extends Phaser.Scene {
     this.bossLayer.setVisible(boss !== null && boss.hp > 0);
     if (!boss || boss.hp === this.shownBossHp) return;
     this.shownBossHp = boss.hp;
-    this.bossName.setText(boss.name.toUpperCase());
+    setHudText(this.bossName, boss.name);
     this.bossFill.setCrop(0, 0, Math.round(BOSS_FILL_WIDTH * (boss.hp / boss.max)), 8);
   }
 

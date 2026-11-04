@@ -21,6 +21,7 @@ import { sfx } from '../systems/Sfx';
 import { textStyle } from '../ui/text';
 import { useUiCamera } from '../ui/screen';
 import { addSaveWarning } from '../ui/saveWarning';
+import { addCursor, addPanel } from '../ui/widgets';
 
 const ROW_Y = 58;
 const ROW_H = 18;
@@ -48,6 +49,7 @@ export class SettingsScene extends Phaser.Scene {
   private resetText!: Phaser.GameObjects.Text;
   private backText!: Phaser.GameObjects.Text;
   private overlay = false;
+  private cursor!: Phaser.GameObjects.Image;
 
   constructor() {
     super(SceneKey.Settings);
@@ -65,6 +67,8 @@ export class SettingsScene extends Phaser.Scene {
     addSaveWarning(this);
     const cx = GAME_WIDTH / 2;
     this.add.text(cx, 28, 'SETTINGS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
+    // กล่องครอบตารางปุ่ม ตั้งแต่หัวตารางถึงแถว Back
+    addPanel(this, LABEL_X - 30, ROW_Y - 20, SLOT_X[1] + 90 - (LABEL_X - 30), (BACK_ROW + 1) * ROW_H + 30);
     this.add.text(LABEL_X, ROW_Y - 14, 'ACTION', textStyle(10, PALETTE.neutral3));
     SLOT_X.forEach((x, i) => this.add.text(x, ROW_Y - 14, `KEY ${i + 1}`, textStyle(10, PALETTE.neutral3)));
 
@@ -77,6 +81,7 @@ export class SettingsScene extends Phaser.Scene {
     });
     this.resetText = this.add.text(LABEL_X, ROW_Y + RESET_ROW * ROW_H + 6, 'Reset to defaults', textStyle(12));
     this.backText = this.add.text(LABEL_X, ROW_Y + BACK_ROW * ROW_H + 6, 'Back', textStyle(12));
+    this.cursor = addCursor(this);
     this.message = this.add.text(cx, 304, '', textStyle(10, PALETTE.gold)).setOrigin(0.5);
     this.add
       .text(cx, 322, 'UP/DOWN row  LEFT/RIGHT key slot  ENTER change  DEL clear  ESC back', textStyle(10, PALETTE.neutral3))
@@ -182,7 +187,7 @@ export class SettingsScene extends Phaser.Scene {
   private refresh(): void {
     REBINDABLE_ACTIONS.forEach((action: Action, i) => {
       const selectedRow = i === this.row;
-      this.labels[i].setText(`${selectedRow ? '>' : ' '} ${ACTION_LABELS[action]}`).setColor(selectedRow ? PALETTE.highlight : PALETTE.neutral3);
+      this.labels[i].setColor(selectedRow ? PALETTE.highlight : PALETTE.neutral3);
       SLOT_X.forEach((_x, s) => {
         const cell = this.cells[i][s];
         const key = this.bindings[action][s];
@@ -193,9 +198,14 @@ export class SettingsScene extends Phaser.Scene {
     });
     const dim = isDefaultBindings(this.bindings);
     this.resetText
-      .setText(`${this.row === RESET_ROW ? '>' : ' '} Reset to defaults`)
       .setColor(this.row === RESET_ROW ? PALETTE.highlight : dim ? PALETTE.neutral2 : PALETTE.neutral3);
-    this.backText.setText(`${this.row === BACK_ROW ? '>' : ' '} Back`).setColor(this.row === BACK_ROW ? PALETTE.highlight : PALETTE.neutral3);
+    this.backText.setColor(this.row === BACK_ROW ? PALETTE.highlight : PALETTE.neutral3);
+    const sel = this.selectedText();
+    this.cursor.setPosition(sel.x - 4, sel.y + sel.height / 2);
+  }
+
+  private selectedText(): Phaser.GameObjects.Text {
+    return this.row === BACK_ROW ? this.backText : this.row === RESET_ROW ? this.resetText : this.labels[this.row];
   }
 
   private close(): void {

@@ -102,7 +102,9 @@ with sync_playwright() as pw:
     # ---- 3. companion: switch with real keys, cast, record every frame ----
     start(page, 'w1_1', '?unlock')
     page.evaluate(f"() => {{ const g = {GS}; g.enemies.getChildren().forEach(e => e.vanish()); g.player.setPosition(232, 319); }}")
-    page.wait_for_timeout(1500)
+    # companion lerps toward the player after the teleport; start recording only once it has arrived,
+    # otherwise the catch-up movement (not a switch) shows up as a jump. software GL runs the game slower than real time
+    page.wait_for_function(f"() => {{ const g = {GS}, s = g.companion.sprite; return Math.abs(s.x - (g.player.x - g.player.facing * 18)) < 0.1; }}", timeout=20000)
     page.evaluate(f"""() => {{
       const g = {GS}, s = g.companion.sprite; window.__rec = [];
       g.events.on('postupdate', () => {{
