@@ -134,7 +134,8 @@ def validate(root: Path, master: set, v4: set) -> list[str]:
         atlas_frames[path.stem] = set(frames)
         rectangles: list[tuple[str, int, int, int, int]] = []
         for name, info in frames.items():
-            if not isinstance(name, str) or (not FRAME_NAME.fullmatch(name) and path.stem != "ui"):
+            is_spirit_icon = path.stem == "spirits" and name in {"burnil_icon", "wata_icon", "valvaliz_icon", "eathy_icon"}
+            if not isinstance(name, str) or (not FRAME_NAME.fullmatch(name) and path.stem != "ui" and not is_spirit_icon):
                 fail(path, f"invalid frame name {name!r}")
             try:
                 rect = info["frame"]
