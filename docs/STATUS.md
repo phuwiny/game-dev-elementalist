@@ -31,6 +31,7 @@
 - **ความละเอียด:** พิกัด logical 640×360 สำหรับเมนูและ HUD (`useUiCamera` ใน `src/ui/screen.ts`) canvas จริง 1280×720 (`RENDER_SCALE = 2`) กล้องในด่าน zoom 3 (`WORLD_SCALE = 1.5` × `RENDER_SCALE`) ภาพ 16 px ขยายเป็นจำนวนเต็มพอดี
 - **Aclaire V4:** atlas `player` วาดที่ `density: 2` (frame 96×128, run 128×128, attack 192×128) ในด่านแสดงที่ scale 1/3 = สูง ~41 px ในพิกัดด่าน (~62 px บนจอ logical) hitbox 11×31 px ในด่าน (~16×46 logical เท้าถึงหน้าผาก) กระโดดสูงสุด ~64 px
 - **ฉากและศัตรู:** Codex ยังวาดขนาดเดิม (tile 16, ศัตรู 32, palette 35 สี) ผู้ใช้อนุมัติภาพทดสอบสไตล์ World 1 แล้ว
+- **ภูต density 2:** Valvaliz/Eathy ใช้ภาพ expression v2 (64×64) ใน atlas `spirits_hd` (`public/assets/sprites/spirits/hd/` คัดลอกจาก `art/previews/phase_b/2026-11-04_spirit_expressions_v2/` แบบ byte-identical ตามที่ผู้ใช้อนุมัติ) ส่วน Burnil/Wata ยังอยู่ใน `spirits` 32×32 ทุกจุดที่แสดงภูต (companion, ภูตในด่าน, icon ตอน "joined!") สร้างผ่าน `src/assets/spirits.ts` ซึ่งเลือก atlas ด้วย `spiritAtlasKey` และตั้ง scale ตาม density ให้ขนาดในเกม 32×32 เท่ากันทุกตน ในด่านภาพ density 2 แสดงที่ 1.5 pixel canvas ต่อ texel (ไม่เป็นจำนวนเต็ม) และใน `?lowres` เหลือ 0.75
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
 - **Spirit Shard:** ตำแหน่งสร้างใน `tools/levels/w1.py` (`L.shard(col,row,slot)`, `L.crate_nest`) ด่านละ 3 ชิ้น: 1-1 หอแท่นลอย 3 ชั้นข้างจุดเริ่ม / ลอยเหนือแท่นกลางด่าน / รังลังหลังหลุม, 1-2 ลอยเหนือแท่นข้างพีระมิด / รังลัง / แท่นสูงที่มี Leaf Wisp เฝ้า, 1-3 ลอยเหนือหนามช่องแรก / รังลัง / แท่นข้างพีระมิดที่มี Leaf Wisp ชิ้นที่ลอยสูงต้องกระโดดซ้ำจากแท่น (เก็บจากพื้นไม่ถึง) ภาพ `spirit_shard_shine` ยังเป็น placeholder จนกว่า atlas `items` จะมา
@@ -70,6 +71,7 @@ python3 tests/e2e/music.py                      # เพลง: เริ่ม�
 python3 tests/e2e/shards.py                     # Spirit Shard: เก็บครบ 9 ชิ้นด้วย input จริง (hop/เผาลัง), บันทึกเมื่อผ่านด่านเท่านั้น, HUD/Stage Clear/เงาชิ้นที่เก็บแล้ว
 python3 tests/e2e/settings.py                   # key rebinding: Title/Pause → Settings, สลับปุ่มซ้ำ, ปุ่มสงวน, ใช้ปุ่มใหม่ในเกม, รีเซ็ต
 python3 tests/e2e/save_warning.py               # เซฟไม่ได้: localStorage ถูกบล็อก หรือ setItem throw แล้วขึ้นข้อความเตือน
+python3 tests/e2e/spirits.py                    # ภูต: 4 ตน 32×32 ทุกจุด (pickup, icon, companion) สลับธาตุ/cast ด้วยปุ่มจริงแล้วขนาดและตำแหน่งไม่กระโดด + ภาพสีหน้าใน SHOT_DIR
 python3 tests/e2e/player_anims.py               # Aclaire: 59 frame ชิดพื้น/กึ่งกลาง และกดปุ่มจริงแล้วเล่นท่าถูก (run, combo, jump, double jump, cast, dash, slam, hurt, dead)
 ```
 
