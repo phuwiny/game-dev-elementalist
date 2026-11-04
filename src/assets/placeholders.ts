@@ -218,6 +218,7 @@ const PAINTERS: Record<string, Painter> = {
   player: paintAclaire,
   boss_bramble_king: paintBrambleKing,
   spirits: paintSpirits,
+  spirits_hd: paintSpirits,
   objects: paintObjects,
   enemies_w1: paintEnemiesW1,
   items: paintItems,

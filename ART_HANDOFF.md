@@ -121,7 +121,7 @@ Asset ในเกมใช้สีต่อไปนี้เป็นค่�
 | Aclaire idle/jump และท่าทั่วไป | 48×64 logical; 96×128 physical (density 2) | sprite แสดงผลที่ 0.5 เท่าของพิกเซลไฟล์ |
 | Aclaire run | 64×64 logical; 128×128 physical (density 2) | กรอบกว้างขึ้น แต่ความสูงบนจอเท่า idle |
 | Aclaire attack_1–3 | 96×64 logical; 192×128 physical (density 2) | ลำตัวอยู่กึ่งกลางล่างตำแหน่งเดียวกับ idle แนวดาบยื่นไปทางขวาได้ไม่เกิน 40 logical px จากกึ่งกลางตัว |
-| ภูต | 32×32 | เผื่อปีกของ Valvaliz และลูกหินที่ลอยรอบ Eathy |
+| ภูต | 32×32 (Valvaliz, Eathy: 64×64 physical density 2) | เผื่อปีกของ Valvaliz และลูกหินที่ลอยรอบ Eathy |
 | ศัตรูทั่วไป | 32×32 | ยกเว้นตามตาราง 5 |
 | Rock Golemling, Stone Sentinel | 48×48 | |
 | Spirit Knight | 32×48 | |
@@ -158,7 +158,7 @@ Asset ในเกมใช้สีต่อไปนี้เป็นค่�
 - Animation key ที่ใช้ในเกม: `<atlas>_<anim>` เช่น `player_run`, `enemies_w1_moss_slime_move`
 - ใน atlas ที่รวมหลายตัว ใส่ชื่อตัวไว้หน้า anim: `moss_slime_move_000`
 - Asset ที่มีหลายสถานะ (ตารางที่เขียนว่า "idle 1, burn 6" เป็นต้น) ตั้งชื่อ anim เป็น `<asset>_<state>` และชื่อ frame เป็น `<asset>_<state>_<NNN>` แม้มี frame เดียวก็ต้องมี `_000` เช่น `torch_unlit_000`, `torch_lit_000`…`torch_lit_003`, `earth_block_idle_000`, `freeze_shatter_004`
-- ภูตใน atlas `spirits` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
+- ภูตใน atlas `spirits` และ `spirits_hd` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
 - Frame นิ่งใน atlas `ui` ไม่มีเลขต่อท้าย ใช้ `<element>_<state>` เช่น `heart_full`, `heart_empty`, `energy_bar_fill_normal`, `element_icon_fire_locked` ส่วน element ที่มีสถานะเดียวใช้ชื่อ element ตรงๆ เช่น `energy_bar_frame`, `lives_icon`
 - รายชื่อ frame ที่เกมใช้อยู่ตอนนี้ดูได้ที่ `src/assets/manifest.ts` (เพิ่มตามแต่ละ phase ของการพัฒนา) asset ที่มีมากกว่าในไฟล์นั้นไม่ทำให้เกมพัง
 
@@ -191,7 +191,8 @@ tools/
 public/assets/
   sprites/
     player/        player.png, player.json
-    spirits/       spirits.png, spirits.json
+    spirits/       spirits.png, spirits.json (Burnil, Wata 32×32)
+      hd/          spirits.png, spirits.json (Valvaliz, Eathy 64×64 density 2, atlas key `spirits_hd`)
     fx/            fx.png, fx.json
     objects/       objects.png, objects.json
     items/         items.png, items.json
@@ -278,7 +279,19 @@ public/assets/
 
 `idle` และ `jump_up` มี preview ผ่านการรีวิวภาพแล้ว; `run` ใช้ V4 สี่ key ที่พินรับไว้ชั่วคราวและยังต้องเก็บความลื่นไหล ก่อนส่ง production ต้องตรวจที่ 1:1, nearest-neighbor enlargement และบนจอ 640×360 การผ่าน validator ยืนยันเฉพาะไฟล์และข้อกำหนดเชิงเทคนิค
 
-### 5.2 ภูต — atlas `spirits` (32×32, origin center)
+### 5.2 ภูต — atlas `spirits` (32×32) และ `spirits_hd` (64×64 density 2), origin center
+
+ทุกตนแสดงในเกมขนาด 32×32 เท่ากัน แต่แยกไฟล์ตาม density
+
+| atlas key | ไฟล์ | ภูต | frame physical | density | ขนาดในเกม |
+|---|---|---|---|---|---|
+| `spirits` | `public/assets/sprites/spirits/spirits.png/.json` | Burnil, Wata | 32×32 | 1 | 32×32 |
+| `spirits_hd` | `public/assets/sprites/spirits/hd/spirits.png/.json` | Valvaliz, Eathy | 64×64 | 2 | 32×32 (sprite แสดงที่ 0.5 เท่าของพิกเซลไฟล์) |
+
+- ชื่อ frame ใน `spirits_hd` เหมือนเดิม (`valvaliz_idle_000`, `eathy_icon`) ชื่อ animation ในเกมเป็น `spirits_hd_valvaliz_idle`
+- ไฟล์ใน `hd/` ชื่อ `spirits.*` เพื่อให้ validator อนุญาต icon ที่ไม่มีเลขต่อท้าย (เช็กจากชื่อไฟล์ `spirits`) ถ้าจะเปลี่ยนชื่อไฟล์ต้องแก้ validator ด้วย
+- frame 32×32 เดิมของ Valvaliz/Eathy ที่ยังอยู่ใน atlas `spirits` เกมไม่ใช้แล้ว จะเก็บไว้หรือเอาออกก็ไม่ทำให้เกมพัง
+- ภาพ density 2 ในด่านแสดงที่ 1.5 pixel ของจอ 1280×720 ต่อ 1 pixel ภาพ (ไม่เป็นจำนวนเต็ม) เส้น 1 px บางเส้นจะหนาไม่เท่ากัน ควรตรวจภาพในเกมด้วย `tests/e2e/spirits.py`
 
 ต้นแบบของภูตทุกตนอยู่ใน `art/reference/` ให้ยึดรูปร่าง สีหน้า และนิสัยตามภาพ
 
@@ -297,7 +310,7 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | `<key>_cast` | 4 | 12 | Burnil ยิงไฟ, Wata พ่นฟองน้ำ, Valvaliz สร้างพายุหมุนเล็ก, Eathy พุ่งโขกหัว |
 | `<key>_icon` | 1 | — | หน้าตรง ใช้ในหน้าจอได้รับภูต |
 
-ภูตทั้ง 4 ตนวาดเป็นตัวการ์ตูนกลมๆ ขนาดเล็กกว่า Aclaire ชัดเจน (สูงไม่เกิน 24 px ภายใน frame 32×32 ยกเว้นปีกของ Valvaliz)
+ภูตทั้ง 4 ตนวาดเป็นตัวการ์ตูนกลมๆ ขนาดเล็กกว่า Aclaire ชัดเจน (สูงไม่เกิน 24 px ภายใน frame 32×32 ยกเว้นปีกของ Valvaliz) Valvaliz และ Eathy ฉบับ density 2 (expression v2, 2026-11-04) ผู้ใช้อนุมัติให้หน้าใหญ่ขึ้นและตัวเล็กลงเพื่อให้เห็นสีหน้า ตัวเต็มกรอบ 64×64 ได้
 
 ### 5.3 FX — atlas `fx`
 

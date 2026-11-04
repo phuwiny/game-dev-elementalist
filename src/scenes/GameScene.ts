@@ -41,6 +41,7 @@ import { animKey, backgroundForTileset } from '../assets/manifest';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
 import { setAtlasFrame } from '../assets/frames';
+import { addSpiritIcon, addSpiritSprite } from '../assets/spirits';
 import { buildArtTerrain } from '../systems/TerrainArt';
 import { ParallaxBackground } from '../systems/ParallaxBackground';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
@@ -505,8 +506,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private buildSpiritPickup(o: LevelObject): void {
     const element = ELEMENT_ORDER[o.slot ?? 0];
     const pos = this.centerOf(o);
-    const sprite = this.add.sprite(pos.x, pos.y, 'spirits', `${spiritKey(element)}_idle_000`).setDepth(3);
-    sprite.play(animKey('spirits', `${spiritKey(element)}_idle`));
+    // scale ตาม density ของภูตตนนั้น ต้องตั้งก่อนสร้าง body (body ใช้ displayWidth)
+    const sprite = addSpiritSprite(this, pos.x, pos.y, spiritKey(element)).setDepth(3);
     this.tweens.add({ targets: sprite, y: pos.y - 4, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     this.physics.add.existing(sprite, true);
     this.physics.add.overlap(this.player, sprite, () => {
@@ -522,7 +523,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.elements.energy.refill();
     if (announce) {
       sfx.play('spirit');
-      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY - 10, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      const y = this.player.y - PlayerLayout.overheadY - 10;
+      this.floatText(this.player.x, y, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      // icon หน้าตรงของภูต (ART_HANDOFF.md 5.2) ลอยขึ้นพร้อมข้อความ
+      const icon = addSpiritIcon(this, this.player.x, y - 20, spiritKey(element)).setDepth(20).setName('spirit-joined-icon');
+      this.tweens.add({ targets: icon, y: icon.y - 16, alpha: 0, duration: 1200, onComplete: () => icon.destroy() });
       if (isAdventure(this.def.key)) this.progress.addSpirit(element);
     }
   }

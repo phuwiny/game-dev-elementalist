@@ -92,8 +92,32 @@ export function textureScale(atlasKey: string): number {
 
 /** ชื่อภูตที่ใช้เป็น prefix ของ frame ใน atlas spirits (ลำดับ ไฟ น้ำ ลม ดิน) */
 export const SPIRIT_KEYS = ['burnil', 'wata', 'valvaliz', 'eathy'] as const;
+export type SpiritKey = (typeof SPIRIT_KEYS)[number];
+
+/**
+ * ภูตที่วาดที่ density 2 (frame 64×64 แสดงเท่า 32×32) อยู่ใน atlas `spirits_hd`
+ * ตนอื่นยังอยู่ใน atlas `spirits` (32×32) ART_HANDOFF.md หัวข้อ 5.2
+ */
+export const HD_SPIRIT_KEYS: readonly SpiritKey[] = ['valvaliz', 'eathy'];
+
+/** atlas ที่มี frame ของภูตตนนี้ (ใช้คู่กับ textureScale เพื่อให้ขนาดในเกมเท่ากันทุกตน) */
+export function spiritAtlasKey(spirit: SpiritKey): 'spirits' | 'spirits_hd' {
+  return HD_SPIRIT_KEYS.includes(spirit) ? 'spirits_hd' : 'spirits';
+}
+
 /** ชื่อธาตุที่ใช้ในชื่อ frame (ตรงกับค่าของ ElementType) */
 export const ELEMENT_KEYS = ['fire', 'water', 'wind', 'earth'] as const;
+
+/** animation และ icon ของภูตตามสเปกเดียวกันทุกตน (ART_HANDOFF.md หัวข้อ 5.2) */
+function spiritFrames(keys: readonly SpiritKey[]): Pick<AtlasDef, 'anims' | 'stills'> {
+  return {
+    anims: keys.flatMap((k) => [
+      { name: `${k}_idle`, frames: 6, frameRate: 8, repeat: -1 },
+      { name: `${k}_cast`, frames: 4, frameRate: 12, repeat: 0 },
+    ]),
+    stills: keys.map((k) => ({ name: `${k}_icon` })),
+  };
+}
 
 const sprite = (dir: string, key: string) => ({
   key,
@@ -131,11 +155,17 @@ export const ATLASES: AtlasDef[] = [
     ...sprite('spirits', 'spirits'),
     frameWidth: 32,
     frameHeight: 32,
-    anims: SPIRIT_KEYS.flatMap((k) => [
-      { name: `${k}_idle`, frames: 6, frameRate: 8, repeat: -1 },
-      { name: `${k}_cast`, frames: 4, frameRate: 12, repeat: 0 },
-    ]),
-    stills: SPIRIT_KEYS.map((k) => ({ name: `${k}_icon` })),
+    ...spiritFrames(SPIRIT_KEYS.filter((k) => spiritAtlasKey(k) === 'spirits')),
+  },
+  {
+    // Valvaliz, Eathy: 32×32 logical วาดที่ density 2 เพื่อให้เห็นสีหน้าชัดขึ้น
+    key: 'spirits_hd',
+    png: 'assets/sprites/spirits/hd/spirits.png',
+    json: 'assets/sprites/spirits/hd/spirits.json',
+    frameWidth: 64,
+    frameHeight: 64,
+    density: 2,
+    ...spiritFrames(HD_SPIRIT_KEYS),
   },
   {
     ...sprite('objects', 'objects'),
