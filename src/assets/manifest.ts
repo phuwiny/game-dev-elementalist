@@ -217,7 +217,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'thorn_beetle_walk', frames: 6, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_flipped', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_hurt', frames: 2, frameRate: 10, repeat: 0 },
-      { name: 'thorn_beetle_death', frames: 6, frameRate: 12, repeat: 0 },
+      { name: 'thorn_beetle_death', frames: 5, frameRate: 12, repeat: 0 },
     ],
   },
   {
