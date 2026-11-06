@@ -203,6 +203,7 @@ public/assets/
     w1/            bg_w1_far.png, bg_w1_mid.png, bg_w1_near.png
     ... w5/
   ui/              ui.png, ui.json, font_hud.png, font_hud.xml
+  gallery/         gallery_w1_1.png ... (concept art 1280×720 หัวข้อ 8.1)
   animations.json
   maps/            (ผู้พัฒนาดูแล ห้ามแก้)
   audio/           (ไม่อยู่ในขอบเขต ห้ามแก้)
@@ -469,6 +470,23 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | key_art_title.png (Phase E) | ภาพหน้า title 1920×1080 |
 
 **In-game mockups** (`art/mockups/`): ภาพ 640×360 ที่ประกอบจาก asset จริงในเกม แสดง HUD, ตัวเอก, ศัตรู และ tileset ใช้ตรวจว่าอ่านภาพได้ชัดที่ขนาดจริง ทำ 1 ภาพต่อโลกตั้งแต่ Phase C
+
+### 8.1 ภาพ Gallery ในเกม (ปลดล็อกด้วย Spirit Shard)
+
+เก็บ Spirit Shard ครบ 3 ชิ้นของด่านไหน ผู้เล่นได้ภาพ concept art ของด่านนั้น 1 ภาพ ดูได้ที่หน้า Gallery (เมนู Title หรือกด G ที่ World Map) ผู้ใช้เลือกให้ใช้ **concept art จริง** ไม่ต้องวาดใหม่เป็น pixel art
+
+| key | ไฟล์ | ปลดล็อกด้วย | เนื้อหาที่แนะนำ |
+|---|---|---|---|
+| `gallery_w1_1` | `public/assets/gallery/gallery_w1_1.png` | shard 3/3 ของ 1-1 Ember Trail | เลือกจาก concept ที่อนุมัติแล้วใน `art/concept/` เช่น Aclaire กับ Burnil หรือป่าไฟตอนเริ่มทาง |
+| `gallery_w1_2` | `public/assets/gallery/gallery_w1_2.png` | shard 3/3 ของ 1-2 Burning Canopy | เช่น ภูตทั้ง 4 ตน หรือฉากเรือนยอดไม้ลุกไฟ |
+| `gallery_w1_3` | `public/assets/gallery/gallery_w1_3.png` | shard 3/3 ของ 1-3 Bramble Hollow | เช่น Bramble King |
+
+- PNG 1280×720 (16:9) RGB หรือ RGBA, **ไม่บังคับ master palette และไม่บังคับ binary alpha** ย่อจากต้นฉบับใน `art/concept/` ห้ามยืดสัดส่วน ถ้าต้นฉบับไม่ใช่ 16:9 ให้ crop หรือเติมขอบสี `#0f0b1a`
+- ขนาดไฟล์ไม่เกินภาพละ 1.5 MB (เกมโหลดทุกภาพตอนเริ่ม)
+- เกมแสดงในกรอบ 416×234 logical (832×468 บนจอ 1280×720) และกด ENTER ดูเต็มจอที่ 1:1
+- ภาพที่ยังล็อกจะไม่ถูกแสดงเลย (กล่องมืดพร้อมบอกวิธีปลดล็อก) ไม่ต้องทำภาพเงา
+- ระหว่างที่ยังไม่มีไฟล์ เกมสร้างภาพแทนที่เขียนว่า "CONCEPT ART ... placeholder" วางไฟล์ตาม path แล้วเกมใช้ทันที (BootScene ตรวจไฟล์ก่อนโหลด)
+- **ต้องแก้ `tools/validate_assets.py` (ของ Codex) พร้อมกัน:** ตอนนี้ validator บังคับ master palette และ binary alpha กับ PNG ทุกไฟล์ใน `public/assets` ภาพ gallery จะไม่ผ่าน ให้ยกเว้นโฟลเดอร์ `gallery/` จากสองข้อนั้น แต่ยังตรวจขนาด 1280×720 และชื่อไฟล์ snake_case
 
 ---
 

@@ -82,6 +82,27 @@ export function backgroundForTileset(tileset: string): WorldBackground | null {
 }
 
 /**
+ * concept art gallery (ART_HANDOFF.md หัวข้อ 8.1): ภาพละด่าน ปลดล็อกเมื่อเก็บ Spirit Shard ครบ 3 ชิ้นของด่านนั้น
+ * ไฟล์ PNG 1280×720 (ไม่บังคับ palette) ถ้ายังไม่มีไฟล์ PreloadScene สร้างภาพแทนชั่วคราว
+ */
+export interface GalleryImageDef {
+  key: string;
+  png: string;
+  /** ด่านที่ปลดล็อกภาพนี้ */
+  level: string;
+}
+
+export const GALLERY_IMAGE_SIZE = { width: 1280, height: 720 } as const;
+
+const galleryImage = (level: string): GalleryImageDef => ({
+  key: `gallery_${level}`,
+  png: `assets/gallery/gallery_${level}.png`,
+  level,
+});
+
+export const GALLERY_IMAGES: readonly GalleryImageDef[] = [galleryImage('w1_1'), galleryImage('w1_2'), galleryImage('w1_3')];
+
+/**
  * bitmap font ของ HUD (BMFont XML, ART_HANDOFF.md หัวข้อ 7) มีเฉพาะ A–Z, 0–9 และ `× : / - + !`
  * ถ้าโหลดไม่ได้ src/ui/hudText.ts ใช้ font ของระบบแทน
  */
@@ -217,7 +238,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'thorn_beetle_walk', frames: 6, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_flipped', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_hurt', frames: 2, frameRate: 10, repeat: 0 },
-      { name: 'thorn_beetle_death', frames: 6, frameRate: 12, repeat: 0 },
+      { name: 'thorn_beetle_death', frames: 5, frameRate: 12, repeat: 0 },
     ],
   },
   {

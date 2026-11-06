@@ -12,6 +12,8 @@ import type { Vitals } from '../core/Vitals';
 import { sfx } from '../systems/Sfx';
 import { music } from '../systems/Music';
 import { addSaveWarning } from '../ui/saveWarning';
+import { GALLERY_IMAGES } from '../assets/manifest';
+import { unlockedGallery } from '../core/Gallery';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
 
 const NODE_Y = 190;
@@ -37,7 +39,10 @@ export class WorldMapScene extends Phaser.Scene {
     music.play('world_map');
 
     this.add.text(cx, 40, 'WORLD 1 · EMBER WOODS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
-    this.add.text(cx, 62, `Spirit Shards ${progress.totalShards}/${progress.maxShards}`, textStyle(10, PALETTE.pink3)).setOrigin(0.5);
+    const gallery = unlockedGallery(progress, GALLERY_IMAGES).length;
+    this.add
+      .text(cx, 62, `Spirit Shards ${progress.totalShards}/${progress.maxShards}   Gallery ${gallery}/${GALLERY_IMAGES.length}`, textStyle(10, PALETTE.pink3))
+      .setOrigin(0.5);
 
     // เส้นทางเชื่อมระหว่างด่าน
     const path = this.add.graphics();
@@ -89,7 +94,7 @@ export class WorldMapScene extends Phaser.Scene {
     });
     this.add.image(GAME_WIDTH - 80, 322, 'ui', 'lives_icon').setOrigin(0, 0);
     this.add.text(GAME_WIDTH - 60, 322, `×${vitals.lives}`, textStyle(12)).setOrigin(0, 0);
-    this.add.text(cx, 300, 'LEFT/RIGHT select  ESC title  DEL reset save', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
+    this.add.text(cx, 300, 'LEFT/RIGHT select  G gallery  ESC title  DEL reset save', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
 
     const kb = this.input.keyboard;
     const move = (d: number) => {
@@ -113,6 +118,10 @@ export class WorldMapScene extends Phaser.Scene {
     kb?.on('keydown-ENTER', play);
     kb?.on('keydown-SPACE', play);
     kb?.once('keydown-ESC', () => this.scene.start(SceneKey.Title));
+    kb?.once('keydown-G', () => {
+      sfx.play('menu');
+      this.scene.start(SceneKey.Gallery, { from: SceneKey.WorldMap });
+    });
 
     // ล้างเซฟต้องกดยืนยันซ้ำ
     let confirmReset = false;

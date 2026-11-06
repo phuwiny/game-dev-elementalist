@@ -26,7 +26,9 @@
 | #19 | (Codex) core assets ครบชุด: spirits, objects, items, fx, ui, font_hud + Valvaliz/Eathy expression v2 | merged |
 | #20 | Valvaliz/Eathy density 2 (64×64) ใน atlas `spirits_hd` แสดง 32×32 เท่าเดิม | merged |
 | #21 | เชื่อม core assets ที่ยังไม่ได้ใช้: `checkpoint_spark`, `font_hud` บน HUD, `panel_9slice` / `button_*` / `cursor_arrow` ในเมนู, แก้ icon shard บน HUD | merged |
-| #22 | Spirit Orb ด่านละ 2 ลูก + 1UP Feather 1 ชิ้นซ่อนในด่าน 1-2 (เก็บได้ครั้งเดียวต่อเซฟ) | เปิดอยู่ |
+| #22 | Spirit Orb ด่านละ 2 ลูก + 1UP Feather 1 ชิ้นซ่อนในด่าน 1-2 (เก็บได้ครั้งเดียวต่อเซฟ) | merged |
+| #23 | แก้ `thorn_beetle_death` ใน manifest เป็น 5 frame ตามภาพที่ส่ง + test ว่า atlas จริงมีทุก frame ที่ manifest ประกาศ | merged |
+| (ถัดไป) | Concept art gallery ปลดล็อกด้วย Spirit Shard (ภาพแทนชั่วคราวจนกว่า Codex จะส่ง) | PR นี้ |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -40,6 +42,8 @@
 - **UI ของ Codex:** `src/ui/widgets.ts` มี `addPanel` (9-slice ขอบ 16), `MenuButton` (button_* ยืดแบบ 9-slice ขอบ 4 ตามความกว้างข้อความ: hover = รายการที่เลือก, pressed = ตอนกดยืนยัน) และ `addCursor` ใช้ที่ Title (ปุ่ม + ลูกศร), Settings (กล่อง + ลูกศร), Pause (กล่อง), Stage Clear / Game Over (กล่อง + ปุ่ม ENTER/ESC) e2e อ่านรายการที่เลือกใน Title จาก `TitleScene.selectedLabel` (เดิมดูจากข้อความที่ขึ้นต้นด้วย `>`)
 - **font_hud:** ใช้กับตัวเลขและชื่อบอสบน HUD (`src/ui/hudText.ts`, scale 2 = ช่องสูง 16 logical px, tint ตามสี, เงา 1 px) font มีแค่ตัวพิมพ์ใหญ่ `addHudText` แปลงให้เอง ถ้าโหลดไม่ได้ใช้ font ระบบ ข้อความลอยในด่าน ("CHECKPOINT", "1UP" ฯลฯ) และเมนูยังใช้ font ระบบ: font_hud ไม่มีตัวพิมพ์เล็ก และมีแค่เงา 1 px ทำให้อ่านยากบนผนังซากปรัก
 - **Spirit Orb / 1UP Feather:** object class `orb` / `feather` ในไฟล์ Tiled (ASCII `o` / `u`) ค่าอยู่ใน `ItemBalance` (orb +50 Energy, feather +1 ชีวิต) เก็บไม่ได้ถ้าเกจเต็มหรือชีวิตครบ 9 (เหลือไว้เก็บทีหลังเหมือน Heart Fruit) orb เล่นด่านใหม่ก็มีอีก ส่วน feather เก็บได้ครั้งเดียวต่อเซฟ: `Progress.feathers` บันทึก**ทันทีที่เก็บ** (ไม่รอผ่านด่านแบบ shard เพราะ feather ให้ชีวิตทันที ถ้ารอผ่านด่านจะเก็บแล้วออกจากด่านเพื่อเก็บซ้ำได้) เล่นซ้ำเห็นเป็นเงาจางแบบ shard ลบเซฟแล้วเก็บได้ใหม่ ระบุ feather ด้วยลำดับในไฟล์ด่าน (index เริ่ม 0) ตำแหน่งใน `tools/levels/w1.py`: orb 1-1 col 72 / 140, 1-2 col 74 / 142, 1-3 col 68 / 165 (ก่อนสนามบอส) feather มีชิ้นเดียวในโลก 1 บนแท่น one-way 4 ชั้นเหนือ checkpoint ที่สองของ 1-2 (col 118–129) ตัว feather อยู่แถว 7 ซึ่งกล้องไม่เห็นจากพื้น **ห้ามวาง object ในช่วงคอลัมน์ `RUINS`** เพราะช่องที่มี object ทำให้ลำดับสุ่มของผนังซากปรักเลื่อนทั้งด่าน
+- **Gallery:** เก็บ shard ครบ 3 ชิ้นของด่านไหน ได้ภาพ concept art ของด่านนั้น (`src/core/Gallery.ts`, ไม่มีข้อมูลเซฟเพิ่ม คำนวณจาก shard ที่บันทึกไว้) ภาพประกาศใน `GALLERY_IMAGES` ของ `manifest.ts` (`assets/gallery/gallery_<level>.png` 1280×720 ไม่บังคับ palette) BootScene ตรวจไฟล์ภาพด้วย `probeFiles(..., 'image/')` ถ้ายังไม่มีใช้ `createGalleryPlaceholder` หน้า `GalleryScene` เข้าจาก Title (เมนูที่ 3) หรือ G ที่ World Map, LEFT/RIGHT เลื่อน, ENTER ดูเต็มจอ, ESC กลับหน้าที่เปิดมา ภาพที่ล็อกเป็นกล่องมืดบอกวิธีปลดล็อก Stage Clear แจ้ง "New gallery image unlocked!" เฉพาะครั้งที่เก็บครบชุด World Map แสดง Gallery x/3 ข้าง Spirit Shards รอบนี้เพิ่มเมนู Title จาก 4 เป็น 5 ปุ่ม e2e ที่นับจำนวนครั้งกดลง (`flow.py`, `lab_test.py`) ปรับแล้ว
+- **Manifest ต้องตรงกับ atlas ที่ส่งมาแล้ว:** `tests/assets.test.ts` ตรวจว่าทุก frame ที่ manifest ประกาศมีอยู่ในไฟล์ atlas จริง (atlas ที่ยังไม่มีไฟล์ข้ามไป) ถ้า frame ขาด เกมจะเติม placeholder ลง `<atlas>__fill` เงียบๆ เคยเกิดกับ `thorn_beetle_death` ที่ manifest ประกาศ 6 แต่ Codex ส่ง 5 (ART_HANDOFF อนุญาต death 5–6) ตอนนี้ไม่มี atlas ไหนต้องเติม placeholder แล้ว
 - **Placeholder:** atlas ที่ยังไม่มีไฟล์ใช้ placeholder ทั้งชุด atlas ที่ส่งมาไม่ครบท่าจะเติมเฉพาะ frame ที่ขาดลง texture `<atlas>__fill` (`setAtlasFrame` ใน `src/assets/frames.ts` ใช้แทน `setFrame` ทุกครั้ง)
 - **ด่าน:** ไฟล์ Tiled `public/assets/maps/w1_*.json` สร้างจาก `tools/levels/w1.py` (ASCII → Tiled) แก้ใน Tiled ตรงๆ ได้ แต่ถ้าแก้ผ่านสคริปต์จะทับไฟล์ ทุกด่านโหมดผจญภัยต้องผ่าน `LevelLint` (`tests/levels.test.ts`)
 - **Spirit Shard:** ตำแหน่งสร้างใน `tools/levels/w1.py` (`L.shard(col,row,slot)`, `L.crate_nest`) ด่านละ 3 ชิ้น: 1-1 หอแท่นลอย 3 ชั้นข้างจุดเริ่ม / ลอยเหนือแท่นกลางด่าน / รังลังหลังหลุม, 1-2 ลอยเหนือแท่นข้างพีระมิด / รังลัง / แท่นสูงที่มี Leaf Wisp เฝ้า, 1-3 ลอยเหนือหนามช่องแรก / รังลัง / แท่นข้างพีระมิดที่มี Leaf Wisp ชิ้นที่ลอยสูงต้องกระโดดซ้ำจากแท่น (เก็บจากพื้นไม่ถึง) ภาพ `spirit_shard_shine` ยังเป็น placeholder จนกว่า atlas `items` จะมา
@@ -53,7 +57,7 @@
 ## งานถัดไป
 
 ฝั่ง Codex
-1. (ท่าของ Aclaire ครบแล้ว ตรวจในเกมแล้ว: `tests/e2e/player_anims.py`)
+1. ภาพ gallery 3 ภาพ (ART_HANDOFF.md หัวข้อ 8.1): concept art จริง 1280×720 ลง `public/assets/gallery/` พร้อมแก้ validator ให้ยกเว้น palette/binary alpha ในโฟลเดอร์นั้น ผู้ใช้เลือกภาพ
 2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
    - tile มุมใน 11–14 ของ `tiles_w1_ember_woods`: ถ้าตั้งใจให้ใช้ที่มุมเว้า (tile อยู่กลางเนื้อดินแต่เฉียงหนึ่งด้านว่าง) ภาพปัจจุบันไม่เข้า เพราะมีฝาหญ้าหรือเส้นขอบพาดทั้งด้านที่ติดดิน ขอให้บอกว่าตั้งใจใช้ตรงไหน หรือวาดใหม่ให้มีขอบเฉพาะมุมเว้า
 
@@ -79,6 +83,7 @@ python3 tests/e2e/music.py                      # เพลง: เริ่ม�
 python3 tests/e2e/shards.py                     # Spirit Shard: เก็บครบ 9 ชิ้นด้วย input จริง (hop/เผาลัง), บันทึกเมื่อผ่านด่านเท่านั้น, HUD/Stage Clear/เงาชิ้นที่เก็บแล้ว
 python3 tests/e2e/settings.py                   # key rebinding: Title/Pause → Settings, สลับปุ่มซ้ำ, ปุ่มสงวน, ใช้ปุ่มใหม่ในเกม, รีเซ็ต
 python3 tests/e2e/save_warning.py               # เซฟไม่ได้: localStorage ถูกบล็อก หรือ setItem throw แล้วขึ้นข้อความเตือน
+python3 tests/e2e/gallery.py                    # Gallery: ล็อกตอนเซฟใหม่, ปลดล็อกเมื่อ shard ครบ 3 ของด่าน, ดูเต็มจอ, เข้าจาก Title/World Map แล้วกลับถูกหน้า, Stage Clear แจ้งครั้งเดียว
 python3 tests/e2e/items.py                      # Spirit Orb +50 / ไม่เก็บตอนเต็ม, 1UP Feather ปีนแท่นด้วยการกระโดดจริง, ซ่อนจากกล้องตอนยืนพื้น, ไม่เก็บตอนชีวิตครบ, เก็บแล้วบันทึกทันที เล่นซ้ำ/reload เป็นเงาจาง
 python3 tests/e2e/core_ui.py                    # UI ของ Codex: ปุ่ม/cursor ใน Title, panel ใน Settings/Pause/Stage Clear/Game Over, font_hud บน HUD, icon shard, checkpoint_spark
 python3 tests/e2e/spirits.py                    # ภูต: 4 ตน 32×32 ทุกจุด (pickup, icon, companion) สลับธาตุ/cast ด้วยปุ่มจริงแล้วขนาดและตำแหน่งไม่กระโดด + ภาพสีหน้าใน SHOT_DIR

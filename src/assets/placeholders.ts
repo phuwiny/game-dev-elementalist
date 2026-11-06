@@ -122,6 +122,38 @@ export function createPlaceholderAtlas(
   canvas.refresh();
 }
 
+/**
+ * ภาพ gallery แทนชั่วคราวจนกว่า Codex จะ export concept art (ART_HANDOFF.md หัวข้อ 8.1)
+ * วาดที่ครึ่งหนึ่งของขนาดจริง (640×360) ฉากหลังเป็นแถบสีป่าไฟตามโลก 1 พร้อมป้ายบอกว่าเป็นภาพแทน
+ */
+export function createGalleryPlaceholder(textures: Phaser.Textures.TextureManager, key: string, caption: string): void {
+  if (textures.exists(key)) textures.remove(key);
+  const w = 640;
+  const h = 360;
+  const canvas = textures.createCanvas(key, w, h);
+  if (!canvas) throw new Error(`Cannot create placeholder texture "${key}"`);
+  const ctx = canvas.context;
+  const bands = [C.neutral1, C.fire1, C.fire2, C.foliage1, C.neutral1];
+  bands.forEach((color, i) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, Math.round((i * h) / bands.length), w, Math.ceil(h / bands.length));
+  });
+  ctx.strokeStyle = C.gold;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(12, 12, w - 24, h - 24);
+  ctx.fillStyle = C.highlight;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 28px monospace';
+  ctx.fillText('CONCEPT ART', w / 2, h / 2 - 24);
+  ctx.font = '18px monospace';
+  ctx.fillText(caption, w / 2, h / 2 + 12);
+  ctx.fillStyle = C.neutral4;
+  ctx.font = '14px monospace';
+  ctx.fillText('placeholder - waiting for the final image', w / 2, h / 2 + 44);
+  canvas.refresh();
+}
+
 /** Texture สำหรับด่าน graybox: 0 = พื้นทึบ, 1 = พื้นผิวบน, 2 = หนาม */
 export function createGrayboxTiles(textures: Phaser.Textures.TextureManager, key: string, tile: number): void {
   if (textures.exists(key)) return;

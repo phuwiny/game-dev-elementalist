@@ -6,13 +6,18 @@
  * จึงเช็ก content-type ก่อน ไฟล์ไหนไม่ใช่ JSON ถือว่ายังไม่มี และใช้ placeholder แทน
  */
 export async function probeJson(urls: readonly string[]): Promise<Set<string>> {
+  return probeFiles(urls, 'json');
+}
+
+/** แบบเดียวกับ probeJson แต่เลือกชนิดไฟล์จาก content-type เช่น 'image/' สำหรับภาพ gallery */
+export async function probeFiles(urls: readonly string[], contentType: string): Promise<Set<string>> {
   const found = new Set<string>();
   await Promise.all(
     urls.map(async (url) => {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         const type = res.headers.get('content-type') ?? '';
-        if (res.ok && type.includes('json')) found.add(url);
+        if (res.ok && type.includes(contentType)) found.add(url);
       } catch {
         // ไม่มีไฟล์หรือ network error: ใช้ placeholder
       }
