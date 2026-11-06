@@ -37,7 +37,8 @@ import {
   WaterSurface,
   Windmill,
 } from '../puzzles/PuzzleObjects';
-import { animKey, backgroundForTileset } from '../assets/manifest';
+import { GALLERY_IMAGES, animKey, backgroundForTileset } from '../assets/manifest';
+import { newlyUnlocked } from '../core/Gallery';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
 import { setAtlasFrame } from '../assets/frames';
@@ -1048,10 +1049,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       newShards = this.progress.addShards(this.def.key, this.stageShards);
     }
     const shards = { have: adventure ? this.progress.collectedShards(this.def.key).length : this.stageShards.size, total: this.level.shards.length, added: newShards };
+    const galleryUnlocked = adventure && newlyUnlocked(this.progress, GALLERY_IMAGES, this.def.key, shards.have - newShards).length > 0;
     const next = adventure ? nextAdventureLevel(this.def.key) : null;
     this.time.delayedCall(600, () => {
       this.scene.stop(SceneKey.UI);
-      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next, shards });
+      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next, shards, galleryUnlocked });
     });
   }
 

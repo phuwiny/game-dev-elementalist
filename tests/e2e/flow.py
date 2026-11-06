@@ -41,7 +41,8 @@ with sync_playwright() as pw:
     # dev level from title
     page.keyboard.press('Escape'); wait(page, 'TitleScene')
     print('menu before', page.evaluate("() => window.__game.scene.getScene('TitleScene').selectedLabel"))
-    page.keyboard.press('ArrowDown'); page.wait_for_timeout(150); page.keyboard.press('ArrowDown'); page.wait_for_timeout(200)   # Adventure, Settings, then the first dev level
+    for _ in range(3):   # Adventure, Settings, Gallery, then the first dev level
+        page.keyboard.press('ArrowDown'); page.wait_for_timeout(150)
     print('menu after', page.evaluate("() => window.__game.scene.getScene('TitleScene').selectedLabel"))
     page.keyboard.press('Enter'); wait(page, 'GameScene')
     print('10 dev level', page.evaluate(f"() => {GS}.def.key"))

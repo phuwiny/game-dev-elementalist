@@ -28,6 +28,7 @@ export const SceneKey = {
   Game: 'GameScene',
   UI: 'UIScene',
   Settings: 'SettingsScene',
+  Gallery: 'GalleryScene',
   GameOver: 'GameOverScene',
   StageClear: 'StageClearScene',
 } as const;

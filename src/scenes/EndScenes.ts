@@ -67,26 +67,36 @@ export class StageClearScene extends Phaser.Scene {
     super(SceneKey.StageClear);
   }
 
-  create(data: { coins?: number; level?: string; next?: string | null; shards?: { have: number; total: number; added: number } }): void {
+  create(data: {
+    coins?: number;
+    level?: string;
+    next?: string | null;
+    shards?: { have: number; total: number; added: number };
+    /** การผ่านด่านครั้งนี้ปลดล็อกภาพ gallery ใหม่ */
+    galleryUnlocked?: boolean;
+  }): void {
     useUiCamera(this).setBackgroundColor(PALETTE.outline);
     addSaveWarning(this);
     music.play('stage_clear');
     const cx = GAME_WIDTH / 2;
     const exit = exitScene(data.level);
     const adventure = exit === SceneKey.WorldMap;
-    addPanel(this, cx - 160, 88, 320, 190);
-    this.add.text(cx, 120, 'STAGE CLEAR', textStyle(28, PALETTE.gold)).setOrigin(0.5);
-    this.add.text(cx, 165, `Coins collected: ${data.coins ?? 0}`, textStyle(12)).setOrigin(0.5);
+    addPanel(this, cx - 160, 80, 320, 206);
+    this.add.text(cx, 110, 'STAGE CLEAR', textStyle(28, PALETTE.gold)).setOrigin(0.5);
+    this.add.text(cx, 150, `Coins collected: ${data.coins ?? 0}`, textStyle(12)).setOrigin(0.5);
     const sh = data.shards;
     if (sh && sh.total > 0) {
       const fresh = sh.added > 0 ? `  (+${sh.added} new)` : '';
-      this.add.text(cx, 184, `Spirit Shards: ${sh.have}/${sh.total}${fresh}`, textStyle(12, PALETTE.pink3)).setOrigin(0.5);
+      this.add.text(cx, 168, `Spirit Shards: ${sh.have}/${sh.total}${fresh}`, textStyle(12, PALETTE.pink3)).setOrigin(0.5);
+    }
+    if (data.galleryUnlocked) {
+      this.add.text(cx, 186, 'New gallery image unlocked!', textStyle(12, PALETTE.gold)).setOrigin(0.5);
     }
 
     const kb = this.input.keyboard;
     if (adventure) {
       const next = data.next ?? null;
-      const buttons = keyButtons(this, 214, next ? 'Next stage' : 'World Map', 'World Map');
+      const buttons = keyButtons(this, 222, next ? 'Next stage' : 'World Map', 'World Map');
       if (!next) this.add.text(cx, 292, 'World 1 complete! More worlds coming soon.', textStyle(10, PALETTE.wind)).setOrigin(0.5);
       kb?.once('keydown-ENTER', () => {
         buttons.enter.setState('pressed');
@@ -100,7 +110,7 @@ export class StageClearScene extends Phaser.Scene {
       });
       return;
     }
-    const buttons = keyButtons(this, 214, 'Play again', 'Title');
+    const buttons = keyButtons(this, 222, 'Play again', 'Title');
     kb?.once('keydown-ENTER', () => {
       buttons.enter.setState('pressed');
       this.scene.start(SceneKey.Game, { level: data.level });

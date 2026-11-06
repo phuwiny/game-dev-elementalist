@@ -57,7 +57,7 @@ with sync_playwright() as pw:
     # ---- 1. Title ----
     objs = objects(page, 'TitleScene')
     buttons = frames(objs, 'button_')
-    check(len(buttons) == 4 and all(b['type'] == 'NineSlice' and b['tex'] == 'ui' for b in buttons), f'4 Title buttons from ui button_*: {[b["frame"] for b in buttons]}')
+    check(len(buttons) == 5 and all(b['type'] == 'NineSlice' and b['tex'] == 'ui' for b in buttons), f'5 Title buttons from ui button_*: {[b["frame"] for b in buttons]}')
     check([b['frame'] for b in buttons].count('button_hover') == 1 and buttons[0]['frame'] == 'button_hover', 'first button is hover')
     page.keyboard.press('ArrowDown')
     page.wait_for_timeout(200)

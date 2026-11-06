@@ -13,7 +13,7 @@ import { addSaveWarning } from '../ui/saveWarning';
 import { BUTTON_HEIGHT, MenuButton, addCursor } from '../ui/widgets';
 
 /** กึ่งกลางของปุ่มแรกและความกว้างปุ่มเมนู (ชื่อด่านทดสอบยาวสุด ~22 ตัวอักษร) */
-const MENU_Y = 190;
+const MENU_Y = 172;
 const MENU_WIDTH = 200;
 
 interface MenuItem {
@@ -40,13 +40,14 @@ export class TitleScene extends Phaser.Scene {
     addSaveWarning(this);
     music.play('title');
 
-    this.add.text(cx, 64, 'ELEMENTAL SPIRIT', textStyle(28, PALETTE.gold)).setOrigin(0.5);
-    this.add.text(cx, 94, 'Phase 3 · Vertical Slice', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
-    this.add.sprite(cx, 176, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player')).play(animKey('player', 'idle'));
+    this.add.text(cx, 50, 'ELEMENTAL SPIRIT', textStyle(28, PALETTE.gold)).setOrigin(0.5);
+    this.add.text(cx, 78, 'Phase 3 · Vertical Slice', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
+    this.add.sprite(cx, 152, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player')).play(animKey('player', 'idle'));
 
     const menu: MenuItem[] = [
       { label: 'Adventure', run: () => this.scene.start(SceneKey.WorldMap) },
       { label: 'Settings', run: () => this.scene.start(SceneKey.Settings) },
+      { label: 'Gallery', run: () => this.scene.start(SceneKey.Gallery, { from: SceneKey.Title }) },
       ...DEV_LEVELS.map((l) => ({ label: l.name, run: () => this.scene.start(SceneKey.Game, { level: l.key }) })),
     ];
 
@@ -60,14 +61,16 @@ export class TitleScene extends Phaser.Scene {
     };
     refresh();
 
-    const muteText = this.add.text(cx, MENU_Y + (menu.length - 1) * (BUTTON_HEIGHT + 2) + BUTTON_HEIGHT / 2 + 8, '', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
+    // ข้อความใต้เมนูเรียงต่อจากปุ่มสุดท้าย
+    const below = MENU_Y + (menu.length - 1) * (BUTTON_HEIGHT + 2) + BUTTON_HEIGHT / 2;
+    const muteText = this.add.text(cx, below + 8, '', textStyle(10, PALETTE.neutral4)).setOrigin(0.5);
     const refreshMute = () => muteText.setText(`M  Sound: ${sfx.muted ? 'OFF' : 'ON'}`);
     refreshMute();
 
     this.add
-      .text(cx, 304, controlsHint(loadBindings(new SaveStore())), textStyle(10, PALETTE.neutral3))
+      .text(cx, below + 26, controlsHint(loadBindings(new SaveStore())), textStyle(10, PALETTE.neutral3))
       .setOrigin(0.5);
-    this.add.text(cx, 322, 'UP/DOWN select  ENTER start', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
+    this.add.text(cx, below + 42, 'UP/DOWN select  ENTER start', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
 
     const kb = this.input.keyboard;
     let started = false;
