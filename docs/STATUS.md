@@ -1,6 +1,6 @@
 # STATUS — สถานะงานและบันทึกส่งต่อ
 
-อัปเดตล่าสุด 2026-11-04 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
+อัปเดตล่าสุด 2026-11-06 · ใช้เอกสารนี้เริ่มงานต่อใน session ใหม่ของ Claude (Claude Code หรือ chat ใหม่) อ่านคู่กับ `CLAUDE.md`, `docs/GDD.md` และ `ART_HANDOFF.md`
 
 ## สถานะตอนนี้
 
@@ -27,8 +27,8 @@
 | #20 | Valvaliz/Eathy density 2 (64×64) ใน atlas `spirits_hd` แสดง 32×32 เท่าเดิม | merged |
 | #21 | เชื่อม core assets ที่ยังไม่ได้ใช้: `checkpoint_spark`, `font_hud` บน HUD, `panel_9slice` / `button_*` / `cursor_arrow` ในเมนู, แก้ icon shard บน HUD | merged |
 | #22 | Spirit Orb ด่านละ 2 ลูก + 1UP Feather 1 ชิ้นซ่อนในด่าน 1-2 (เก็บได้ครั้งเดียวต่อเซฟ) | merged |
-| #23 | แก้ `thorn_beetle_death` ใน manifest เป็น 5 frame ตามภาพที่ส่ง + test ว่า atlas จริงมีทุก frame ที่ manifest ประกาศ | merged |
-| (ถัดไป) | Concept art gallery ปลดล็อกด้วย Spirit Shard (ภาพแทนชั่วคราวจนกว่า Codex จะส่ง) | PR นี้ |
+| #23 | แก้ `thorn_beetle_death` ใน manifest เป็น 5 frame ตามภาพที่ส่ง + test ว่า atlas จริงมีทุก frame ที่ manifest ประกาศ และ concept art gallery ปลดล็อกด้วย Spirit Shard (ภาพแทนชั่วคราวจนกว่า Codex จะส่ง) | merged |
+| (รอเริ่ม) | ด่านพิเศษ 1-S จับเวลา ปลดล็อกเมื่อ shard ครบ 9 ชิ้น: แผนอยู่ใน `docs/PLAN_special_stage.md` | ยังไม่เริ่ม |
 | #3 | (Codex) art/phase-a เดิม รวมอยู่ใน #5 แล้ว | เปิดค้าง ปิดได้ |
 
 ลิงก์อื่น: GDD ฉบับ Claude Docs <https://claude.ai/artifact/MZuWdrBm1rpa1anhEG9ppD> (ฉบับใน repo คือ `docs/GDD.md` เป็นหลัก) · ตัวเล่นทดสอบบน claude.ai <https://claude.ai/artifact/9ZhqvBnLoj4FhthKxjDMYN> (session เดิมเป็นคน publish session ใหม่อัปเดตลิงก์นี้ไม่ได้ ถ้าต้องการให้ build แล้วเปิด `npm run preview` ในเครื่องแทน)
@@ -62,9 +62,10 @@
    - tile มุมใน 11–14 ของ `tiles_w1_ember_woods`: ถ้าตั้งใจให้ใช้ที่มุมเว้า (tile อยู่กลางเนื้อดินแต่เฉียงหนึ่งด้านว่าง) ภาพปัจจุบันไม่เข้า เพราะมีฝาหญ้าหรือเส้นขอบพาดทั้งด้านที่ติดดิน ขอให้บอกว่าตั้งใจใช้ตรงไหน หรือวาดใหม่ให้มีขอบเฉพาะมุมเว้า
 
 ฝั่ง Claude
+0. **ด่านพิเศษ 1-S:** ทำตาม `docs/PLAN_special_stage.md` ถามคำถามในหัวข้อ 6 ของแผนกับผู้ใช้ก่อนเริ่ม
 1. ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
 2. ตรวจภาพที่ Codex ส่งในเกมทุกรอบ: เท้าตรงพื้น, hitbox, ไม่ jitter, กล้องในสนามบอส (บอสสูง 192 px มงกุฎชิดขอบบนจอ)
-3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD)
+3. Playtest รอบแรกกับผู้ใช้แล้วปรับความยาก/ความยาวด่าน (ด่าน W1 ยาว 170–204 tile สั้นกว่าเป้า GDD) ตัวเล่นที่ publish ไว้: <https://claude.ai/artifact/DCvFEBkmtfmrF2wBsAuYF8> (build 2026-11-05 ก่อนมี gallery) session ใหม่จะ publish ทับลิงก์นี้ได้ต้องอ่านด้วย `Artifact` action `read` ก่อน
 4. งานค้างจาก GDD (แผนทำตามลำดับ แยก PR ต่อข้อ): ~~A ข้อความแจ้งเมื่อเซฟไม่ได้~~ (เสร็จ), ~~B key rebinding + หน้า Settings~~ (เสร็จ), ~~C Spirit Shard~~ (เสร็จ: ด่านละ 3 ชิ้น บันทึกเมื่อผ่านด่าน ยังไม่ทำ gallery/ด่านพิเศษที่ shard ปลดล็อก), ~~D เพลง~~ (เสร็จ: chiptune ชั่วคราวในโค้ด + ตัวโหลดไฟล์จริงจาก `public/assets/audio/music/` แหล่งเพลงจริงรอพิน)
 
 ## การทดสอบ
