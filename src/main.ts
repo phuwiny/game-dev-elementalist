@@ -10,6 +10,7 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { GameOverScene, StageClearScene } from './scenes/EndScenes';
 import { SettingsScene } from './scenes/SettingsScene';
+import { GalleryScene } from './scenes/GalleryScene';
 import { music } from './systems/Music';
 
 const game = new Phaser.Game({
@@ -32,7 +33,7 @@ const game = new Phaser.Game({
     },
   },
   // SettingsScene อยู่หลัง UIScene เพื่อให้เปิดซ้อนบนหน้า Pause ได้
-  scene: [BootScene, PreloadScene, TitleScene, WorldMapScene, GameScene, UIScene, SettingsScene, GameOverScene, StageClearScene],
+  scene: [BootScene, PreloadScene, TitleScene, WorldMapScene, GalleryScene, GameScene, UIScene, SettingsScene, GameOverScene, StageClearScene],
 });
 
 // เปิดให้ทดสอบผ่าน console / automated test ได้

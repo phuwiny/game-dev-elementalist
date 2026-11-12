@@ -54,8 +54,8 @@ with sync_playwright() as pw:
     def to_title_row(label):
         # Title menu: Adventure, Settings, dev levels
         for _ in range(4):
-            sel = [t for t in texts('TitleScene') if t.startswith('>')]
-            if sel and label in sel[0]:
+            sel = page.evaluate("() => window.__game.scene.getScene('TitleScene').selectedLabel")
+            if label in sel:
                 return
             tap('ArrowDown')
 

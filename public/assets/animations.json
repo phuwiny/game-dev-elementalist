@@ -264,5 +264,327 @@
     "frames": 6,
     "frameRate": 10,
     "repeat": 0
+  },
+  "items_coin_spin": {
+    "atlas": "items",
+    "prefix": "coin_spin_",
+    "frames": 6,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "items_heart_fruit_bob": {
+    "atlas": "items",
+    "prefix": "heart_fruit_bob_",
+    "frames": 4,
+    "frameRate": 6,
+    "repeat": -1
+  },
+  "items_spirit_orb_pulse": {
+    "atlas": "items",
+    "prefix": "spirit_orb_pulse_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "items_oneup_feather_float": {
+    "atlas": "items",
+    "prefix": "oneup_feather_float_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "items_spirit_shard_shine": {
+    "atlas": "items",
+    "prefix": "spirit_shard_shine_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "items_checkpoint_shrine_unlit": {
+    "atlas": "items",
+    "prefix": "checkpoint_shrine_unlit_",
+    "frames": 1,
+    "frameRate": 8,
+    "repeat": 0
+  },
+  "items_checkpoint_shrine_lighting": {
+    "atlas": "items",
+    "prefix": "checkpoint_shrine_lighting_",
+    "frames": 6,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "items_checkpoint_shrine_lit": {
+    "atlas": "items",
+    "prefix": "checkpoint_shrine_lit_",
+    "frames": 4,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "items_goal_flag_wave": {
+    "atlas": "items",
+    "prefix": "goal_flag_wave_",
+    "frames": 6,
+    "frameRate": 8,
+    "repeat": -1
+  },
+  "objects_ice_block_idle": {
+    "atlas": "objects",
+    "prefix": "ice_block_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "objects_ice_block_melt": {
+    "atlas": "objects",
+    "prefix": "ice_block_melt_",
+    "frames": 5,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "objects_water_surface_water": {
+    "atlas": "objects",
+    "prefix": "water_surface_water_",
+    "frames": 4,
+    "frameRate": 6,
+    "repeat": -1
+  },
+  "objects_water_surface_frozen": {
+    "atlas": "objects",
+    "prefix": "water_surface_frozen_",
+    "frames": 1,
+    "frameRate": 6,
+    "repeat": 0
+  },
+  "objects_magic_seed_seed": {
+    "atlas": "objects",
+    "prefix": "magic_seed_seed_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "objects_magic_seed_grow": {
+    "atlas": "objects",
+    "prefix": "magic_seed_grow_",
+    "frames": 8,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "objects_magic_seed_grown": {
+    "atlas": "objects",
+    "prefix": "magic_seed_grown_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "objects_windmill_idle": {
+    "atlas": "objects",
+    "prefix": "windmill_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "objects_windmill_spin": {
+    "atlas": "objects",
+    "prefix": "windmill_spin_",
+    "frames": 8,
+    "frameRate": 14,
+    "repeat": -1
+  },
+  "objects_cracked_wall_idle": {
+    "atlas": "objects",
+    "prefix": "cracked_wall_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "objects_cracked_wall_break": {
+    "atlas": "objects",
+    "prefix": "cracked_wall_break_",
+    "frames": 6,
+    "frameRate": 14,
+    "repeat": 0
+  },
+  "fx_slash_1": {
+    "atlas": "fx",
+    "prefix": "slash_1_",
+    "frames": 3,
+    "frameRate": 20,
+    "repeat": 0
+  },
+  "fx_slash_2": {
+    "atlas": "fx",
+    "prefix": "slash_2_",
+    "frames": 3,
+    "frameRate": 20,
+    "repeat": 0
+  },
+  "fx_slash_3": {
+    "atlas": "fx",
+    "prefix": "slash_3_",
+    "frames": 3,
+    "frameRate": 20,
+    "repeat": 0
+  },
+  "fx_hit_spark": {
+    "atlas": "fx",
+    "prefix": "hit_spark_",
+    "frames": 4,
+    "frameRate": 20,
+    "repeat": 0
+  },
+  "fx_poof": {
+    "atlas": "fx",
+    "prefix": "poof_",
+    "frames": 6,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_fireball": {
+    "atlas": "fx",
+    "prefix": "fireball_",
+    "frames": 4,
+    "frameRate": 12,
+    "repeat": -1
+  },
+  "fx_fire_burst": {
+    "atlas": "fx",
+    "prefix": "fire_burst_",
+    "frames": 6,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_burn_status": {
+    "atlas": "fx",
+    "prefix": "burn_status_",
+    "frames": 4,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "fx_water_bubble": {
+    "atlas": "fx",
+    "prefix": "water_bubble_",
+    "frames": 4,
+    "frameRate": 10,
+    "repeat": -1
+  },
+  "fx_water_splash": {
+    "atlas": "fx",
+    "prefix": "water_splash_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_freeze_overlay": {
+    "atlas": "fx",
+    "prefix": "freeze_overlay_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "fx_freeze_shatter": {
+    "atlas": "fx",
+    "prefix": "freeze_shatter_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_wind_wave": {
+    "atlas": "fx",
+    "prefix": "wind_wave_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_dash_trail": {
+    "atlas": "fx",
+    "prefix": "dash_trail_",
+    "frames": 3,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_ground_slam_wave": {
+    "atlas": "fx",
+    "prefix": "ground_slam_wave_",
+    "frames": 6,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_stone_shield_appear": {
+    "atlas": "fx",
+    "prefix": "stone_shield_appear_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_stone_shield_idle": {
+    "atlas": "fx",
+    "prefix": "stone_shield_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "fx_stone_shield_break": {
+    "atlas": "fx",
+    "prefix": "stone_shield_break_",
+    "frames": 4,
+    "frameRate": 14,
+    "repeat": 0
+  },
+  "fx_earth_block_appear": {
+    "atlas": "fx",
+    "prefix": "earth_block_appear_",
+    "frames": 4,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_earth_block_idle": {
+    "atlas": "fx",
+    "prefix": "earth_block_idle_",
+    "frames": 1,
+    "frameRate": 1,
+    "repeat": 0
+  },
+  "fx_earth_block_crumble": {
+    "atlas": "fx",
+    "prefix": "earth_block_crumble_",
+    "frames": 4,
+    "frameRate": 14,
+    "repeat": 0
+  },
+  "fx_checkpoint_spark": {
+    "atlas": "fx",
+    "prefix": "checkpoint_spark_",
+    "frames": 5,
+    "frameRate": 12,
+    "repeat": 0
+  },
+  "fx_element_switch_aura_fire": {
+    "atlas": "fx",
+    "prefix": "element_switch_aura_fire_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_element_switch_aura_water": {
+    "atlas": "fx",
+    "prefix": "element_switch_aura_water_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_element_switch_aura_wind": {
+    "atlas": "fx",
+    "prefix": "element_switch_aura_wind_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
+  },
+  "fx_element_switch_aura_earth": {
+    "atlas": "fx",
+    "prefix": "element_switch_aura_earth_",
+    "frames": 5,
+    "frameRate": 16,
+    "repeat": 0
   }
 }

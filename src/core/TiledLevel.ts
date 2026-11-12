@@ -22,7 +22,7 @@ import {
  * - object layer ชื่อ "objects": ใช้ class (หรือ type ใน Tiled รุ่นเก่า) เป็นชนิดวัตถุ
  *   ตำแหน่งวัตถุอ่านจากมุมล่างซ้ายของสี่เหลี่ยม (หรือจุด) แล้วปัดเป็นช่อง
  *
- * class ที่รองรับ: player, goal, checkpoint, coin, heart, shard (property `slot` 0–2), boss,
+ * class ที่รองรับ: player, goal, checkpoint, coin, heart, orb, feather, shard (property `slot` 0–2), boss,
  *   moss_slime, leaf_wisp, thorn_beetle,
  *   vine, crate, ice, water, torch, seed, windmill, cracked_wall, plate, gate, arena_gate,
  *   spirit (property `slot` 0–3 = ไฟ น้ำ ลม ดิน)
@@ -141,6 +141,8 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
     checkpoints: [],
     coins: [],
     hearts: [],
+    orbs: [],
+    feathers: [],
     shards: [],
     enemies: [],
     objects: [],
@@ -175,6 +177,12 @@ export function parseTiledMap(map: TiledMap, tileSize = 16): ParsedLevel {
         break;
       case 'heart':
         level.hearts.push(p);
+        break;
+      case 'orb':
+        level.orbs.push(p);
+        break;
+      case 'feather':
+        level.feathers.push(p);
         break;
       case 'shard': {
         const slot = Number(prop(o, 'slot') ?? Number.NaN);

@@ -121,7 +121,7 @@ Asset ในเกมใช้สีต่อไปนี้เป็นค่�
 | Aclaire idle/jump และท่าทั่วไป | 48×64 logical; 96×128 physical (density 2) | sprite แสดงผลที่ 0.5 เท่าของพิกเซลไฟล์ |
 | Aclaire run | 64×64 logical; 128×128 physical (density 2) | กรอบกว้างขึ้น แต่ความสูงบนจอเท่า idle |
 | Aclaire attack_1–3 | 96×64 logical; 192×128 physical (density 2) | ลำตัวอยู่กึ่งกลางล่างตำแหน่งเดียวกับ idle แนวดาบยื่นไปทางขวาได้ไม่เกิน 40 logical px จากกึ่งกลางตัว |
-| ภูต | 32×32 | เผื่อปีกของ Valvaliz และลูกหินที่ลอยรอบ Eathy |
+| ภูต | 32×32 (Valvaliz, Eathy: 64×64 physical density 2) | เผื่อปีกของ Valvaliz และลูกหินที่ลอยรอบ Eathy |
 | ศัตรูทั่วไป | 32×32 | ยกเว้นตามตาราง 5 |
 | Rock Golemling, Stone Sentinel | 48×48 | |
 | Spirit Knight | 32×48 | |
@@ -158,7 +158,7 @@ Asset ในเกมใช้สีต่อไปนี้เป็นค่�
 - Animation key ที่ใช้ในเกม: `<atlas>_<anim>` เช่น `player_run`, `enemies_w1_moss_slime_move`
 - ใน atlas ที่รวมหลายตัว ใส่ชื่อตัวไว้หน้า anim: `moss_slime_move_000`
 - Asset ที่มีหลายสถานะ (ตารางที่เขียนว่า "idle 1, burn 6" เป็นต้น) ตั้งชื่อ anim เป็น `<asset>_<state>` และชื่อ frame เป็น `<asset>_<state>_<NNN>` แม้มี frame เดียวก็ต้องมี `_000` เช่น `torch_unlit_000`, `torch_lit_000`…`torch_lit_003`, `earth_block_idle_000`, `freeze_shatter_004`
-- ภูตใน atlas `spirits` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
+- ภูตใน atlas `spirits` และ `spirits_hd` ใช้ชื่อภูตเป็น prefix: `burnil_idle_000`, `wata_cast_000` ส่วน icon ไม่มีเลข: `burnil_icon`
 - Frame นิ่งใน atlas `ui` ไม่มีเลขต่อท้าย ใช้ `<element>_<state>` เช่น `heart_full`, `heart_empty`, `energy_bar_fill_normal`, `element_icon_fire_locked` ส่วน element ที่มีสถานะเดียวใช้ชื่อ element ตรงๆ เช่น `energy_bar_frame`, `lives_icon`
 - รายชื่อ frame ที่เกมใช้อยู่ตอนนี้ดูได้ที่ `src/assets/manifest.ts` (เพิ่มตามแต่ละ phase ของการพัฒนา) asset ที่มีมากกว่าในไฟล์นั้นไม่ทำให้เกมพัง
 
@@ -191,7 +191,8 @@ tools/
 public/assets/
   sprites/
     player/        player.png, player.json
-    spirits/       spirits.png, spirits.json
+    spirits/       spirits.png, spirits.json (Burnil, Wata 32×32)
+      hd/          spirits.png, spirits.json (Valvaliz, Eathy 64×64 density 2, atlas key `spirits_hd`)
     fx/            fx.png, fx.json
     objects/       objects.png, objects.json
     items/         items.png, items.json
@@ -202,6 +203,7 @@ public/assets/
     w1/            bg_w1_far.png, bg_w1_mid.png, bg_w1_near.png
     ... w5/
   ui/              ui.png, ui.json, font_hud.png, font_hud.xml
+  gallery/         gallery_w1_1.png ... (concept art 1280×720 หัวข้อ 8.1)
   animations.json
   maps/            (ผู้พัฒนาดูแล ห้ามแก้)
   audio/           (ไม่อยู่ในขอบเขต ห้ามแก้)
@@ -278,7 +280,19 @@ public/assets/
 
 `idle` และ `jump_up` มี preview ผ่านการรีวิวภาพแล้ว; `run` ใช้ V4 สี่ key ที่พินรับไว้ชั่วคราวและยังต้องเก็บความลื่นไหล ก่อนส่ง production ต้องตรวจที่ 1:1, nearest-neighbor enlargement และบนจอ 640×360 การผ่าน validator ยืนยันเฉพาะไฟล์และข้อกำหนดเชิงเทคนิค
 
-### 5.2 ภูต — atlas `spirits` (32×32, origin center)
+### 5.2 ภูต — atlas `spirits` (32×32) และ `spirits_hd` (64×64 density 2), origin center
+
+ทุกตนแสดงในเกมขนาด 32×32 เท่ากัน แต่แยกไฟล์ตาม density
+
+| atlas key | ไฟล์ | ภูต | frame physical | density | ขนาดในเกม |
+|---|---|---|---|---|---|
+| `spirits` | `public/assets/sprites/spirits/spirits.png/.json` | Burnil, Wata | 32×32 | 1 | 32×32 |
+| `spirits_hd` | `public/assets/sprites/spirits/hd/spirits.png/.json` | Valvaliz, Eathy | 64×64 | 2 | 32×32 (sprite แสดงที่ 0.5 เท่าของพิกเซลไฟล์) |
+
+- ชื่อ frame ใน `spirits_hd` เหมือนเดิม (`valvaliz_idle_000`, `eathy_icon`) ชื่อ animation ในเกมเป็น `spirits_hd_valvaliz_idle`
+- ไฟล์ใน `hd/` ชื่อ `spirits.*` เพื่อให้ validator อนุญาต icon ที่ไม่มีเลขต่อท้าย (เช็กจากชื่อไฟล์ `spirits`) ถ้าจะเปลี่ยนชื่อไฟล์ต้องแก้ validator ด้วย
+- frame 32×32 เดิมของ Valvaliz/Eathy ที่ยังอยู่ใน atlas `spirits` เกมไม่ใช้แล้ว จะเก็บไว้หรือเอาออกก็ไม่ทำให้เกมพัง
+- ภาพ density 2 ในด่านแสดงที่ 1.5 pixel ของจอ 1280×720 ต่อ 1 pixel ภาพ (ไม่เป็นจำนวนเต็ม) เส้น 1 px บางเส้นจะหนาไม่เท่ากัน ควรตรวจภาพในเกมด้วย `tests/e2e/spirits.py`
 
 ต้นแบบของภูตทุกตนอยู่ใน `art/reference/` ให้ยึดรูปร่าง สีหน้า และนิสัยตามภาพ
 
@@ -297,7 +311,7 @@ Animation ต่อภูต (ชื่อ frame เช่น `burnil_idle_000`)
 | `<key>_cast` | 4 | 12 | Burnil ยิงไฟ, Wata พ่นฟองน้ำ, Valvaliz สร้างพายุหมุนเล็ก, Eathy พุ่งโขกหัว |
 | `<key>_icon` | 1 | — | หน้าตรง ใช้ในหน้าจอได้รับภูต |
 
-ภูตทั้ง 4 ตนวาดเป็นตัวการ์ตูนกลมๆ ขนาดเล็กกว่า Aclaire ชัดเจน (สูงไม่เกิน 24 px ภายใน frame 32×32 ยกเว้นปีกของ Valvaliz)
+ภูตทั้ง 4 ตนวาดเป็นตัวการ์ตูนกลมๆ ขนาดเล็กกว่า Aclaire ชัดเจน (สูงไม่เกิน 24 px ภายใน frame 32×32 ยกเว้นปีกของ Valvaliz) Valvaliz และ Eathy ฉบับ density 2 (expression v2, 2026-11-04) ผู้ใช้อนุมัติให้หน้าใหญ่ขึ้นและตัวเล็กลงเพื่อให้เห็นสีหน้า ตัวเต็มกรอบ 64×64 ได้
 
 ### 5.3 FX — atlas `fx`
 
@@ -430,7 +444,7 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | coin_icon | 12×12 | — |
 | boss_bar_frame / boss_bar_fill | 240×12 / 236×8 | — (เกมตัด fill จากซ้ายตาม HP บอส) |
 | panel_9slice | 48×48 | ใช้ทำกล่องเมนู ขอบ 16 px |
-| button | 96×24 | normal, hover, pressed |
+| button | 96×24 | normal, hover, pressed (เกมยืดความกว้างแบบ 9-slice ขอบ 4 px ตามข้อความ ความสูงคงที่ 24) |
 | cursor_arrow | 8×8 | — |
 | world_map_node | 16×16 | locked, open, cleared (frame `world_map_node_locked` ฯลฯ เกมขยาย 2 เท่าบนแผนที่โลก) |
 
@@ -456,6 +470,23 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 | key_art_title.png (Phase E) | ภาพหน้า title 1920×1080 |
 
 **In-game mockups** (`art/mockups/`): ภาพ 640×360 ที่ประกอบจาก asset จริงในเกม แสดง HUD, ตัวเอก, ศัตรู และ tileset ใช้ตรวจว่าอ่านภาพได้ชัดที่ขนาดจริง ทำ 1 ภาพต่อโลกตั้งแต่ Phase C
+
+### 8.1 ภาพ Gallery ในเกม (ปลดล็อกด้วย Spirit Shard)
+
+เก็บ Spirit Shard ครบ 3 ชิ้นของด่านไหน ผู้เล่นได้ภาพ concept art ของด่านนั้น 1 ภาพ ดูได้ที่หน้า Gallery (เมนู Title หรือกด G ที่ World Map) ผู้ใช้เลือกให้ใช้ **concept art จริง** ไม่ต้องวาดใหม่เป็น pixel art
+
+| key | ไฟล์ | ปลดล็อกด้วย | เนื้อหาที่แนะนำ |
+|---|---|---|---|
+| `gallery_w1_1` | `public/assets/gallery/gallery_w1_1.png` | shard 3/3 ของ 1-1 Ember Trail | เลือกจาก concept ที่อนุมัติแล้วใน `art/concept/` เช่น Aclaire กับ Burnil หรือป่าไฟตอนเริ่มทาง |
+| `gallery_w1_2` | `public/assets/gallery/gallery_w1_2.png` | shard 3/3 ของ 1-2 Burning Canopy | เช่น ภูตทั้ง 4 ตน หรือฉากเรือนยอดไม้ลุกไฟ |
+| `gallery_w1_3` | `public/assets/gallery/gallery_w1_3.png` | shard 3/3 ของ 1-3 Bramble Hollow | เช่น Bramble King |
+
+- PNG 1280×720 (16:9) RGB หรือ RGBA, **ไม่บังคับ master palette และไม่บังคับ binary alpha** ย่อจากต้นฉบับใน `art/concept/` ห้ามยืดสัดส่วน ถ้าต้นฉบับไม่ใช่ 16:9 ให้ crop หรือเติมขอบสี `#0f0b1a`
+- ขนาดไฟล์ไม่เกินภาพละ 1.5 MB (เกมโหลดทุกภาพตอนเริ่ม)
+- เกมแสดงในกรอบ 416×234 logical (832×468 บนจอ 1280×720) และกด ENTER ดูเต็มจอที่ 1:1
+- ภาพที่ยังล็อกจะไม่ถูกแสดงเลย (กล่องมืดพร้อมบอกวิธีปลดล็อก) ไม่ต้องทำภาพเงา
+- ระหว่างที่ยังไม่มีไฟล์ เกมสร้างภาพแทนที่เขียนว่า "CONCEPT ART ... placeholder" วางไฟล์ตาม path แล้วเกมใช้ทันที (BootScene ตรวจไฟล์ก่อนโหลด)
+- **ต้องแก้ `tools/validate_assets.py` (ของ Codex) พร้อมกัน:** ตอนนี้ validator บังคับ master palette และ binary alpha กับ PNG ทุกไฟล์ใน `public/assets` ภาพ gallery จะไม่ผ่าน ให้ยกเว้นโฟลเดอร์ `gallery/` จากสองข้อนั้น แต่ยังตรวจขนาด 1280×720 และชื่อไฟล์ snake_case
 
 ---
 

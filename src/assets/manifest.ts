@@ -81,6 +81,33 @@ export function backgroundForTileset(tileset: string): WorldBackground | null {
   return tileset === 'tiles_w1_ember_woods' ? WORLD1_BACKGROUND : null;
 }
 
+/**
+ * concept art gallery (ART_HANDOFF.md หัวข้อ 8.1): ภาพละด่าน ปลดล็อกเมื่อเก็บ Spirit Shard ครบ 3 ชิ้นของด่านนั้น
+ * ไฟล์ PNG 1280×720 (ไม่บังคับ palette) ถ้ายังไม่มีไฟล์ PreloadScene สร้างภาพแทนชั่วคราว
+ */
+export interface GalleryImageDef {
+  key: string;
+  png: string;
+  /** ด่านที่ปลดล็อกภาพนี้ */
+  level: string;
+}
+
+export const GALLERY_IMAGE_SIZE = { width: 1280, height: 720 } as const;
+
+const galleryImage = (level: string): GalleryImageDef => ({
+  key: `gallery_${level}`,
+  png: `assets/gallery/gallery_${level}.png`,
+  level,
+});
+
+export const GALLERY_IMAGES: readonly GalleryImageDef[] = [galleryImage('w1_1'), galleryImage('w1_2'), galleryImage('w1_3')];
+
+/**
+ * bitmap font ของ HUD (BMFont XML, ART_HANDOFF.md หัวข้อ 7) มีเฉพาะ A–Z, 0–9 และ `× : / - + !`
+ * ถ้าโหลดไม่ได้ src/ui/hudText.ts ใช้ font ของระบบแทน
+ */
+export const HUD_FONT = { key: 'font_hud', png: 'assets/ui/font_hud.png', xml: 'assets/ui/font_hud.xml' } as const;
+
 /** texture ที่เก็บ placeholder ของ frame ที่ไฟล์จริงยังไม่มี (atlas ส่งมาไม่ครบทุกท่า) */
 export const fillTextureKey = (atlasKey: string): string => `${atlasKey}__fill`;
 
@@ -92,8 +119,32 @@ export function textureScale(atlasKey: string): number {
 
 /** ชื่อภูตที่ใช้เป็น prefix ของ frame ใน atlas spirits (ลำดับ ไฟ น้ำ ลม ดิน) */
 export const SPIRIT_KEYS = ['burnil', 'wata', 'valvaliz', 'eathy'] as const;
+export type SpiritKey = (typeof SPIRIT_KEYS)[number];
+
+/**
+ * ภูตที่วาดที่ density 2 (frame 64×64 แสดงเท่า 32×32) อยู่ใน atlas `spirits_hd`
+ * ตนอื่นยังอยู่ใน atlas `spirits` (32×32) ART_HANDOFF.md หัวข้อ 5.2
+ */
+export const HD_SPIRIT_KEYS: readonly SpiritKey[] = ['valvaliz', 'eathy'];
+
+/** atlas ที่มี frame ของภูตตนนี้ (ใช้คู่กับ textureScale เพื่อให้ขนาดในเกมเท่ากันทุกตน) */
+export function spiritAtlasKey(spirit: SpiritKey): 'spirits' | 'spirits_hd' {
+  return HD_SPIRIT_KEYS.includes(spirit) ? 'spirits_hd' : 'spirits';
+}
+
 /** ชื่อธาตุที่ใช้ในชื่อ frame (ตรงกับค่าของ ElementType) */
 export const ELEMENT_KEYS = ['fire', 'water', 'wind', 'earth'] as const;
+
+/** animation และ icon ของภูตตามสเปกเดียวกันทุกตน (ART_HANDOFF.md หัวข้อ 5.2) */
+function spiritFrames(keys: readonly SpiritKey[]): Pick<AtlasDef, 'anims' | 'stills'> {
+  return {
+    anims: keys.flatMap((k) => [
+      { name: `${k}_idle`, frames: 6, frameRate: 8, repeat: -1 },
+      { name: `${k}_cast`, frames: 4, frameRate: 12, repeat: 0 },
+    ]),
+    stills: keys.map((k) => ({ name: `${k}_icon` })),
+  };
+}
 
 const sprite = (dir: string, key: string) => ({
   key,
@@ -131,11 +182,17 @@ export const ATLASES: AtlasDef[] = [
     ...sprite('spirits', 'spirits'),
     frameWidth: 32,
     frameHeight: 32,
-    anims: SPIRIT_KEYS.flatMap((k) => [
-      { name: `${k}_idle`, frames: 6, frameRate: 8, repeat: -1 },
-      { name: `${k}_cast`, frames: 4, frameRate: 12, repeat: 0 },
-    ]),
-    stills: SPIRIT_KEYS.map((k) => ({ name: `${k}_icon` })),
+    ...spiritFrames(SPIRIT_KEYS.filter((k) => spiritAtlasKey(k) === 'spirits')),
+  },
+  {
+    // Valvaliz, Eathy: 32×32 logical วาดที่ density 2 เพื่อให้เห็นสีหน้าชัดขึ้น
+    key: 'spirits_hd',
+    png: 'assets/sprites/spirits/hd/spirits.png',
+    json: 'assets/sprites/spirits/hd/spirits.json',
+    frameWidth: 64,
+    frameHeight: 64,
+    density: 2,
+    ...spiritFrames(HD_SPIRIT_KEYS),
   },
   {
     ...sprite('objects', 'objects'),
@@ -181,7 +238,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'thorn_beetle_walk', frames: 6, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_flipped', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'thorn_beetle_hurt', frames: 2, frameRate: 10, repeat: 0 },
-      { name: 'thorn_beetle_death', frames: 6, frameRate: 12, repeat: 0 },
+      { name: 'thorn_beetle_death', frames: 5, frameRate: 12, repeat: 0 },
     ],
   },
   {
@@ -209,6 +266,8 @@ export const ATLASES: AtlasDef[] = [
       { name: 'coin_spin', frames: 6, frameRate: 10, repeat: -1, width: 12, height: 12 },
       { name: 'heart_fruit_bob', frames: 4, frameRate: 6, repeat: -1 },
       { name: 'spirit_shard_shine', frames: 6, frameRate: 10, repeat: -1 },
+      { name: 'spirit_orb_pulse', frames: 4, frameRate: 8, repeat: -1 },
+      { name: 'oneup_feather_float', frames: 4, frameRate: 8, repeat: -1 },
       { name: 'checkpoint_shrine_unlit', frames: 1, frameRate: 1, repeat: 0, width: 32, height: 48 },
       { name: 'checkpoint_shrine_lighting', frames: 6, frameRate: 12, repeat: 0, width: 32, height: 48 },
       { name: 'checkpoint_shrine_lit', frames: 4, frameRate: 8, repeat: -1, width: 32, height: 48 },
@@ -241,6 +300,7 @@ export const ATLASES: AtlasDef[] = [
       { name: 'earth_block_appear', frames: 4, frameRate: 16, repeat: 0 },
       { name: 'earth_block_idle', frames: 1, frameRate: 1, repeat: 0 },
       { name: 'earth_block_crumble', frames: 4, frameRate: 14, repeat: 0 },
+      { name: 'checkpoint_spark', frames: 5, frameRate: 12, repeat: 0, width: 16, height: 16 },
       ...ELEMENT_KEYS.map((el) => ({
         name: `element_switch_aura_${el}`,
         frames: 5,
@@ -279,6 +339,12 @@ export const ATLASES: AtlasDef[] = [
       { name: 'world_map_node_locked' },
       { name: 'world_map_node_open' },
       { name: 'world_map_node_cleared' },
+      // กล่องเมนูแบบ 9-slice ขอบ 16 px (ART_HANDOFF.md หัวข้อ 7)
+      { name: 'panel_9slice', width: 48, height: 48 },
+      { name: 'button_normal', width: 96, height: 24 },
+      { name: 'button_hover', width: 96, height: 24 },
+      { name: 'button_pressed', width: 96, height: 24 },
+      { name: 'cursor_arrow', width: 8, height: 8 },
     ],
   },
 ];

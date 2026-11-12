@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ONE_WAY_DECK_OFFSET, SceneKey, TILE_SIZE, WORLD_ZOOM } from '../config/constants';
-import { BossBalance, ElementBalance } from '../config/balance';
+import { BossBalance, ElementBalance, ItemBalance, VitalsBalance } from '../config/balance';
 import { ElementType } from '../core/Element';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { parseLevel, Tile, type GridPoint, type LevelObject, type ParsedLevel } from '../core/LevelParser';
@@ -37,10 +37,12 @@ import {
   WaterSurface,
   Windmill,
 } from '../puzzles/PuzzleObjects';
-import { animKey, backgroundForTileset } from '../assets/manifest';
+import { GALLERY_IMAGES, animKey, backgroundForTileset } from '../assets/manifest';
+import { newlyUnlocked } from '../core/Gallery';
 import { PALETTE, hex } from '../assets/palette';
 import { GRAYBOX_TILES } from './PreloadScene';
 import { setAtlasFrame } from '../assets/frames';
+import { addSpiritIcon, addSpiritSprite } from '../assets/spirits';
 import { buildArtTerrain } from '../systems/TerrainArt';
 import { ParallaxBackground } from '../systems/ParallaxBackground';
 import { REGISTRY_PROGRESS, REGISTRY_VITALS } from './BootScene';
@@ -505,8 +507,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   private buildSpiritPickup(o: LevelObject): void {
     const element = ELEMENT_ORDER[o.slot ?? 0];
     const pos = this.centerOf(o);
-    const sprite = this.add.sprite(pos.x, pos.y, 'spirits', `${spiritKey(element)}_idle_000`).setDepth(3);
-    sprite.play(animKey('spirits', `${spiritKey(element)}_idle`));
+    // scale ตาม density ของภูตตนนั้น ต้องตั้งก่อนสร้าง body (body ใช้ displayWidth)
+    const sprite = addSpiritSprite(this, pos.x, pos.y, spiritKey(element)).setDepth(3);
     this.tweens.add({ targets: sprite, y: pos.y - 4, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     this.physics.add.existing(sprite, true);
     this.physics.add.overlap(this.player, sprite, () => {
@@ -522,7 +524,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     this.elements.energy.refill();
     if (announce) {
       sfx.play('spirit');
-      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY - 10, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      const y = this.player.y - PlayerLayout.overheadY - 10;
+      this.floatText(this.player.x, y, `${SPIRIT_NAMES[element]} joined!`, PALETTE.gold);
+      // icon หน้าตรงของภูต (ART_HANDOFF.md 5.2) ลอยขึ้นพร้อมข้อความ
+      const icon = addSpiritIcon(this, this.player.x, y - 20, spiritKey(element)).setDepth(20).setName('spirit-joined-icon');
+      this.tweens.add({ targets: icon, y: icon.y - 16, alpha: 0, duration: 1200, onComplete: () => icon.destroy() });
       if (isAdventure(this.def.key)) this.progress.addSpirit(element);
     }
   }
@@ -591,7 +597,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const shards = this.physics.add.staticGroup();
     for (const s of this.level.shards) {
       const c = this.centerOf(s);
-      const sprite = this.add.sprite(c.x, c.y, 'items', 'spirit_shard_000').setDepth(3);
+      const sprite = this.add.sprite(c.x, c.y, 'items', 'spirit_shard_shine_000').setDepth(3);
       sprite.play(animKey('items', 'spirit_shard_shine'));
       if (this.savedShards.includes(s.slot)) {
         sprite.setAlpha(0.3);
@@ -619,6 +625,45 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       (obj as Phaser.GameObjects.Sprite).destroy();
       sfx.play('heart');
       this.vitals.heal(1);
+    });
+
+    // Spirit Orb: ฟื้น Energy ตอนเกจเต็มอยู่แล้วไม่เก็บ (เก็บไว้ใช้ทีหลังเหมือน Heart Fruit)
+    const orbs = this.physics.add.staticGroup();
+    for (const p of this.level.orbs) {
+      const o = this.add.sprite(this.centerOf(p).x, this.centerOf(p).y, 'items', 'spirit_orb_pulse_000').setDepth(3);
+      o.play(animKey('items', 'spirit_orb_pulse'));
+      orbs.add(o);
+    }
+    this.physics.add.overlap(this.player, orbs, (_p, obj) => {
+      const energy = this.elements.energy;
+      if (energy.value >= energy.max) return;
+      (obj as Phaser.GameObjects.Sprite).destroy();
+      energy.add(ItemBalance.orbEnergy);
+      sfx.play('spirit');
+    });
+
+    // 1UP Feather: +1 ชีวิต เก็บได้ครั้งเดียวต่อเซฟ (บันทึกทันทีที่เก็บ) ชิ้นที่เก็บแล้วแสดงเป็นเงาจางแบบ Spirit Shard
+    // ถ้าชีวิตเต็มแล้วไม่เก็บ
+    const savedFeathers = adventure ? this.progress.collectedFeathers(this.def.key) : [];
+    const feathers = this.physics.add.staticGroup();
+    this.level.feathers.forEach((p, i) => {
+      const f = this.add.sprite(this.centerOf(p).x, this.centerOf(p).y, 'items', 'oneup_feather_float_000').setDepth(3);
+      f.play(animKey('items', 'oneup_feather_float'));
+      if (savedFeathers.includes(i)) {
+        f.setAlpha(0.3);
+        return;
+      }
+      f.setData('index', i);
+      feathers.add(f);
+    });
+    this.physics.add.overlap(this.player, feathers, (_p, obj) => {
+      if (this.vitals.lives >= VitalsBalance.maxLives) return;
+      const sprite = obj as Phaser.GameObjects.Sprite;
+      if (adventure) this.progress.addFeather(this.def.key, sprite.getData('index') as number);
+      sprite.destroy();
+      for (let i = 0; i < ItemBalance.featherLives; i += 1) this.vitals.addLife();
+      sfx.play('one_up');
+      this.floatText(this.player.x, this.player.y - PlayerLayout.overheadY, '1UP', PALETTE.wind);
     });
   }
 
@@ -986,6 +1031,8 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     shrine.play(animKey('items', 'checkpoint_shrine_lighting'));
     shrine.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => shrine.play(animKey('items', 'checkpoint_shrine_lit')));
     sfx.play('checkpoint');
+    // ประกายที่เปลวไฟบนยอดแท่น (ยอดเปลวอยู่สูงจากฐาน ~44 px)
+    this.spawnFx('checkpoint_spark', shrine.x, shrine.y - 40);
     this.floatText(shrine.x, shrine.y - 56, 'CHECKPOINT', PALETTE.gold);
   }
 
@@ -1002,10 +1049,11 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
       newShards = this.progress.addShards(this.def.key, this.stageShards);
     }
     const shards = { have: adventure ? this.progress.collectedShards(this.def.key).length : this.stageShards.size, total: this.level.shards.length, added: newShards };
+    const galleryUnlocked = adventure && newlyUnlocked(this.progress, GALLERY_IMAGES, this.def.key, shards.have - newShards).length > 0;
     const next = adventure ? nextAdventureLevel(this.def.key) : null;
     this.time.delayedCall(600, () => {
       this.scene.stop(SceneKey.UI);
-      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next, shards });
+      this.scene.start(SceneKey.StageClear, { coins: this.stageCoins, level: this.def.key, next, shards, galleryUnlocked });
     });
   }
 
@@ -1042,6 +1090,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
   }
 
   private floatText(x: number, y: number, text: string, color: string): void {
+    // ข้อความลอยในด่านยังใช้ font ระบบที่มีขอบหนา: font_hud มีแค่เงา 1 px อ่านยากบนผนังซากปรักและใบไม้
     const t = this.add
       .text(x, y, text, { fontFamily: 'monospace', fontSize: '7px', color, stroke: PALETTE.outline, strokeThickness: 2, resolution: 6 })
       .setOrigin(0.5)

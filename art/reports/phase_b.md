@@ -278,3 +278,7 @@ Pinz cancelled the right-hand revision. Production Cast is restored to the origi
 ### Final artwork selection and closeout — 30 October 2026
 
 Pinz rejected the pixel-cleanup experiment and chose the original approved combat artwork. All 59 production frames, the player atlas and animations.json are byte-identical to c82edd6; the experiment never entered production or PR #13. Rejected study files and helpers are preserved in a local untracked archive. Asset validator: PASS (0 errors). Current combat atlas tests: PASS (2 tests). No spec conflict or further art decision remains for this revision. See [closeout report](2026-10-30_aclaire_art_closeout.md).
+
+## Core asset completion — 4 November 2026
+
+The remaining core sprite set is delivered: 281 frames across spirits, objects, items, FX and UI plus the HUD bitmap font. See [completion report](2026-11-04_core_assets_complete.md) for coverage, validation, integration notes and review links. Earlier pending-core statements are superseded by this report. World 2–5 and title art are separate phases.

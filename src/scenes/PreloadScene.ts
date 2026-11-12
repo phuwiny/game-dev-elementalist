@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { useUiCamera } from '../ui/screen';
 import { GAME_HEIGHT, GAME_WIDTH, SceneKey, TILE_SIZE } from '../config/constants';
-import { ANIMATIONS_JSON, ATLASES, TILESETS, WORLD1_BACKGROUND, fillTextureKey } from '../assets/manifest';
-import { createGrayboxTiles, createPlaceholderAtlas, missingFrames } from '../assets/placeholders';
+import { ANIMATIONS_JSON, ATLASES, GALLERY_IMAGES, HUD_FONT, TILESETS, WORLD1_BACKGROUND, fillTextureKey } from '../assets/manifest';
+import { createGalleryPlaceholder, createGrayboxTiles, createPlaceholderAtlas, missingFrames } from '../assets/placeholders';
 import { registerAnimations } from '../assets/animations';
 import { PALETTE, hex } from '../assets/palette';
 import { REGISTRY_AVAILABLE_JSON } from './BootScene';
@@ -41,6 +41,8 @@ export class PreloadScene extends Phaser.Scene {
     // tileset และ background เป็นภาพเดี่ยว ถ้าโหลดไม่ได้ GameScene ใช้ graybox / สีพื้นแทน
     for (const t of TILESETS) this.load.image(t.key, t.png);
     for (const b of [...WORLD1_BACKGROUND.layers, WORLD1_BACKGROUND.bossFar]) this.load.image(b.key, b.png);
+    this.load.bitmapFont(HUD_FONT.key, HUD_FONT.png, HUD_FONT.xml);
+    for (const g of GALLERY_IMAGES) if (available.has(g.png)) this.load.image(g.key, g.png);
     if (available.has(ANIMATIONS_JSON)) this.load.json(ANIMATIONS_KEY, ANIMATIONS_JSON);
     else this.failed.add(ANIMATIONS_KEY);
     // ด่าน Tiled เป็นของฝั่งโค้ด ต้องมีเสมอ ถ้าโหลดไม่ได้ให้ error ชัด ๆ
@@ -72,6 +74,13 @@ export class PreloadScene extends Phaser.Scene {
       console.info(`[assets] filling missing frames with placeholders: ${partial.join(', ')}`);
     }
     createGrayboxTiles(this.textures, GRAYBOX_TILES, TILE_SIZE);
+    const galleryPlaceholders = GALLERY_IMAGES.filter((g) => !this.textures.exists(g.key));
+    for (const g of galleryPlaceholders) {
+      createGalleryPlaceholder(this.textures, g.key, LEVELS.find((l) => l.key === g.level)?.name ?? g.level);
+    }
+    if (galleryPlaceholders.length > 0) {
+      console.info(`[assets] gallery placeholders: ${galleryPlaceholders.map((g) => g.key).join(', ')}`);
+    }
 
     const overrides = this.failed.has(ANIMATIONS_KEY) ? null : this.cache.json.get(ANIMATIONS_KEY);
     registerAnimations(this, overrides);

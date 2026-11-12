@@ -122,6 +122,38 @@ export function createPlaceholderAtlas(
   canvas.refresh();
 }
 
+/**
+ * ภาพ gallery แทนชั่วคราวจนกว่า Codex จะ export concept art (ART_HANDOFF.md หัวข้อ 8.1)
+ * วาดที่ครึ่งหนึ่งของขนาดจริง (640×360) ฉากหลังเป็นแถบสีป่าไฟตามโลก 1 พร้อมป้ายบอกว่าเป็นภาพแทน
+ */
+export function createGalleryPlaceholder(textures: Phaser.Textures.TextureManager, key: string, caption: string): void {
+  if (textures.exists(key)) textures.remove(key);
+  const w = 640;
+  const h = 360;
+  const canvas = textures.createCanvas(key, w, h);
+  if (!canvas) throw new Error(`Cannot create placeholder texture "${key}"`);
+  const ctx = canvas.context;
+  const bands = [C.neutral1, C.fire1, C.fire2, C.foliage1, C.neutral1];
+  bands.forEach((color, i) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, Math.round((i * h) / bands.length), w, Math.ceil(h / bands.length));
+  });
+  ctx.strokeStyle = C.gold;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(12, 12, w - 24, h - 24);
+  ctx.fillStyle = C.highlight;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 28px monospace';
+  ctx.fillText('CONCEPT ART', w / 2, h / 2 - 24);
+  ctx.font = '18px monospace';
+  ctx.fillText(caption, w / 2, h / 2 + 12);
+  ctx.fillStyle = C.neutral4;
+  ctx.font = '14px monospace';
+  ctx.fillText('placeholder - waiting for the final image', w / 2, h / 2 + 44);
+  canvas.refresh();
+}
+
 /** Texture สำหรับด่าน graybox: 0 = พื้นทึบ, 1 = พื้นผิวบน, 2 = หนาม */
 export function createGrayboxTiles(textures: Phaser.Textures.TextureManager, key: string, tile: number): void {
   if (textures.exists(key)) return;
@@ -218,6 +250,7 @@ const PAINTERS: Record<string, Painter> = {
   player: paintAclaire,
   boss_bramble_king: paintBrambleKing,
   spirits: paintSpirits,
+  spirits_hd: paintSpirits,
   objects: paintObjects,
   enemies_w1: paintEnemiesW1,
   items: paintItems,
@@ -482,6 +515,19 @@ function paintItems(p: PixelPen, f: FrameInfo): void {
     p.rect(cx - w / 2, 0, w, 1, C.wood2);
     return;
   }
+  if (f.anim === 'spirit_orb_pulse') {
+    const r = 4 + (f.index % 2);
+    p.disc(8, 8, r + 1, C.outline);
+    p.disc(8, 8, r, C.magic);
+    p.rect(6, 5, 2, 2, C.highlight);
+    return;
+  }
+  if (f.anim === 'oneup_feather_float') {
+    const bob = f.index === 1 || f.index === 2 ? 1 : 0;
+    p.line(4, 13 - bob, 11, 2 - bob, 3, C.highlight);
+    p.line(5, 13 - bob, 11, 3 - bob, 1, C.wind);
+    return;
+  }
   if (f.anim === 'spirit_shard_shine') {
     // ผลึกรูปข้าวหลามตัด กะพริบสว่างไล่ไปตาม frame
     const bob = f.index % 2;
@@ -548,6 +594,13 @@ function paintFx(p: PixelPen, f: FrameInfo): void {
       const y = cy + Math.sin(a) * r;
       p.rect(x, y, 2, 2, i % 3 === 0 ? C.gold : C.highlight);
     }
+    return;
+  }
+  if (f.anim === 'checkpoint_spark') {
+    const r = 1 + Math.round(t * 6);
+    p.rect(8 - r, 7, r * 2 + 1, 1, C.gold);
+    p.rect(7, 8 - r, 1, r * 2 + 1, C.gold);
+    p.rect(7, 7, 2, 2, C.highlight);
     return;
   }
   if (f.anim === 'hit_spark') {
@@ -726,6 +779,23 @@ function paintUi(p: PixelPen, f: FrameInfo): void {
       if (f.name.endsWith('cleared')) p.rect(5, 7, 6, 2, C.outline);
       return;
     }
+    case 'panel_9slice':
+      p.rect(0, 0, f.w, f.h, C.outline);
+      p.rect(1, 1, f.w - 2, f.h - 2, C.gold);
+      p.rect(2, 2, f.w - 4, f.h - 4, C.outline);
+      p.rect(4, 4, f.w - 8, f.h - 8, C.magic);
+      p.rect(5, 5, f.w - 10, f.h - 10, C.outline);
+      return;
+    case 'button_normal':
+    case 'button_hover':
+    case 'button_pressed':
+      p.rect(0, 0, f.w, f.h, C.outline);
+      p.rect(1, 1, f.w - 2, f.h - 2, C.gold);
+      p.rect(2, 2, f.w - 4, f.h - 4, f.name === 'button_hover' ? C.magic : f.name === 'button_pressed' ? C.neutral2 : C.outline);
+      return;
+    case 'cursor_arrow':
+      for (let i = 0; i < 4; i += 1) p.rect(1 + i, i, 1, 8 - i * 2, C.gold);
+      return;
     default:
       break;
   }

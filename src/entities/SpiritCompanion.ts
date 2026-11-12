@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { ElementType } from '../core/Element';
-import { animKey, SPIRIT_KEYS } from '../assets/manifest';
+import { SPIRIT_KEYS, type SpiritKey } from '../assets/manifest';
+import { addSpiritSprite, playSpirit } from '../assets/spirits';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import { PlayerLayout, type Player } from './Player';
 
-/** ชื่อภูตตามธาตุ (ใช้เป็น prefix ของ frame ใน atlas spirits) */
-export function spiritKey(element: ElementType): string {
+/** ชื่อภูตตามธาตุ (ใช้เป็น prefix ของ frame ใน atlas spirits / spirits_hd) */
+export function spiritKey(element: ElementType): SpiritKey {
   return SPIRIT_KEYS[ELEMENT_ORDER.indexOf(element)];
 }
 
@@ -29,7 +30,7 @@ export class SpiritCompanion {
     scene: Phaser.Scene,
     private readonly player: Player,
   ) {
-    this.sprite = scene.add.sprite(player.x, player.y - PlayerLayout.overheadY, 'spirits', 'burnil_idle_000').setDepth(7).setVisible(false);
+    this.sprite = addSpiritSprite(scene, player.x, player.y - PlayerLayout.overheadY, 'burnil').setDepth(7).setVisible(false);
   }
 
   setElement(element: ElementType | null): void {
@@ -39,15 +40,15 @@ export class SpiritCompanion {
       return;
     }
     this.sprite.setVisible(true);
-    this.sprite.play(animKey('spirits', `${spiritKey(element)}_idle`));
+    // ภูตแต่ละตนอาจคนละ atlas/density: playSpirit ตั้ง scale ใหม่ทุกครั้งที่สลับ
+    playSpirit(this.sprite, spiritKey(element), 'idle');
   }
 
   playCast(): void {
     if (this.element === null) return;
-    const key = spiritKey(this.element);
-    this.sprite.play(animKey('spirits', `${key}_cast`));
+    playSpirit(this.sprite, spiritKey(this.element), 'cast');
     this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-      if (this.element !== null) this.sprite.play(animKey('spirits', `${spiritKey(this.element)}_idle`));
+      if (this.element !== null) playSpirit(this.sprite, spiritKey(this.element), 'idle');
     });
   }
 
