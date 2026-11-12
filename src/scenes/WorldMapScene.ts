@@ -4,7 +4,8 @@ import { PALETTE, hex } from '../assets/palette';
 import { animKey, textureScale } from '../assets/manifest';
 import { textStyle } from '../ui/text';
 import { useUiCamera } from '../ui/screen';
-import { ADVENTURE_LEVELS } from '../levels';
+import { WORLDS } from '../levels';
+import { initialSelection, type MapSelection, stepSelection } from '../core/Worlds';
 import { ELEMENT_ORDER } from '../core/ElementSelector';
 import type { Progress } from '../core/Progress';
 import { SHARDS_PER_LEVEL } from '../core/LevelParser';
@@ -21,39 +22,52 @@ const nodeX = (i: number, n: number) => GAME_WIDTH / 2 + (i - (n - 1) / 2) * 140
 
 /**
  * แผนที่โลก (GDD หัวข้อ 8): เลือกด่านที่ปลดล็อกแล้ว ด่านถัดไปเปิดเมื่อผ่านด่านก่อนหน้า
- * ตอนนี้มีเฉพาะโลก 1 Ember Woods
+ * แสดงทีละโลก เลื่อนซ้าย/ขวาเลยด่านริมสุดเพื่อข้ามไปโลกข้างเคียง (scene เริ่มใหม่ด้วย `select`)
  */
 export class WorldMapScene extends Phaser.Scene {
   constructor() {
     super(SceneKey.WorldMap);
   }
 
-  create(data?: { focus?: string }): void {
+  /** โลกและด่านที่เลือกอยู่ (e2e อ่านค่านี้) */
+  selection: MapSelection = { world: 0, level: 0 };
+
+  create(data?: { focus?: string; select?: MapSelection }): void {
     const progress = this.registry.get(REGISTRY_PROGRESS) as Progress;
     const vitals = this.registry.get(REGISTRY_VITALS) as Vitals;
+    const sel = data?.select ?? initialSelection(WORLDS, (k) => progress.isUnlocked(k), data?.focus);
+    this.selection = sel;
+    const world = WORLDS[sel.world];
+    const levels = world.levels;
     useUiCamera(this);
-    this.cameras.main.setBackgroundColor(PALETTE.foliage1);
+    this.cameras.main.setBackgroundColor(world.mapColor);
     const cx = GAME_WIDTH / 2;
-    const n = ADVENTURE_LEVELS.length;
+    const n = levels.length;
     addSaveWarning(this);
     music.play('world_map');
 
-    this.add.text(cx, 40, 'WORLD 1 · EMBER WOODS', textStyle(20, PALETTE.gold)).setOrigin(0.5);
+    this.add.text(cx, 40, `WORLD ${world.id} · ${world.name.toUpperCase()}`, textStyle(20, PALETTE.gold)).setOrigin(0.5);
     const gallery = unlockedGallery(progress, GALLERY_IMAGES).length;
     this.add
       .text(cx, 62, `Spirit Shards ${progress.totalShards}/${progress.maxShards}   Gallery ${gallery}/${GALLERY_IMAGES.length}`, textStyle(10, PALETTE.pink3))
       .setOrigin(0.5);
 
+    // โลกข้างเคียง: บอกว่าเลื่อนเลยขอบแล้วไปที่ไหน
+    const prev = WORLDS[sel.world - 1];
+    const next = WORLDS[sel.world + 1];
+    if (prev) this.add.text(12, NODE_Y, `< ${prev.name}`, textStyle(10, PALETTE.neutral4)).setOrigin(0, 0.5);
+    if (next) this.add.text(GAME_WIDTH - 12, NODE_Y, `${next.name} >`, textStyle(10, PALETTE.neutral4)).setOrigin(1, 0.5);
+
     // เส้นทางเชื่อมระหว่างด่าน
     const path = this.add.graphics();
     for (let i = 0; i < n - 1; i += 1) {
-      const open = progress.isUnlocked(ADVENTURE_LEVELS[i + 1].key);
+      const open = progress.isUnlocked(levels[i + 1].key);
       path.lineStyle(3, hex(open ? PALETTE.earth4 : PALETTE.neutral2), 1);
       path.lineBetween(nodeX(i, n) + 12, NODE_Y, nodeX(i + 1, n) - 12, NODE_Y);
     }
 
     const labels: Phaser.GameObjects.Text[] = [];
-    ADVENTURE_LEVELS.forEach((l, i) => {
+    levels.forEach((l, i) => {
       const state = progress.isCleared(l.key) ? 'cleared' : progress.isUnlocked(l.key) ? 'open' : 'locked';
       this.add.image(nodeX(i, n), NODE_Y, 'ui', `world_map_node_${state}`).setScale(2);
       labels.push(
@@ -65,25 +79,20 @@ export class WorldMapScene extends Phaser.Scene {
         .setOrigin(0.5, 0);
       if (l.boss) this.add.text(nodeX(i, n), NODE_Y - 34, 'BOSS', textStyle(10, PALETTE.fire)).setOrigin(0.5);
     });
+    if (n === 0) this.add.text(cx, NODE_Y, 'Coming soon', textStyle(16, PALETTE.neutral4)).setOrigin(0.5);
 
-    // เริ่มที่ด่านที่ส่งมา หรือด่านล่าสุดที่เปิดอยู่
-    let selected = ADVENTURE_LEVELS.findIndex((l) => l.key === data?.focus);
-    if (selected < 0) {
-      selected = 0;
-      ADVENTURE_LEVELS.forEach((l, i) => {
-        if (progress.isUnlocked(l.key)) selected = i;
-      });
+    const selected = sel.level;
+    const level = selected >= 0 ? levels[selected] : undefined;
+    if (level) {
+      const cursor = this.add.sprite(nodeX(selected, n), NODE_Y - 8, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player'));
+      cursor.play(animKey('player', 'idle'));
+      labels[selected].setFontStyle('bold');
     }
-
-    const cursor = this.add.sprite(nodeX(selected, n), NODE_Y - 8, 'player', 'idle_000').setOrigin(0.5, 1).setScale(textureScale('player'));
-    cursor.play(animKey('player', 'idle'));
 
     const info = this.add.text(cx, 270, '', textStyle(12, PALETTE.neutral4)).setOrigin(0.5);
     const refresh = () => {
-      cursor.setX(nodeX(selected, n));
-      labels.forEach((t, i) => t.setFontStyle(i === selected ? 'bold' : ''));
-      const l = ADVENTURE_LEVELS[selected];
-      info.setText(progress.isUnlocked(l.key) ? `ENTER  Play ${l.name}` : 'Locked: clear the previous stage');
+      if (!level) info.setText('No stages here yet');
+      else info.setText(progress.isUnlocked(level.key) ? `ENTER  Play ${level.name}` : 'Locked: clear the previous stage');
     };
     refresh();
 
@@ -97,23 +106,23 @@ export class WorldMapScene extends Phaser.Scene {
     this.add.text(cx, 300, 'LEFT/RIGHT select  G gallery  ESC title  DEL reset save', textStyle(10, PALETTE.neutral3)).setOrigin(0.5);
 
     const kb = this.input.keyboard;
-    const move = (d: number) => {
-      selected = Phaser.Math.Clamp(selected + d, 0, n - 1);
+    const move = (d: -1 | 1) => {
+      const to = stepSelection(WORLDS, sel, d);
+      if (to.world === sel.world && to.level === sel.level) return;
       sfx.play('menu');
-      refresh();
+      this.scene.restart({ select: to });
     };
     kb?.on('keydown-LEFT', () => move(-1));
     kb?.on('keydown-A', () => move(-1));
     kb?.on('keydown-RIGHT', () => move(1));
     kb?.on('keydown-D', () => move(1));
     const play = () => {
-      const l = ADVENTURE_LEVELS[selected];
-      if (!progress.isUnlocked(l.key)) {
+      if (!level || !progress.isUnlocked(level.key)) {
         sfx.play('deny');
         return;
       }
       sfx.play('menu');
-      this.scene.start(SceneKey.Game, { level: l.key });
+      this.scene.start(SceneKey.Game, { level: level.key });
     };
     kb?.on('keydown-ENTER', play);
     kb?.on('keydown-SPACE', play);
@@ -136,7 +145,7 @@ export class WorldMapScene extends Phaser.Scene {
         return;
       }
       progress.reset();
-      this.scene.restart();
+      this.scene.restart({});
     });
   }
 }

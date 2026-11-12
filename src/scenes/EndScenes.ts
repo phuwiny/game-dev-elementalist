@@ -6,7 +6,7 @@ import { useUiCamera } from '../ui/screen';
 import type { Vitals } from '../core/Vitals';
 import { REGISTRY_VITALS } from './BootScene';
 import { REGISTRY_LEVEL } from './GameScene';
-import { isAdventure } from '../levels';
+import { isAdventure, worldOfLevel } from '../levels';
 import { sfx } from '../systems/Sfx';
 import { music } from '../systems/Music';
 import { addSaveWarning } from '../ui/saveWarning';
@@ -97,7 +97,12 @@ export class StageClearScene extends Phaser.Scene {
     if (adventure) {
       const next = data.next ?? null;
       const buttons = keyButtons(this, 222, next ? 'Next stage' : 'World Map', 'World Map');
-      if (!next) this.add.text(cx, 292, 'World 1 complete! More worlds coming soon.', textStyle(10, PALETTE.wind)).setOrigin(0.5);
+      // ผ่านด่านสุดท้ายของโลก: ด่านถัดไปอยู่อีกโลก หรือยังไม่มีด่านถัดไป
+      const world = data.level ? worldOfLevel(data.level) : undefined;
+      if (world && (!next || worldOfLevel(next) !== world)) {
+        const more = next ? '' : ' More worlds coming soon.';
+        this.add.text(cx, 292, `World ${world.id} complete!${more}`, textStyle(10, PALETTE.wind)).setOrigin(0.5);
+      }
       kb?.once('keydown-ENTER', () => {
         buttons.enter.setState('pressed');
         sfx.play('menu');
