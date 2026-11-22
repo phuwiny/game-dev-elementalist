@@ -488,6 +488,18 @@ Spirit Knight ต้องมี 4 ชุดสีเกราะตามสี
 - ระหว่างที่ยังไม่มีไฟล์ เกมสร้างภาพแทนที่เขียนว่า "CONCEPT ART ... placeholder" วางไฟล์ตาม path แล้วเกมใช้ทันที (BootScene ตรวจไฟล์ก่อนโหลด)
 - **ต้องแก้ `tools/validate_assets.py` (ของ Codex) พร้อมกัน:** ตอนนี้ validator บังคับ master palette และ binary alpha กับ PNG ทุกไฟล์ใน `public/assets` ภาพ gallery จะไม่ผ่าน ให้ยกเว้นโฟลเดอร์ `gallery/` จากสองข้อนั้น แต่ยังตรวจขนาด 1280×720 และชื่อไฟล์ snake_case
 
+### 8.2 Concept ภูตตัวที่ 5 "Inkle" (งานศิลป์ส่วนตัว ยังไม่ใช้ในเกม)
+
+ผู้ใช้ขอภูตตัวที่ 5 ไว้เป็นงานศิลป์ส่วนตัวเนื่องในวันเกิด ดีไซน์ทั้งหมดอยู่ใน `docs/spirits/inkle.md` (ลักษณะ, palette, นิสัย, expression) **ส่งแค่ concept art ห้ามทำ sprite, atlas หรือไฟล์ใดๆ ใน `public/assets/` และห้ามเพิ่มสีใน master palette**
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| `art/concept/2026-11-22_inkle_concept_source.png` | ขนาดอย่างน้อย 1024×1024 เหมือน `spirits_sheet.png` แต่มีภูตตนเดียว ได้แก่ ภาพเต็มตัว 1 ภาพ, expression 3 แบบ (ปกติ / ตั้งใจวาด / ดีใจ), pixel study 64×64 1 frame ที่ขนาดจริงและขยาย ×8 และภาพเทียบขนาดกับภูต 4 ตนเดิม |
+
+- ถ้ามี `art/reference/spirit_ink_inkle.jpg` (ภาพที่ผู้ใช้วาดเอง) ให้ยึดภาพนั้นเหนือคำบรรยายใน `docs/spirits/inkle.md`
+- ใน concept ใช้สีนอก master palette ได้ แต่ pixel study ให้ใช้ palette ในหัวข้อ 3 ของ `docs/spirits/inkle.md` (12 สี)
+- รายงานส่งงานเขียนที่ `art/reports/inkle_concept.md`
+
 ---
 
 ## 9. Validator และ Acceptance Criteria

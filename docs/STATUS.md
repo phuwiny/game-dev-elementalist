@@ -60,6 +60,7 @@
 1. ภาพ gallery 3 ภาพ (ART_HANDOFF.md หัวข้อ 8.1): concept art จริง 1280×720 ลง `public/assets/gallery/` พร้อมแก้ validator ให้ยกเว้น palette/binary alpha ในโฟลเดอร์นั้น ผู้ใช้เลือกภาพ
 2. แก้ภาพ Phase C ตามผลทดสอบในเกม:
    - tile มุมใน 11–14 ของ `tiles_w1_ember_woods`: ถ้าตั้งใจให้ใช้ที่มุมเว้า (tile อยู่กลางเนื้อดินแต่เฉียงหนึ่งด้านว่าง) ภาพปัจจุบันไม่เข้า เพราะมีฝาหญ้าหรือเส้นขอบพาดทั้งด้านที่ติดดิน ขอให้บอกว่าตั้งใจใช้ตรงไหน หรือวาดใหม่ให้มีขอบเฉพาะมุมเว้า
+3. Concept ภูตตัวที่ 5 "Inkle" (ART_HANDOFF.md หัวข้อ 8.2, ดีไซน์ใน `docs/spirits/inkle.md`): งานศิลป์ส่วนตัวของผู้ใช้ ส่งแค่ concept ลง `art/concept/` ยังไม่ใช้ในเกม ผู้ใช้วาดเองด้วยและจะวางที่ `art/reference/spirit_ink_inkle.jpg` ถ้าภาพนั้นมาก่อนให้ยึดตาม
 
 ฝั่ง Claude
 1. ถ้า Codex ส่งภาพแก้ ให้รัน `python3 tools/levels/w1.py public/assets/maps` ใหม่เมื่อ ID หรือบทบาท tile เปลี่ยน
