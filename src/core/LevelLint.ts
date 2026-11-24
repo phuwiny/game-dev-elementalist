@@ -38,6 +38,12 @@ export const SINGLE_JUMP_RULES: LintRules = {
   allowedObjects: ['vine', 'crate', 'ice', 'torch', 'gate', 'arenaGate', 'spirit'],
 };
 
+/** โลก 2: ยังกระโดดชั้นเดียว แต่มีน้ำแล้ว (แช่แข็งผิวน้ำ, รดเมล็ด) */
+export const WATER_WORLD_RULES: LintRules = {
+  ...SINGLE_JUMP_RULES,
+  allowedObjects: [...SINGLE_JUMP_RULES.allowedObjects, 'water', 'seed'],
+};
+
 export function lintLevel(level: ParsedLevel, rules: LintRules): string[] {
   const issues: string[] = [];
   const { width, height, tiles } = level;

@@ -8,7 +8,7 @@ import { isGateOpen, linkTriggers } from '../core/TriggerLinks';
 import { parseTiledMap, type TiledMap } from '../core/TiledLevel';
 import type { Progress } from '../core/Progress';
 import type { Vitals } from '../core/Vitals';
-import { findLevel, isAdventure, mapCacheKey, nextAdventureLevel, type LevelDef } from '../levels';
+import { findLevel, isAdventure, levelMusic, mapCacheKey, nextAdventureLevel, type LevelDef } from '../levels';
 import { Player, PlayerEvent, PlayerLayout } from '../entities/Player';
 import { Projectile } from '../entities/Projectile';
 import { Enemy } from '../entities/enemies/Enemy';
@@ -154,7 +154,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
     const def = findLevel(data?.level ?? (this.registry.get(REGISTRY_LEVEL) as string | undefined));
     this.def = def;
     this.registry.set(REGISTRY_LEVEL, def.key);
-    music.play('world1');
+    music.play(levelMusic(this.def.key));
 
     this.vitals = this.registry.get(REGISTRY_VITALS) as Vitals;
     this.progress = this.registry.get(REGISTRY_PROGRESS) as Progress;
@@ -730,7 +730,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
 
   private onBossDefeated(): void {
     this.frameBossFight(false);
-    music.play('world1');
+    music.play(levelMusic(this.def.key));
     this.arenaGate?.setClosed(false);
     this.time.delayedCall(1200, () => {
       this.goalFlag?.setVisible(true);
@@ -1011,7 +1011,7 @@ export class GameScene extends Phaser.Scene implements ElementWorld, PuzzleHost,
         this.boss.reset();
         this.frameBossFight(false);
         this.background?.setBossArena(false);
-        music.play('world1');
+        music.play(levelMusic(this.def.key));
         this.arenaGate?.setClosed(false);
       }
       this.companion.snap();

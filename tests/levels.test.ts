@@ -5,15 +5,15 @@ import { gidToTileId, isFlippedH, parseTiledMap, type TiledMap } from '../src/co
 type TiledObjects = NonNullable<TiledMap['layers'][number]['objects']>;
 import { lintLevel, SINGLE_JUMP_RULES } from '../src/core/LevelLint';
 import { parseLevel, LevelParseError, Tile } from '../src/core/LevelParser';
-import { ADVENTURE_LEVELS } from '../src/levels';
+import { ADVENTURE_LEVELS, worldOfLevel } from '../src/levels';
 
 const load = (file: string) => JSON.parse(readFileSync(new URL(`../public/${file}`, import.meta.url), 'utf8')) as TiledMap;
 
 describe('World 1 Tiled maps', () => {
   for (const def of ADVENTURE_LEVELS) {
-    it(`${def.key} parses and passes the single-jump lint`, () => {
+    it(`${def.key} parses and passes the lint rules of its world`, () => {
       const level = parseTiledMap(load(def.map!));
-      expect(lintLevel(level, SINGLE_JUMP_RULES)).toEqual([]);
+      expect(lintLevel(level, worldOfLevel(def.key)!.lint)).toEqual([]);
       expect(level.checkpoints.length).toBeGreaterThanOrEqual(1);
     });
   }
